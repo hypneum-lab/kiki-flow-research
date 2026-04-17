@@ -15,6 +15,7 @@ dependencies = [
     "numpy>=2.1",
     "pyyaml>=6.0",
     "prometheus-client>=0.20",
+    "scikit-learn>=1.8.0",
 ]
 
 [project.optional-dependencies]
@@ -54,7 +55,7 @@ warn_unreachable = true
 disallow_untyped_decorators = false
 
 [[tool.mypy.overrides]]
-module = ["ot", "ot.*"]
+module = ["ot", "ot.*", "sklearn", "sklearn.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
