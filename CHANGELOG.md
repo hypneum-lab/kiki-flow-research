@@ -2,6 +2,25 @@
 
 All notable releases of `kiki-flow-research`. Dates in YYYY-MM-DD.
 
+## [Unreleased] — 2026-04-18 (post v0.7)
+
+### Added
+- `PERFORMANCE.md` — single-page consolidation of every measured
+  performance and quality number reported in the paper, with source
+  files and reproduction commands for each entry.
+- `.github/workflows/reproducibility.yml` — weekly schedule
+  (Monday 07:00 UTC) + `workflow_dispatch` re-runs the deterministic
+  scripts and verifies structural keys on the output JSONs.
+- New tests: `tests/track2_paper/test_mlx_full_jko_solver.py` (3),
+  `tests/test_species_hybrid_edges.py` (4),
+  `tests/test_module_error_paths.py` (5). Exercises MLXFullJKOSolver,
+  HybridSpecies init branches, and error paths in scheduler /
+  phonological loop / advection-diffusion.
+
+### Changed
+- Test suite: 103 → 115. Coverage: 93 → 94 percent.
+- Removed `README.md.backup` (accidentally committed temp file).
+
 ## [paper-v0.7-draft] — 2026-04-18
 
 ### Added
