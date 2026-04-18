@@ -1,0 +1,56 @@
+{
+  "n_seeds": 5,
+  "grid": 32,
+  "setup": "MiniLM embeddings -> PCA-1D -> histogram per domain",
+  "domains": [
+    "phonology",
+    "lexicon",
+    "syntax"
+  ],
+  "ewc_lambda": 5.0,
+  "kl_weight": 0.3,
+  "strategies": {
+    "without": {
+      "phonology": {
+        "mean": 0.3503365042356822,
+        "std": 0.039648444951621946
+      },
+      "lexicon": {
+        "mean": 0.6371264058979598,
+        "std": 0.10074851166041467
+      },
+      "syntax": {
+        "mean": 0.7710856555917346,
+        "std": 0.06283044832233228
+      }
+    },
+    "with_prior": {
+      "phonology": {
+        "mean": 0.5739422852215232,
+        "std": 0.05407398714690967
+      },
+      "lexicon": {
+        "mean": 0.4944947522314337,
+        "std": 0.030249284194675423
+      },
+      "syntax": {
+        "mean": 0.7241080163921428,
+        "std": 0.016376450752860823
+      }
+    },
+    "with_ewc": {
+      "phonology": {
+        "mean": 0.6555081280573785,
+        "std": 0.10647207104017362
+      },
+      "lexicon": {
+        "mean": 0.23759889143365692,
+        "std": 0.11344262639586937
+      },
+      "syntax": {
+        "mean": 0.3604104662047372,
+        "std": 0.157174834873051
+      }
+    }
+  }
+}
