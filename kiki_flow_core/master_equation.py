@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import Callable
+from typing import cast
 
 import numpy as np
 
@@ -77,7 +78,7 @@ class JKOStep:
         # Strategy pattern: Track-specific subclasses can inject an MLX-backed
         # prox without forcing a circular import here. Default remains the
         # POT-backed prox_w2.
-        self.prox_fn: ProxFn = prox_fn if prox_fn is not None else prox_w2  # type: ignore[assignment]
+        self.prox_fn: ProxFn = prox_fn if prox_fn is not None else cast(ProxFn, prox_w2)
 
     def step(self, state: FlowState) -> FlowState:
         new_rho: dict[str, np.ndarray] = {}
