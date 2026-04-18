@@ -44,3 +44,24 @@ class AdvisoryRecorder:
                 for line in self._buffer:
                     f.write(line + "\n")
             self._buffer.clear()
+
+
+def blend_advisory(
+    base_scores: np.ndarray,
+    advisory: np.ndarray | None,
+    prior_weight: float = 0.1,
+) -> np.ndarray:
+    """Convex-combine the base scores with the advisory.
+
+    ``prior_weight`` controls how much the advisory influences the final
+    routing decision. 0.0 = native, 1.0 = pure advisory. Returns a copy
+    of ``base_scores`` if advisory is None.
+    """
+    if advisory is None:
+        return base_scores.copy()
+    if advisory.shape != base_scores.shape:
+        return base_scores.copy()
+    out: np.ndarray = ((1.0 - prior_weight) * base_scores + prior_weight * advisory).astype(
+        base_scores.dtype
+    )
+    return out
