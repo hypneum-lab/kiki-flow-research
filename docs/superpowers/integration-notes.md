@@ -74,12 +74,14 @@ latency: < 5 ms per query, well within any reasonable production SLO.
   LoRA trajectories once they are available (current Mode-B uses
   pure 4-species trajectories from the paper track).
 
-## Open dependencies before PR can be filed
+## Dependency status (final)
 
-1. `ANERouter` 37 vs 32 discrepancy — **NOT yet resolved**. The stub
-   returns `[0.0] * 37`; MetaRouter trains for 32 domains. Upstream
-   maintainer decision: is the target 32 (drop 5) or 37 (add 5 new
-   domains)? Blocks the ANE path only — the MoE LoRA path is unaffected.
+1. `ANERouter` 37 vs 32 discrepancy — **patch ready**
+   (`patches/00-micro-kiki-dep1-ane-router-dynamic-N.patch`). Applies
+   against `src/serving/ane_router.py`. Reads output N from the
+   CoreML model spec dynamically, falls back to 32 if unloaded.
+   Awaits user to clean up current WIP on `KIKI-Mac_tunner/main`
+   before applying.
 
 2. T3 surrogate retrained at `state_dim=128` — **DONE (v0.2-d128)**.
    `kiki_flow_core/track3_deploy/weights/v0.2-d128.safetensors` trained
@@ -87,8 +89,38 @@ latency: < 5 ms per query, well within any reasonable production SLO.
    `scripts/dump_hybrid_pairs.py`. Final train loss 9.8e-5 after 30
    epochs. Latency on GrosMac M5: p50=0.37ms, p99=0.53ms (still well
    under the 10ms SLO). Architecture: 128 + 384 -> 256 hidden -> 128.
+   Smoke-tested end-to-end on a 32-stack-shaped FlowState.
 
-3. Query-string plumbing through the router call path — **NOT
+3. Query-string plumbing — **design + reference implementation ready**
+   (`patches/02-micro-kiki-dep3-runner-factory.md`). Resolved via
+   option (b): a `KikiFlowBridge` class on the micro-kiki side owns
+   its own tokenizer, so no change is required to `MetaRouter.forward`.
+   Bridge is lazy-constructed, gracefully disables on any failure,
+   and returns None whenever `KIKI_FLOW_ENABLED` is unset. Full code,
+   testing plan, and risk analysis in the patch file.
+
+4. Feature-flag plumbing — **subsumed by Dep 3**. The `KikiFlowBridge`
+   reads `KIKI_FLOW_ENABLED` at construction from `os.environ`, so
+   there is no need for a separate `Config` dataclass field. Patch
+   `01-micro-kiki-dep4-feature-flag.patch` is therefore redundant
+   and kept only for completeness.
+
+## Summary
+
+All four dependencies now have either a ready patch, a resolved
+artifact, or a reference implementation. The remaining work is purely
+on the micro-kiki side: (a) commit/stash current WIP on
+`KIKI-Mac_tunner/main`, (b) apply patch 00, (c) create
+`src/serving/kiki_flow_bridge.py` from patch 02, (d) wire the bridge
+into the inference pathway, (e) run tests. Estimated time: ~1 hour
+of focused work.
+
+## Legacy section: OLD OPEN-DEP LIST (do not use)
+
+The list below is kept for git-blame traceability; refer to
+**Dependency status (final)** above for the current state.
+
+1. `ANERouter` 37 vs 32 discrepancy — OLD. The stub
    resolved**. `MetaRouter.forward` takes a blended hidden-state
    vector; the raw query string is consumed earlier (in the
    tokenizer / embedding stage). To pass it to `StreamingRunner`,
