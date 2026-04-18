@@ -1,0 +1,14 @@
+{
+  "n_seeds": 1,
+  "per_seed": [
+    {
+      "seed": 0,
+      "n_slow_completed": 5
+    }
+  ],
+  "backend": {
+    "simulator": "mlx",
+    "w2_prox": true,
+    "sinkhorn_backend": "mlx"
+  }
+}
