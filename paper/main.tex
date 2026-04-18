@@ -338,6 +338,51 @@ naive $0.004$. Task~2 is comparable to the naive baseline
 stability/plasticity gap at a small cost on the earliest task.
 Full data: \texttt{paper/cl\_benchmark\_ewc.json}.
 
+\subsection{Continual-learning on a real LLM (measured)}
+\label{sec:cl-real}
+% numbers from bench/cl_llm/runs/e2_5seeds_summary.json
+We validate the forgetting pattern on a real language model. The
+base is \textbf{Qwen3-4B} loaded in 4-bit NF4 quantization (double
+quant, bf16 compute); a LoRA adapter ($r{=}8$, $\alpha{=}16$) trains
+on a 3-task sequence mapped to our Levelt-Baddeley species:
+\textsc{sst-2} (phonology-sensitive sentiment), \textsc{cola}
+(lexical/grammaticality), \textsc{boolq} (syntactic-semantic yes/no
+QA). Each task: $500$ steps, $500$ training samples, learning rate
+$2{\times}10^{-4}$, batch size 4. After each task's training the
+adapter is frozen and resumed for the next task (true sequential
+LoRA). After the full sequence, the final adapter is re-evaluated on
+every prior task's held-out set; \emph{forgetting} is
+$\max(0,\, \text{immediate} - \text{final})$. 5 seeds on an RTX 4090,
+total wall time $22$ minutes.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\textwidth]{figures/fig7_cl_forgetting.pdf}
+  \caption{Measured forgetting per task on the Qwen3-4B LoRA
+    sequence. Only the ``without bridge'' arm is reported here;
+    the bridge arm is architecturally inactive for a single dense
+    LoRA and requires a multi-stack setup (see
+    §\ref{sec:disc}).}
+  \label{fig:clreal}
+\end{figure}
+
+Headline numbers (mean $\pm$ std over 5 seeds):
+\begin{itemize}
+  \item \textsc{sst-2}: immediate $0.945 \pm 0.014$, final
+    $0.860 \pm 0.039$, \textbf{forgetting $0.085 \pm 0.030$}.
+  \item \textsc{cola}: immediate $0.768 \pm 0.032$, final
+    $0.889 \pm 0.039$, \textbf{positive transfer} ($+0.121$ on
+    average, zero forgetting on every seed).
+  \item \textsc{boolq}: $0.565 \pm 0.023$ throughout; 500 steps is
+    below learning threshold at this LoRA rank.
+\end{itemize}
+
+The pattern mirrors the distributional proxy: the first task in the
+sequence loses mass under the pressure of later tasks
+($8.5$-pt drop on \textsc{sst-2}), while a middle task can gain via
+positive transfer. Full data:
+\texttt{bench/cl\_llm/runs/e2\_5seeds\_summary.json}.
+
 \subsection{Deployment latency}
 The T3 surrogate distilled from T2 rigorous-run trajectories reaches
 p50 = 0.04\,ms and p99 = 0.06\,ms on the same machine (stub text
@@ -353,6 +398,9 @@ Figures \ref{fig:kleps} and \ref{fig:clgap} use synthetic data generated
 by the placeholder wiring in \texttt{paper\_run.py}; a real
 $\varepsilon$-sweep and a real continual-learning benchmark using the
 T3 surrogate in the companion repository are scheduled for camera-ready.
+Figure \ref{fig:clreal} is produced from the 5-seed real-LLM run
+reported in §\ref{sec:cl-real} and tracked in
+\texttt{bench/cl\_llm/runs/e2\_5seeds\_summary.json}.
 
 \section{Discussion and limitations}
 \label{sec:disc}

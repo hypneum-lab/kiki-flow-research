@@ -70,6 +70,25 @@ each task's target.
 EWC restores task-2 retention 60 × over naive while keeping task-0 near
 0.90. Source: `paper/cl_benchmark_ewc.json`.
 
+## Continual-learning on a real LLM
+
+3-task sequential LoRA on **Qwen3-4B** (4-bit NF4, LoRA r=8 α=16,
+500 steps × 500 samples × 3 tasks per seed, learning rate 2e-4, 5 seeds).
+Each task resumes the previous LoRA adapter; the final adapter is
+re-evaluated on every prior task to compute forgetting =
+max(0, immediate − final). RTX 4090, ~4.5 min wall per seed, ~22 min total.
+
+| Task | Immediate acc. | Final acc. | Forgetting |
+|---|---|---|---|
+| SST-2 (phono) | 0.945 ± 0.014 | 0.860 ± 0.039 | **0.085 ± 0.030** |
+| CoLA (lex) | 0.768 ± 0.032 | **0.889 ± 0.039** | 0.000 (positive transfer) |
+| BoolQ (syntax) | 0.565 ± 0.023 | 0.565 ± 0.023 | 0 (last task, by definition) |
+
+Real LLM run confirms the distributional-proxy pattern: first-task
+forgetting under pressure of later tasks, positive transfer mid-sequence.
+Source: `bench/cl_llm/runs/e2_5seeds_summary.json`. Reproduce via
+`docs/superpowers/runbooks/real-cl-bench.md`.
+
 ## Fast-vs-rigorous agreement
 
 Reduced setup: grid 16, 500 particles, 20 slow steps, 5 seeds.
