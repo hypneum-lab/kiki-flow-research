@@ -27,6 +27,20 @@ jobs:
       - name: Run fast-vs-rigorous KL
         run: PYTHONPATH=. uv run python scripts/fast_vs_rigorous_kl.py
 
+      - name: Run CL LLM benchmark (stub)
+        run: |
+          PYTHONPATH=. uv run python -c "
+          from pathlib import Path
+          from scripts.cl_llm_bench.run_cl_bench import run_cl_bench
+          out = Path('bench/cl_llm/runs/ci-stub')
+          run_cl_bench(
+              task_names=['phono_sst2', 'lex_cola', 'syn_boolq'],
+              mode='stub',
+              output_dir=out,
+              seed=0,
+          )
+          "
+
       - name: Diff result JSONs against the committed versions
         run: |
           # Allow relative numerical drift; fail only on dropped or
