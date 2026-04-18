@@ -65,7 +65,7 @@ def test_preflight_parses_all_checks_when_ssh_succeeds(
     def fake_run(*args: object, **kwargs: object) -> object:  # type: ignore[no-untyped-def]
         class R:
             returncode = 0
-            stdout = """===train_stack===
+            stdout = """===train_cl_task===
 ok
 ===qwen_weights===
 ok
@@ -85,7 +85,7 @@ ok
     monkeypatch.setattr(subprocess, "run", fake_run)
     report = preflight_report(ssh_host="test-host")
     assert report["ready_for_real"] is True
-    assert report["checks"]["train_stack"]["status"] == "ok"
+    assert report["checks"]["train_cl_task"]["status"] == "ok"
     assert report["checks"]["qwen_weights"]["status"] == "ok"
     assert report["checks"]["hf_datasets"]["status"] == "ok"
     assert report["checks"]["uv"]["status"] == "ok"
@@ -102,7 +102,7 @@ def test_preflight_marks_failed_checks(
     def fake_run(*args: object, **kwargs: object) -> object:  # type: ignore[no-untyped-def]
         class R:
             returncode = 0
-            stdout = """===train_stack===
+            stdout = """===train_cl_task===
 missing
 ===qwen_weights===
 missing
@@ -122,7 +122,7 @@ no gpu
     monkeypatch.setattr(subprocess, "run", fake_run)
     report = preflight_report(ssh_host="test-host")
     assert report["ready_for_real"] is False
-    assert report["checks"]["train_stack"]["status"] == "fail"
+    assert report["checks"]["train_cl_task"]["status"] == "fail"
     assert report["checks"]["qwen_weights"]["status"] == "fail"
     assert report["checks"]["hf_datasets"]["status"] == "fail"
     assert report["checks"]["disk_gb"]["status"] == "fail"  # < 50 GB
@@ -135,7 +135,7 @@ def test_preflight_output_written_to_json(tmp_path: Path, monkeypatch: pytest.Mo
     def fake_run(*args: object, **kwargs: object) -> object:  # type: ignore[no-untyped-def]
         class R:
             returncode = 0
-            stdout = """===train_stack===
+            stdout = """===train_cl_task===
 ok
 ===qwen_weights===
 ok
@@ -193,7 +193,7 @@ def test_cli_preflight_mode_via_main(tmp_path: Path, monkeypatch: pytest.MonkeyP
     def fake_run(*args: object, **kwargs: object) -> object:  # type: ignore[no-untyped-def]
         class R:
             returncode = 0
-            stdout = """===train_stack===
+            stdout = """===train_cl_task===
 ok
 ===qwen_weights===
 ok

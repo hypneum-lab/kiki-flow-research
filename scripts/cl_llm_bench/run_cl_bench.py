@@ -35,8 +35,8 @@ _MIN_DISK_GB = 50
 # Uses `set +e` to capture all results without early exit.
 _PREFLIGHT_SCRIPT = r"""
 set +e
-echo "===train_stack==="
-test -f ~/KIKI-Mac_tunner/scripts/train_stack.py && echo "ok" || echo "missing"
+echo "===train_cl_task==="
+test -f ~/kiki-flow-research-kxkm/train_cl_task.py && echo "ok" || echo "missing"
 echo "===qwen_weights==="
 ls ~/.cache/huggingface 2>/dev/null | grep -i qwen >/dev/null && echo "ok" || echo "missing"
 echo "===hf_datasets==="

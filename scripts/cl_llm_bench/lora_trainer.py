@@ -1,11 +1,13 @@
-"""LoRA trainer wrapper around the existing ~/KIKI-Mac_tunner/scripts/train_stack.py.
+"""LoRA trainer wrapper around the standalone ~/kiki-flow-research-kxkm/train_cl_task.py.
 
 Runs in two modes:
 - ``stub``: returns a synthetic manifest without touching any LLM. For
   CI and for initial pipeline wiring.
-- ``real``: invokes the real trainer on kxkm-ai via SSH. Requires the
-  user's confirmation every time (per user memory: never launch heavy
-  training on kxkm-ai without asking).
+- ``real``: invokes the remote trainer on kxkm-ai via SSH + ``uv run``
+  (the remote script uses PEP 723 inline metadata to resolve torch /
+  transformers / peft / datasets on the fly). Requires the user's
+  confirmation every time (per user memory: never launch heavy training
+  on kxkm-ai without asking).
 """
 
 from __future__ import annotations
@@ -53,11 +55,13 @@ class LoRATrainerStub:
 
 
 class LoRATrainerReal:
-    """Invokes the real trainer on a remote SSH host via the existing
-    ~/KIKI-Mac_tunner/scripts/train_stack.py entry point. Every invocation
-    requires explicit user confirmation when dry_run is False."""
+    """Invokes the real trainer on a remote SSH host via the standalone
+    ~/kiki-flow-research-kxkm/train_cl_task.py entry point. The remote
+    script declares its heavy ML deps via PEP 723 inline metadata, so we
+    run it with ``uv run``. Every invocation requires explicit user
+    confirmation when dry_run is False."""
 
-    REMOTE_SCRIPT = "~/KIKI-Mac_tunner/scripts/train_stack.py"
+    REMOTE_SCRIPT = "~/kiki-flow-research-kxkm/train_cl_task.py"
 
     def __init__(
         self,
@@ -71,7 +75,8 @@ class LoRATrainerReal:
 
     def build_command(self, dataset_path: Path) -> list[str]:
         return [
-            "python",
+            "uv",
+            "run",
             self.REMOTE_SCRIPT,
             "--base-model",
             self.config.base_model,
