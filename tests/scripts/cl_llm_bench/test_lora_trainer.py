@@ -1,8 +1,10 @@
 # tests/scripts/cl_llm_bench/test_lora_trainer.py
+from pathlib import Path
+
 from scripts.cl_llm_bench.lora_trainer import LoRATrainerStub, LoRATrainingConfig
 
 
-def test_lora_trainer_stub_produces_manifest(tmp_path):
+def test_lora_trainer_stub_produces_manifest(tmp_path: Path) -> None:
     cfg = LoRATrainingConfig(
         base_model="qwen3.5-4b",
         lora_rank=8,
