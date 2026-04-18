@@ -25,5 +25,39 @@
   "backend": {
     "simulator": "mlx",
     "w2_prox": false
+  },
+  "aggregate": {
+    "phono": {
+      "peak_mean": 0.015933668916447145,
+      "peak_std": 9.501565622134648e-05,
+      "entropy_bits_mean": 5.999980863349717,
+      "entropy_bits_std": 5.844369673154669e-06,
+      "peak_idx_mean": 26.8,
+      "peak_idx_std": 3.3105890714493698
+    },
+    "lex": {
+      "peak_mean": 0.015837013752287372,
+      "peak_std": 1.0449551906391192e-05,
+      "entropy_bits_mean": 5.999955479615044,
+      "entropy_bits_std": 5.85243072076249e-06,
+      "peak_idx_mean": 12.8,
+      "peak_idx_std": 24.11140808828883
+    },
+    "syntax": {
+      "peak_mean": 0.015857971422374197,
+      "peak_std": 3.2722109160027225e-05,
+      "entropy_bits_mean": 5.999983834181014,
+      "entropy_bits_std": 2.8618305141074764e-06,
+      "peak_idx_mean": 33.6,
+      "peak_idx_std": 3.8781438859330635
+    },
+    "sem": {
+      "peak_mean": 0.01596043097685377,
+      "peak_std": 6.123035583516012e-05,
+      "entropy_bits_mean": 5.9999844698424365,
+      "entropy_bits_std": 3.260889122911462e-06,
+      "peak_idx_mean": 33.8,
+      "peak_idx_std": 2.5612496949731396
+    }
   }
 }
