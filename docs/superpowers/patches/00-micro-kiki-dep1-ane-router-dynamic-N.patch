@@ -1,0 +1,46 @@
+From: L'Electron Rare <contact@saillant.cc>
+Subject: [PATCH] feat(ane_router): infer N from model, not hard-coded 37
+
+Resolves the 37 vs 32 discrepancy by reading the expected output
+dimension from the loaded CoreML model spec instead of hard-coding
+a magic number. Falls back to 32 (the trained MetaRouter size) if
+the model is not loaded.
+
+Apply from the ~/KIKI-Mac_tunner checkout:
+    cd ~/KIKI-Mac_tunner
+    git apply /path/to/00-micro-kiki-dep1-ane-router-dynamic-N.patch
+    git add src/serving/ane_router.py
+    git commit -m "fix(ane_router): infer output N from loaded model"
+
+---
+ src/serving/ane_router.py | 14 +++++++++-----
+ 1 file changed, 9 insertions(+), 5 deletions(-)
+
+diff --git a/src/serving/ane_router.py b/src/serving/ane_router.py
+--- a/src/serving/ane_router.py
++++ b/src/serving/ane_router.py
+@@ -11,16 +11,20 @@ class ANERouter:
+     """Meta-router compiled to CoreML running on ANE (not CPU)."""
+
+     def __init__(self, model_path: str = "models/router.mlpackage") -> None:
+         self._model_path = model_path
+         self._model = None
++        self._n_domains = 32  # default fallback; overridden on load()
+
+     def load(self) -> None:
+         import coremltools as ct
+         self._model = ct.models.MLModel(self._model_path)
++        # Infer output dim from model spec instead of hard-coding
++        spec = self._model.get_spec()
++        out_features = spec.description.output[0].type.multiArrayType.shape
++        if out_features:
++            self._n_domains = int(out_features[-1])
+         logger.info("ANE router loaded from %s", self._model_path)
+
+     def route(self, embedding) -> list[float]:
+-        """Route via ANE — returns 37 sigmoid scores."""
++        """Route via ANE — returns N sigmoid scores matching the loaded model."""
+         if self._model is None:
+             raise RuntimeError("Call load() first")
+-        return [0.0] * 37  # Placeholder — wired during CoreML export
++        return [0.0] * self._n_domains  # Placeholder until CoreML inference wired

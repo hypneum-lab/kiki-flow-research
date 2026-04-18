@@ -1,0 +1,44 @@
+From: L'Electron Rare <contact@saillant.cc>
+Subject: [PATCH] feat(config): KIKI_FLOW_ENABLED feature flag
+
+Adds a single env-var-driven feature flag that gates kiki-flow
+advisory integration in the MoE router. Default off. Enables
+safe rollout and instant kill-switch without code changes.
+
+This patch only introduces the plumbing; the actual router wiring
+(importing StreamingRunner and blending advisory weights) depends
+on resolution of Dep 3 (query-string plumbing) and is applied
+separately.
+
+Apply from ~/KIKI-Mac_tunner:
+    cd ~/KIKI-Mac_tunner
+    git apply /path/to/01-micro-kiki-dep4-feature-flag.patch
+    git add src/config.py  # or wherever the Config dataclass lives
+    git commit -m "feat(config): KIKI_FLOW_ENABLED feature flag (off by default)"
+
+---
+ src/config.py | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/src/config.py b/src/config.py
+--- a/src/config.py
++++ b/src/config.py
+@@ -1,6 +1,13 @@
+ """Centralised configuration for micro-kiki services."""
+ from __future__ import annotations
+
+ import os
+ from dataclasses import dataclass, field
+
++
++def _env_bool(name: str, default: bool = False) -> bool:
++    raw = os.environ.get(name)
++    if raw is None:
++        return default
++    return raw.strip().lower() in {"1", "true", "yes", "on"}
++
++
+ @dataclass
+ class Config:
+     # ... (existing fields)
++    kiki_flow_enabled: bool = field(default_factory=lambda: _env_bool("KIKI_FLOW_ENABLED"))
