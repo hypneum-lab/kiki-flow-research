@@ -304,6 +304,7 @@ def _run_real(
     confirmed: bool,
     max_samples: int = 500,
     base_model: str = "Qwen/Qwen3-4B",
+    n_steps: int = 500,
 ) -> dict[str, Any]:
     """Real-mode CL sequence: train sequentially on ``task_names`` with LoRA
     adapter resume between tasks, then evaluate the final adapter on every
@@ -344,7 +345,9 @@ def _run_real(
         return _fail("input", "task_names is empty", seed)
 
     try:
-        return _run_real_sequence(task_names, output_dir, seed, ssh_host, max_samples, base_model)
+        return _run_real_sequence(
+            task_names, output_dir, seed, ssh_host, max_samples, base_model, n_steps
+        )
     except Exception as e:  # noqa: BLE001
         # Any unexpected failure inside the loop surfaces as a structured
         # error dict — do not propagate out of _run_real.
@@ -358,6 +361,7 @@ def _run_real_sequence(  # noqa: PLR0911
     ssh_host: str,
     max_samples: int,
     base_model: str,
+    n_steps: int,
 ) -> dict[str, Any]:
     """Inner loop for the CL sequence. Each per-stage failure returns a
     ``_fail(...)`` dict; unexpected exceptions bubble up to ``_run_real``
@@ -397,7 +401,7 @@ def _run_real_sequence(  # noqa: PLR0911
             lora_rank=8,
             lora_alpha=16,
             learning_rate=2e-4,
-            n_steps=500,
+            n_steps=n_steps,
             batch_size=4,
             output_dir=Path(remote_output),
             seed=seed,
@@ -478,6 +482,7 @@ def run_cl_bench(
     confirmed: bool = False,
     max_samples: int = 500,
     base_model: str = "Qwen/Qwen3-4B",
+    n_steps: int = 500,
 ) -> dict[str, Any]:
     """Orchestrate CL benchmark in stub, preflight, or real mode.
 
@@ -528,6 +533,7 @@ def run_cl_bench(
             confirmed,
             max_samples=max_samples,
             base_model=base_model,
+            n_steps=n_steps,
         )
         (output_dir / "result.json").write_text(json.dumps(result, indent=2))
         return result
@@ -601,6 +607,12 @@ def main() -> int:
         default="Qwen/Qwen3-4B",
         help="HF repo ID for the base model in real mode (default: Qwen/Qwen3-4B).",
     )
+    parser.add_argument(
+        "--n-steps",
+        type=int,
+        default=500,
+        help="Training steps per task for real mode (default: 500).",
+    )
 
     args = parser.parse_args()
 
@@ -616,6 +628,7 @@ def main() -> int:
             confirmed=args.i_confirm_heavy_training,
             max_samples=args.max_samples,
             base_model=args.base_model,
+            n_steps=args.n_steps,
         )
         print(json.dumps(result, indent=2))
         return 0
