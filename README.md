@@ -85,6 +85,7 @@ uv run pytest --cov=kiki_flow_core
 | Emergent specialization under asymmetric potentials | Mean entropy 2.60 bits vs max 4.00 bits (gap 1.40 bits, 35 % below max) at `(α, β, γ) = (5, 1, 0)` | `paper/hyperparam_sweep.json` |
 | Streaming surrogate latency | p50 = 0.04 ms, p99 = 0.06 ms (v0.1, `state_dim=16`); p50 = 0.37 ms (v0.2-d128, `state_dim=128`) | `bench/T3_latency.jsonl` |
 | Continual-learning retention (honest trade-off) | Task 1 with cons. 0.90 ± 0.07 / without 0.29 ± 0.07; Task 3 with 0.004 / without 0.81 | `paper/cl_benchmark.json` |
+| Real-LLM continual learning (Qwen3-4B 4-bit LoRA, 5 seeds) | SST-2: forgetting 0.085 ± 0.030; CoLA: positive transfer +0.121; BoolQ: 0.565 ± 0.023 (data-limited) | `bench/cl_llm/runs/e2_5seeds_summary.json` |
 | Sinkhorn entropic bias | KL(ρ_ε ‖ ρ_0.001) grows 0 → 8.3 bits, saturates at ε ≥ 0.05 | `paper/epsilon_sweep.json` |
 | MLX Sinkhorn speedup vs POT | 5.13× faster on T2 JKO solver (GrosMac M5, `sinkhorn_backend="mlx"`) | `bench/T2_backend_speedup.jsonl` |
 
