@@ -3,20 +3,16 @@
 from __future__ import annotations
 
 import hashlib
+import logging
 import random
 import re
 import unicodedata
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 
 import numpy as np
 
-try:
-    from sentence_transformers import SentenceTransformer as _SentenceTransformer
-
-    _ST_AVAILABLE = True
-except ImportError:  # optional dep — only needed by dedup()
-    _ST_AVAILABLE = False
+Embedder = Callable[[list[str]], np.ndarray]  # (n, D) float32, normalized
 
 
 @dataclass(frozen=True)
@@ -53,31 +49,27 @@ class CorpusBuilder:
 
     Dedup policy:
       1. Exact match on normalized text → drop duplicates, keep earliest.
-      2. Embedding dedup (MiniLM cosine > threshold) → drop the lower-priority
+      2. Embedding dedup (cosine > threshold) → drop the lower-priority
          source on cross-source dup; otherwise drop the shorter text.
+         Embeddings are provided externally via the ``embedder`` callable.
+
+    Args:
+        dedup_threshold: Cosine similarity above which two entries are
+            considered near-duplicates. Default 0.92.
+        embedder: Optional callable ``(list[str]) -> np.ndarray`` of shape
+            ``(n, D)`` float32, normalized. If ``None``, only exact-match
+            dedup runs (a warning is logged). Typical providers: MLX port
+            of MiniLM, pre-computed .npz cache, or a closure over an
+            external model that is free of torch.
     """
 
     def __init__(
         self,
         dedup_threshold: float = 0.92,
-        embed_model: str | None = None,
+        embedder: Embedder | None = None,
     ) -> None:
         self.dedup_threshold = dedup_threshold
-        self._embed_model_name = embed_model
-        self._embed_model: object | None = None  # lazy-loaded
-
-    def _embed(self, texts: list[str]) -> np.ndarray:
-        """Lazy-load MiniLM and embed."""
-        if self._embed_model is None:
-            if not _ST_AVAILABLE:
-                raise ImportError(
-                    "sentence-transformers is required for embedding dedup. "
-                    "Install it with: uv pip install sentence-transformers"
-                )
-            model_name = self._embed_model_name or "sentence-transformers/all-MiniLM-L6-v2"
-            self._embed_model = _SentenceTransformer(model_name)
-        model = self._embed_model  # narrow type for mypy
-        return np.asarray(model.encode(texts, normalize_embeddings=True))  # type: ignore[union-attr]
+        self.embedder = embedder
 
     @staticmethod
     def _resolve_dup(
@@ -102,34 +94,59 @@ class CorpusBuilder:
         keep[i] = False
         return True
 
-    def dedup(self, entries: Iterable[CorpusEntry]) -> list[CorpusEntry]:
-        """Run exact + embedding dedup. Preserve input order where possible."""
-        entry_list = list(entries)
-        # Stage 1: exact match on normalized text
+    def dedup_exact(self, entries: Iterable[CorpusEntry]) -> list[CorpusEntry]:
+        """Stage 1: exact match on normalized text. Always runs."""
         seen_norm: set[str] = set()
-        stage1: list[CorpusEntry] = []
-        for e in entry_list:
+        result: list[CorpusEntry] = []
+        for e in entries:
             key = _normalize(e.text)
             if key in seen_norm:
                 continue
             seen_norm.add(key)
-            stage1.append(e)
-        if len(stage1) < _MIN_FOR_EMBED_DEDUP:
-            return stage1
-        # Stage 2: embedding cosine dedup
-        embs = self._embed([e.text for e in stage1])
-        keep = [True] * len(stage1)
-        for i in range(len(stage1)):
+            result.append(e)
+        return result
+
+    def dedup_by_embeddings(
+        self,
+        entries: list[CorpusEntry],
+        embeddings: np.ndarray,
+    ) -> list[CorpusEntry]:
+        """Stage 2: cosine-similarity dedup using PROVIDED embeddings.
+
+        ``entries[i]`` corresponds to ``embeddings[i]``. The caller computes
+        embeddings separately (e.g. MLX port of MiniLM, pre-computed .npz
+        cache). No ML dependency is introduced here.
+        """
+        if len(entries) < _MIN_FOR_EMBED_DEDUP:
+            return entries
+        keep = [True] * len(entries)
+        for i in range(len(entries)):
             if not keep[i]:
                 continue
-            for j in range(i + 1, len(stage1)):
+            for j in range(i + 1, len(entries)):
                 if not keep[j]:
                     continue
-                if _cosine(embs[i], embs[j]) > self.dedup_threshold and self._resolve_dup(
-                    stage1, keep, i, j
-                ):
+                if _cosine(
+                    embeddings[i], embeddings[j]
+                ) > self.dedup_threshold and self._resolve_dup(entries, keep, i, j):
                     break
-        return [e for e, k in zip(stage1, keep, strict=True) if k]
+        return [e for e, k in zip(entries, keep, strict=True) if k]
+
+    def dedup(self, entries: Iterable[CorpusEntry]) -> list[CorpusEntry]:
+        """Full dedup: exact stage + optional embedding stage.
+
+        If ``self.embedder`` is ``None``, only exact dedup runs (with a
+        warning logged).
+        """
+        stage1 = self.dedup_exact(entries)
+        if self.embedder is None:
+            logging.getLogger(__name__).warning(
+                "CorpusBuilder.dedup: no embedder provided, skipping embedding stage. "
+                "Only exact-match dedup performed."
+            )
+            return stage1
+        embs = self.embedder([e.text for e in stage1])
+        return self.dedup_by_embeddings(stage1, embs)
 
     def split(
         self,
