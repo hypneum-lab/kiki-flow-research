@@ -24,6 +24,7 @@
   ],
   "backend": {
     "simulator": "mlx",
-    "w2_prox": true
+    "w2_prox": true,
+    "sinkhorn_backend": "pot"
   }
 }

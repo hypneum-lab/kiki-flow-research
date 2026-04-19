@@ -89,6 +89,27 @@ forgetting under pressure of later tasks, positive transfer mid-sequence.
 Source: `bench/cl_llm/runs/e2_5seeds_summary.json`. Reproduce via
 `docs/superpowers/runbooks/real-cl-bench.md`.
 
+### Same setup at 5000 samples × 1500 steps (5 seeds)
+
+When each task gets 10× more data and 3× more steps, **forgetting
+amplifies sharply** — the LoRA actually learns each task instead of
+underfitting, leaving more to overwrite when the next task arrives.
+
+| Task | Immediate acc. | Final acc. | Forgetting |
+|---|---|---|---|
+| SST-2 (phono) | 0.928 ± 0.009 | 0.567 ± 0.013 | **0.361 ± 0.010** (4.2× the 500-sample regime) |
+| CoLA (lex) | 0.833 ± 0.005 | 0.704 ± 0.019 | **0.129 ± 0.021** (positive transfer disappears) |
+| BoolQ (syntax) | 0.652 ± 0.015 | 0.652 ± 0.015 | 0 (last task, by definition) |
+
+Headline: at the 500-sample regime CoLA appeared to gain via
+"positive transfer". The 5000-sample regime exposes that as an
+artefact of an underfitted SST-2 baseline; once SST-2 is properly
+learned, training on CoLA (and BoolQ) overwrites a meaningful chunk
+of it. This is the regime in which a stability mechanism (e.g. the
+bridge-as-EWC-prior of the next subsection) is actually needed.
+Source: `bench/cl_llm/runs/e3_5k_5seeds_summary.json`. Total wall:
+~62 min on RTX 4090.
+
 ### Bridge-as-EWC-prior (prototype)
 
 **Status: PROTOTYPE — pending measurement.** Bridge arm of the real-LLM

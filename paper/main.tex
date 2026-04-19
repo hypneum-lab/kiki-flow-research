@@ -389,6 +389,32 @@ sequence loses mass under the pressure of later tasks
 positive transfer. Full data:
 \texttt{bench/cl\_llm/runs/e2\_5seeds\_summary.json}.
 
+\paragraph{The 5000-sample regime: forgetting amplifies.}
+Repeating the sweep with $5000$ samples per task and $1500$ steps
+per task (5 seeds, $\sim 62$ min wall on the same GPU) exposes a
+much stronger forgetting signal:
+
+\begin{itemize}
+  \item \textsc{sst-2}: immediate $0.928 \pm 0.009$, final
+    $0.567 \pm 0.013$, \textbf{forgetting $0.361 \pm 0.010$}
+    --- \emph{$4.2\times$} the 500-sample number.
+  \item \textsc{cola}: immediate $0.833 \pm 0.005$, final
+    $0.704 \pm 0.019$, \textbf{forgetting $0.129 \pm 0.021$}.
+    The positive transfer reported in the 500-sample regime
+    disappears once \textsc{sst-2} is actually learned.
+  \item \textsc{boolq}: immediate $0.652 \pm 0.015$ (matching
+    the data-limit ablation), no forgetting (last task).
+\end{itemize}
+
+The 500-sample numbers turned out to be partly an artefact of the
+underfitted baseline: when each task barely learned, there was
+little to forget and apparent positive transfer. Once each task is
+properly trained, sequential LoRA on a 4-bit Qwen3-4B exhibits
+catastrophic forgetting on \textsc{sst-2} of the magnitude this
+framework is designed to address (cf.\ §\ref{sec:cl-real} bridge
+prototype). Full data:
+\texttt{bench/cl\_llm/runs/e3\_5k\_5seeds\_summary.json}.
+
 \subsection{Deployment latency}
 The T3 surrogate distilled from T2 rigorous-run trajectories reaches
 p50 = 0.04\,ms and p99 = 0.06\,ms on the same machine (stub text
