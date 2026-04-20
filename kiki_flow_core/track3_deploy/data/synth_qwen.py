@@ -97,6 +97,9 @@ class SyntheticGenerator:
             "temperature": self.temperature,
             "top_p": self.top_p,
             "max_tokens": _TOKENS_PER_QUERY * n,
+            # Qwen3 thinking-mode bypass: empty content + reasoning-only output trap.
+            # Reference: feedback_qwen3_thinking_mode (user memory).
+            "chat_template_kwargs": {"enable_thinking": False},
         }
         last_exc: Exception | None = None
         for attempt in range(_HTTP_MAX_RETRIES):
@@ -118,9 +121,13 @@ class SyntheticGenerator:
                         f"Qwen returned empty choices; body snippet: {str(data)[:200]!r}"
                     )
                 content = choices[0].get("message", {}).get("content")
-                if content is None:
+                if not content:
+                    # Defensive fallback: Qwen3 thinking-mode may put output in reasoning_content
+                    content = choices[0].get("message", {}).get("reasoning_content") or ""
+                if not content:
                     raise SyntheticGenerationError(
-                        f"Qwen response missing message.content; body snippet: {str(data)[:200]!r}"
+                        f"Qwen response message has neither content nor reasoning_content;"
+                        f" body snippet: {str(data)[:200]!r}"
                     )
                 return _parse_lines(content)
             except httpx.TransportError as e:

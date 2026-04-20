@@ -748,6 +748,7 @@ dependencies = [
     { name = "jax" },
     { name = "jaxlib" },
     { name = "mlx" },
+    { name = "mypy" },
     { name = "numpy" },
     { name = "optax" },
     { name = "pot" },
@@ -757,6 +758,7 @@ dependencies = [
     { name = "pyyaml" },
     { name = "safetensors" },
     { name = "scikit-learn" },
+    { name = "types-pyyaml" },
     { name = "virtualenv" },
 ]
 
@@ -791,6 +793,7 @@ requires-dist = [
     { name = "jaxlib", specifier = ">=0.4.30" },
     { name = "matplotlib", marker = "extra == 'dev'", specifier = ">=3.8" },
     { name = "mlx", specifier = ">=0.20" },
+    { name = "mypy", specifier = ">=1.20.1" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.10" },
     { name = "numpy", specifier = ">=2.1" },
     { name = "optax", specifier = ">=0.2" },
@@ -807,6 +810,7 @@ requires-dist = [
     { name = "safetensors", specifier = ">=0.7.0" },
     { name = "scikit-learn", specifier = ">=1.8.0" },
     { name = "spacy", marker = "extra == 'text-bridge-labeler'", specifier = ">=3.7" },
+    { name = "types-pyyaml", specifier = ">=6.0.12.20260408" },
     { name = "types-pyyaml", marker = "extra == 'dev'", specifier = ">=6.0" },
     { name = "virtualenv", specifier = ">=21.2.4" },
 ]

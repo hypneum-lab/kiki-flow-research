@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json as _json
+
 import httpx
 import pytest
 
@@ -118,3 +120,52 @@ def test_malformed_choices_raises() -> None:
     gen = SyntheticGenerator(base_url="http://mock", client=client)
     with pytest.raises(Exception, match="empty choices|Failed to generate"):
         gen.generate_batch("phono", n=1)
+
+
+_N_REASONING_FALLBACK = 2  # queries expected in reasoning-content fallback test
+
+
+def test_reasoning_content_fallback() -> None:
+    """If response has empty content, parser falls back to reasoning_content."""
+
+    def _responder(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={
+                "choices": [
+                    {
+                        "message": {
+                            "content": "",
+                            "reasoning_content": "Query depuis reasoning\nAutre query reasoning\n",
+                        }
+                    }
+                ]
+            },
+        )
+
+    transport = httpx.MockTransport(_responder)
+    client = httpx.Client(transport=transport)
+    gen = SyntheticGenerator(base_url="http://mock", client=client)
+    queries = gen.generate_batch("phono", n=_N_REASONING_FALLBACK)
+    assert len(queries) == _N_REASONING_FALLBACK
+    assert all("reasoning" in q.lower() for q in queries)
+
+
+def test_payload_contains_thinking_disabled() -> None:
+    """Payload must set chat_template_kwargs.enable_thinking=False."""
+    captured: list[dict] = []
+
+    def _responder(request: httpx.Request) -> httpx.Response:
+        captured.append(_json.loads(request.content.decode("utf-8")))
+        return httpx.Response(
+            200,
+            json={"choices": [{"message": {"content": "ok\n"}}]},
+        )
+
+    transport = httpx.MockTransport(_responder)
+    client = httpx.Client(transport=transport)
+    gen = SyntheticGenerator(base_url="http://mock", client=client)
+    gen.generate_batch("phono", n=1)
+    assert captured, "no request captured"
+    payload = captured[0]
+    assert payload.get("chat_template_kwargs") == {"enable_thinking": False}

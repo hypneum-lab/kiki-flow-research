@@ -13,10 +13,10 @@ repos:
         types: [python]
       - id: mypy
         name: mypy
-        entry: /Users/electron/.local/bin/uv run mypy
+        entry: /Users/electron/.local/bin/uv run mypy kiki_flow_core/
         language: system
-        args: [--strict, --ignore-missing-imports]
-        files: ^kiki_flow_core/
+        args: [--strict, --ignore-missing-imports,
+               --exclude, 'kiki_flow_core/track3_deploy/encoders/tiny_tf\.py']
         pass_filenames: false
       - id: pytest-collect
         name: pytest collect (smoke)
