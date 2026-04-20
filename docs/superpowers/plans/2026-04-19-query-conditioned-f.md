@@ -1380,13 +1380,13 @@ git tag phase1-pilot10k-done
 - `artifacts/scale50k/summary.json`
 - `kiki_flow_core/track3_deploy/weights/v0.3.safetensors` (winner promoted)
 
-- [ ] **Step 23.1: Build 50k corpus**
+- [x] **Step 23.1: Build 50k corpus**
 
 ```bash
 uv run python scripts/build_corpus_v1.py --size 50000 --out data/processed/scale50k/
 ```
 
-- [ ] **Step 23.2: Label the 50k corpus (incremental — reuses labeled subset)**
+- [x] **Step 23.2: Label the 50k corpus (incremental — reuses labeled subset)**
 
 ```bash
 cat data/processed/scale50k/{train,val,test}.jsonl > /tmp/all_50k.jsonl
@@ -1396,7 +1396,7 @@ uv run python scripts/label_corpus.py \
   -v
 ```
 
-- [ ] **Step 23.3: Refresh reference embeddings for 50k**
+- [x] **Step 23.3: Refresh reference embeddings for 50k**
 
 ```bash
 uv run python scripts/make_reference_embeddings.py \
@@ -1404,7 +1404,7 @@ uv run python scripts/make_reference_embeddings.py \
   --output data/processed/encoder_embeddings_50k.npz
 ```
 
-- [ ] **Step 23.4: Optionally re-pretrain g_JEPA on 50k labels**
+- [x] **Step 23.4: Optionally re-pretrain g_JEPA on 50k labels**
 
 ```bash
 uv run python -m kiki_flow_core.track3_deploy.train_g_jepa \
