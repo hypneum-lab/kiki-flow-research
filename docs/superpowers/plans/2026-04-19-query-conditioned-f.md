@@ -79,7 +79,7 @@ T19 (HeuristicLabeler) ──────────┘                        
 - Create: `kiki_flow_core/track3_deploy/query_conditioned_f.py`
 - Test: `tests/track3_deploy/test_query_conditioned_f.py`
 
-- [ ] **Step 18.1: Write the failing test**
+- [x] **Step 18.1: Write the failing test**
 
 Create `tests/track3_deploy/test_query_conditioned_f.py`:
 
@@ -218,12 +218,12 @@ def test_value_strictly_positive_when_rho_differs_from_prior() -> None:
     assert F.value(state) > 0
 ```
 
-- [ ] **Step 18.2: Run test to verify it fails**
+- [x] **Step 18.2: Run test to verify it fails**
 
 Run: `uv run python -m pytest tests/track3_deploy/test_query_conditioned_f.py -v`
 Expected: FAIL — `ModuleNotFoundError`.
 
-- [ ] **Step 18.3: Implement QueryConditionedF**
+- [x] **Step 18.3: Implement QueryConditionedF**
 
 Create `kiki_flow_core/track3_deploy/query_conditioned_f.py`:
 
@@ -343,12 +343,12 @@ class QueryConditionedF(FreeEnergy):
         return (grad_complexity + grad_accuracy + grad_coupling).astype(np.float32)
 ```
 
-- [ ] **Step 18.4: Run test to verify it passes**
+- [x] **Step 18.4: Run test to verify it passes**
 
 Run: `uv run python -m pytest tests/track3_deploy/test_query_conditioned_f.py -v`
 Expected: 5 passed.
 
-- [ ] **Step 18.5: Commit**
+- [x] **Step 18.5: Commit**
 
 ```bash
 git add kiki_flow_core/track3_deploy/query_conditioned_f.py \
@@ -380,7 +380,7 @@ EOF
 - Test: `tests/track3_deploy/test_phono_classes.py`
 - Modify: `pyproject.toml` (add `text-bridge-labeler` optional deps)
 
-- [ ] **Step 19.1: Add optional deps group to pyproject.toml**
+- [x] **Step 19.1: Add optional deps group to pyproject.toml**
 
 Inspect existing `[project.optional-dependencies]` section. Add a new group:
 
@@ -404,7 +404,7 @@ Then:
 
 If `espeak-ng` is missing on macOS: `brew install espeak-ng`.
 
-- [ ] **Step 19.2: Create phono_classes module**
+- [x] **Step 19.2: Create phono_classes module**
 
 Create `kiki_flow_core/track3_deploy/data/phono_classes.py`:
 
@@ -445,7 +445,7 @@ N_CLASSES = 32
 DEFAULT_CLASS = 31  # fallback for unknown phonemes
 ```
 
-- [ ] **Step 19.3: Write test for phono_classes**
+- [x] **Step 19.3: Write test for phono_classes**
 
 Create `tests/track3_deploy/test_phono_classes.py`:
 
@@ -484,7 +484,7 @@ def test_common_fr_phonemes_mapped() -> None:
 Run: `uv run python -m pytest tests/track3_deploy/test_phono_classes.py -v`
 Expected: 4 passed.
 
-- [ ] **Step 19.4: Create sem_categories module**
+- [x] **Step 19.4: Create sem_categories module**
 
 Create `kiki_flow_core/track3_deploy/data/sem_categories.py`:
 
@@ -510,7 +510,7 @@ N_SEM = 32
 assert len(SEM_CATEGORIES) == N_SEM
 ```
 
-- [ ] **Step 19.5: Create syntax_patterns module**
+- [x] **Step 19.5: Create syntax_patterns module**
 
 Create `kiki_flow_core/track3_deploy/data/syntax_patterns.py`:
 
@@ -536,7 +536,7 @@ N_SYNTAX = 32
 assert len(SYNTAX_PATTERNS) == N_SYNTAX
 ```
 
-- [ ] **Step 19.6: Write the failing test for HeuristicLabeler**
+- [x] **Step 19.6: Write the failing test for HeuristicLabeler**
 
 Create `tests/track3_deploy/test_heuristic_labeler.py`:
 
@@ -601,12 +601,12 @@ def test_empty_query_returns_uniform(labeler: HeuristicLabeler) -> None:
         np.testing.assert_allclose(vec, np.ones(N_STACKS) / N_STACKS, rtol=1e-5)
 ```
 
-- [ ] **Step 19.7: Run failing**
+- [x] **Step 19.7: Run failing**
 
 Run: `uv run python -m pytest tests/track3_deploy/test_heuristic_labeler.py -v`
 Expected: FAIL — `ModuleNotFoundError`.
 
-- [ ] **Step 19.8: Implement HeuristicLabeler**
+- [x] **Step 19.8: Implement HeuristicLabeler**
 
 Create `kiki_flow_core/track3_deploy/data/heuristic_labeler.py`:
 
@@ -740,12 +740,12 @@ class HeuristicLabeler:
         return _smooth_normalize(counts)
 ```
 
-- [ ] **Step 19.9: Run tests**
+- [x] **Step 19.9: Run tests**
 
 Run: `uv run python -m pytest tests/track3_deploy/test_heuristic_labeler.py tests/track3_deploy/test_phono_classes.py -v`
 Expected: 5 + 4 = 9 passed. If SpaCy model not available, the labeler test file will skip at the `importorskip`.
 
-- [ ] **Step 19.10: Commit**
+- [x] **Step 19.10: Commit**
 
 ```bash
 git add kiki_flow_core/track3_deploy/data/heuristic_labeler.py \
@@ -777,7 +777,7 @@ EOF
 - Test: `tests/track3_deploy/test_train_g_jepa.py`
 - Create (runtime): `artifacts/g_jepa_pretrained.safetensors`
 
-- [ ] **Step 20.1: Write the failing test**
+- [x] **Step 20.1: Write the failing test**
 
 Create `tests/track3_deploy/test_train_g_jepa.py`:
 
@@ -845,12 +845,12 @@ def test_save_load_roundtrip(tmp_path) -> None:
         np.testing.assert_array_equal(np.asarray(params[key]), np.asarray(loaded[key]))
 ```
 
-- [ ] **Step 20.2: Run failing**
+- [x] **Step 20.2: Run failing**
 
 Run: `uv run python -m pytest tests/track3_deploy/test_train_g_jepa.py -v`
 Expected: FAIL — `ModuleNotFoundError`.
 
-- [ ] **Step 20.3: Implement train_g_jepa**
+- [x] **Step 20.3: Implement train_g_jepa**
 
 Create `kiki_flow_core/track3_deploy/train_g_jepa.py`:
 
@@ -1003,12 +1003,12 @@ if __name__ == "__main__":
     sys.exit(main())
 ```
 
-- [ ] **Step 20.4: Run tests**
+- [x] **Step 20.4: Run tests**
 
 Run: `uv run python -m pytest tests/track3_deploy/test_train_g_jepa.py -v`
 Expected: 3 passed.
 
-- [ ] **Step 20.5: Commit**
+- [x] **Step 20.5: Commit**
 
 ```bash
 git add kiki_flow_core/track3_deploy/train_g_jepa.py \
@@ -1034,7 +1034,7 @@ EOF
 - Modify: `kiki_flow_core/track3_deploy/jko_oracle_runner.py`
 - Test: extend `tests/track3_deploy/test_jko_oracle_runner.py`
 
-- [ ] **Step 21.1: Update runner to accept g_JEPA weights**
+- [x] **Step 21.1: Update runner to accept g_JEPA weights**
 
 In `kiki_flow_core/track3_deploy/jko_oracle_runner.py`, add an argparse flag `--g-jepa` pointing to a pre-trained `.safetensors`. Replace the current `ZeroF`-based `compute_jko_pair` with a `QueryConditionedF`-based version that takes the embedder + `g_JEPA` params.
 
@@ -1104,7 +1104,7 @@ Keep the module-level `compute_jko_pair` for backward compatibility (tests monke
 compute_jko_pair = make_pair_computer(None, lambda q: np.zeros(384, dtype=np.float32))
 ```
 
-- [ ] **Step 21.2: Extend test to cover `--g-jepa` flag**
+- [x] **Step 21.2: Extend test to cover `--g-jepa` flag**
 
 Add to `tests/track3_deploy/test_jko_oracle_runner.py`:
 
@@ -1124,12 +1124,12 @@ def test_runner_accepts_g_jepa_flag(tmp_path: Path, fake_jko) -> None:
     assert rc == 0
 ```
 
-- [ ] **Step 21.3: Run tests**
+- [x] **Step 21.3: Run tests**
 
 Run: `uv run python -m pytest tests/track3_deploy/test_jko_oracle_runner.py -v`
 Expected: 4 passed (3 existing + 1 new).
 
-- [ ] **Step 21.4: Commit**
+- [x] **Step 21.4: Commit**
 
 ```bash
 git add kiki_flow_core/track3_deploy/jko_oracle_runner.py \
@@ -1160,7 +1160,7 @@ EOF
 - `artifacts/pilot10k/{B_distilled,C_hash_mlp,D_tiny_tf}.safetensors`
 - `artifacts/pilot10k/summary.json`
 
-- [ ] **Step 22.1: Build the 10k corpus (reuse v0.3 T14 logic)**
+- [x] **Step 22.1: Build the 10k corpus (reuse v0.3 T14 logic)**
 
 ```bash
 uv run python scripts/build_corpus_v1.py --size 10000 --out data/processed/pilot10k/
@@ -1168,7 +1168,7 @@ uv run python scripts/build_corpus_v1.py --size 10000 --out data/processed/pilot
 
 Expected: 3 JSONL split files + `test.sha256`.
 
-- [ ] **Step 22.2: Run the heuristic labeler over the 10k corpus**
+- [x] **Step 22.2: Run the heuristic labeler over the 10k corpus**
 
 Create `scripts/label_corpus.py`:
 
@@ -1239,7 +1239,7 @@ uv run python scripts/label_corpus.py \
 
 Expected: ~5-10 min wall clock on GrosMac. NPZ file ~10 MB.
 
-- [ ] **Step 22.3: Generate reference encoder embeddings for each query**
+- [x] **Step 22.3: Generate reference encoder embeddings for each query**
 
 Use the simplest encoder (C hash-mlp) as the fixed reference `f_θ` for phase A:
 
@@ -1306,7 +1306,7 @@ uv run python scripts/make_reference_embeddings.py \
 
 Expected: <1 min wall clock. NPZ ~15 MB.
 
-- [ ] **Step 22.4: Pre-train g_JEPA on paired data (phase A)**
+- [x] **Step 22.4: Pre-train g_JEPA on paired data (phase A)**
 
 ```bash
 uv run python -m kiki_flow_core.track3_deploy.train_g_jepa \
