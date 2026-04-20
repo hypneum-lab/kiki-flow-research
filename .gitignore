@@ -16,5 +16,5 @@ bench/reports/
 
 # Local-only ephemera
 .remember/
-data/
-artifacts/
+/data/
+/artifacts/

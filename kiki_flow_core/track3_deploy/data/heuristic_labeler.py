@@ -83,6 +83,14 @@ class HeuristicLabeler:
         self._phoneme_lang = phoneme_lang
         self._lexique_bins: dict[str, int] | None = None
         _configure_espeak_library()
+        # Preload the espeak backend once. The top-level `phonemize()` helper
+        # builds a fresh EspeakBackend on every call, which copies the
+        # espeak-ng shared library into /tmp each time — on a long sweep
+        # (e.g. 8k corpus labelling) this saturates mmap and crashes with
+        # "échec d'adressage du segment de l'objet partagé".
+        from phonemizer.backend import EspeakBackend  # noqa: PLC0415
+
+        self._phoneme_backend = EspeakBackend(language=phoneme_lang, preserve_punctuation=False)
         if lexique_csv is not None:
             self._load_lexique(Path(lexique_csv))
 
@@ -119,9 +127,8 @@ class HeuristicLabeler:
         }
 
     def _phono_distribution(self, query: str) -> np.ndarray:
-        from phonemizer import phonemize  # noqa: PLC0415
-
-        ipa = phonemize(query, language=self._phoneme_lang, backend="espeak", strip=True)
+        ipa_list = self._phoneme_backend.phonemize([query], strip=True)
+        ipa = ipa_list[0] if ipa_list else ""
         counts = np.zeros(N_STACKS, dtype=np.float32)
         for ch in ipa:
             cls = PHONO_CLASSES.get(ch, DEFAULT_CLASS)
