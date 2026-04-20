@@ -50,8 +50,11 @@ class SurrogateTrainer:
         post_list: list[np.ndarray] = []
         for ckpt in sorted(self.source_dir.glob("*.safetensors")):
             tensors = load_file(str(ckpt))
-            pre = tensors.get("rho::phono")
-            post = tensors.get("rho::phono_next")
+            pre = tensors.get("state_pre")
+            post = tensors.get("state_post")
+            if pre is None or post is None:
+                pre = tensors.get("rho::phono")
+                post = tensors.get("rho::phono_next")
             if pre is not None and post is not None:
                 pre_list.append(pre)
                 post_list.append(post)
