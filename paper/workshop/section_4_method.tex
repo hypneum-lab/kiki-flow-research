@@ -33,3 +33,31 @@ To pre-train \( g_{\mathrm{JEPA}} \) without ground-truth species labels, we bui
 \end{itemize}
 
 Phase A then minimizes \( \| f_\theta(q) - g_{\mathrm{JEPA}}(\mathrm{flatten}(\pi^{\mathrm{lbl}})) \|^2 \) via Adam-W on \(\sim\)5--10k French queries; \( f_\theta \) is held fixed during phase A and selected by the encoder ablation reported in Section~\ref{sec:experiments}.
+
+\subsection{Ablation}
+\label{sec:ablation}
+
+Figure~\ref{fig:ablation} reports the per-species KL on the FR hybrid
+corpus at 10k (pilot) and 50k (scale) for three text encoders
+(\(\mathrm{B}_{\text{distilled}}\), \(\mathrm{C}_{\text{hash-mlp}}\),
+\(\mathrm{D}_{\text{tiny-tf}}\)). Figure~\ref{fig:scaling} plots the total
+test KL trajectory \(10\text{k} \to 50\text{k}\) per architecture.
+\(\mathrm{C}_{\text{hash-mlp}}\) retains rank-1 at both scales and the
+gap to rank-2 \(\mathrm{B}_{\text{distilled}}\) collapses from
+\(\approx 3\%\) at 10k to \(\approx 0.3\%\) at 50k, confirming the
+R3 kill-switch promotion to Top-2.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{figures/ablation_kl_species.pdf}
+  \caption{Per-species KL across encoders on pilot10k and scale50k.}
+  \label{fig:ablation}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.75\linewidth]{figures/scaling_curves.pdf}
+  \caption{Total test KL scaling \(10\text{k} \to 50\text{k}\) per
+    architecture.}
+  \label{fig:scaling}
+\end{figure}
