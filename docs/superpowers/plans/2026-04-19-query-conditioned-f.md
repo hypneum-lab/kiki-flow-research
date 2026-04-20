@@ -1480,7 +1480,7 @@ git tag phase2-scale50k-done
 - Create: `paper/workshop/figures/ablation_kl_species.{pdf,png}`
 - Create: `paper/workshop/figures/scaling_curves.{pdf,png}`
 
-- [ ] **Step 24.1: Generate figures from saved summaries**
+- [x] **Step 24.1: Generate figures from saved summaries**
 
 ```bash
 uv run python -c "
@@ -1500,7 +1500,7 @@ print('figure written')
 
 Expected: two files in `paper/workshop/figures/`.
 
-- [ ] **Step 24.2: Draft TeX section**
+- [x] **Step 24.2: Draft TeX section**
 
 Create `paper/workshop/section_4_method.tex`:
 
@@ -1559,7 +1559,7 @@ encoders on the FR hybrid corpus at 10k (pilot) and 50k (scale).
 \end{figure}
 ```
 
-- [ ] **Step 24.3: Commit paper section**
+- [x] **Step 24.3: Commit paper section**
 
 ```bash
 git add paper/workshop/section_4_method.tex \
