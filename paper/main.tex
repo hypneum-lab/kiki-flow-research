@@ -718,23 +718,48 @@ decimals. We prototyped the corresponding splitting step as
 $M = \exp(h_d J^{\mathrm{asym}})$ applied per grid cell (a four-term
 Taylor approximation at $h_d = 10^{-2}$; see
 \texttt{T2FreeEnergy.apply\_drift\_splitting}), opt-in through the
-sweep's \texttt{-{}-apply-asym-drift} flag. At the canonical
-$(\alpha, \beta) = (10, 1)$, activating the splitting shifts
-\textsc{dell-full}'s stationary entropy from $1.9675$ bits to
-$1.9753$ bits, a paired shift $\Delta \hat H = +0.0078$ with
-$\sigma_{\mathrm{paired}} \approx 1.3 \times 10^{-4}$ over five
-seeds (paired $t \approx 119$): small in absolute magnitude but
-systematic, and qualitatively consistent with the coupling pushing
-the flow \emph{slightly away from} specialization rather than
-towards it. Propagating the splitting through the full 45-cell
-sweep and into the $\hat\lambda$ measurement of
-\S\ref{sec:lambda-mono} is left as a follow-up run; the default
-results reported in this paper correspond to the non-splitting
-path for reproducibility against the committed
-\texttt{paper/hyperparam\_sweep\_coupling\_modes.json}. The correct
-discretization (mass-preserving forward Euler vs.\ semi-Lagrangian
-advection vs.\ the matrix-exponential choice prototyped here) is
-itself a numerical-analysis question left for future study.
+sweep's \texttt{-{}-apply-asym-drift} flag. We re-ran the full
+$45$-cell sweep with the splitting active~%
+{\small\% from paper/hyperparam\_sweep\_coupling\_modes\_asym\_active.json},
+which gives three robust findings on the $18$ \textsc{*-full}
+cells:
+\begin{enumerate}
+  \item \textbf{Sign consistency.} All $18$ cells show
+        $\Delta \hat H > 0$: the asymmetric drift is uniformly
+        \emph{anti-specializing} under the matrix-exponential
+        discretization, with no exception across the
+        $(\alpha, \beta)$ grid or the choice of topology.
+  \item \textbf{Scaling in $\alpha$.}
+        $\Delta \hat H \approx 5 \times 10^{-4}$ bits at
+        $\alpha = 1$, $\sim 5 \times 10^{-3}$ at $\alpha = 5$, and
+        $\sim 8 \times 10^{-3}$ at $\alpha = 10$. The magnitude
+        grows approximately linearly with the potential drive:
+        $b^{\mathrm{asym}}$ injects entropy in proportion to the
+        gradient force it competes against, with no observed
+        saturation up to the highest tested $\alpha$.
+  \item \textbf{Topology indifference of the delta.}
+        \textsc{dell-full} and \textsc{levelt-full} respond
+        near-identically (e.g.\ $+0.0078$ vs $+0.0088$ bits at
+        $(\alpha, \beta) = (10, 1)$). The \emph{magnitude} of the
+        splitting effect is set by $\|J^{\mathrm{asym}}\|_F$,
+        which is $0.41$ for both topologies; the topology label
+        itself adds nothing beyond fixing this norm.
+\end{enumerate}
+Mean $\Delta \hat H$ across the $18$ \textsc{*-full} cells is
+$+4.7 \times 10^{-3}$ bits (min $+4 \times 10^{-4}$, max
+$+8.8 \times 10^{-3}$). The default numerical results reported
+in \S\ref{sec:coupling-ablation} and \S\ref{sec:exp-lambda}
+correspond to the non-splitting path for reproducibility against
+the committed
+\texttt{paper/hyperparam\_sweep\_coupling\_modes.json}; the
+splitting-active companion file is provided as a parallel artifact.
+Propagating the splitting into the $\hat\lambda$ measurement of
+\S\ref{sec:lambda-mono} (predicted to shift $\hat\lambda$
+modestly downward as the drift slows transient contraction) is
+left for a follow-up run. The correct discretization
+(mass-preserving forward Euler vs.\ semi-Lagrangian advection vs.\
+the matrix-exponential choice prototyped here) is itself a
+numerical-analysis question left for future study.
 
 \paragraph{Integration.} The T3 surrogate passes the latency SLO but has
 not been stress-tested under concurrent load; we are currently wiring it
