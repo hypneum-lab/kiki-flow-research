@@ -687,6 +687,42 @@ distributions, exact-OT via linear programming is available in the repo.
 over many sub-processes. Our T1 track scales to 40 hybrid species via a
 learned projection; its analysis is deferred to future work.
 
+\paragraph{Potential-driven specialization.} The coupling-modes
+ablation of \S\ref{sec:coupling-ablation} shows that at the canonical
+operating point the five modes span under $0.007$ bits of mean
+entropy, with \textsc{separable} slightly below \textsc{dell-full}.
+This does not render the Levelt--Baddeley coupling cosmetic: the
+topology carries the causal production direction of the dynamics
+rather than the stationary entropy, and a decoupled baseline reaches
+the same final entropy only along a qualitatively different
+trajectory. The $\lambda$-monotonicity rate $\hat\lambda \approx
+67.8$ of \S\ref{sec:lambda-mono} quantifies the transient contraction
+that the full coupling provides; a fully decoupled system matches
+the stationary statistics but not the dynamic ones. The architectural
+question ``what does the hierarchy do?'' therefore shifts from ``it
+produces specialization'' to ``it sets the transient geometry along
+which specialization emerges'', a distinction we argue is
+empirically meaningful and deserves its own quantitative treatment
+separate from the steady-state reporting in \S\ref{sec:exp}.
+
+\paragraph{Asymmetric drift not integrated.} Eq.~\eqref{eq:drift-asym}
+defines $b^{\mathrm{asym}} = J^{\mathrm{asym}}\rho$ as a linear
+non-conservative drift, but the current solver does not apply a
+second splitting pass for it: the JKO step sees only the
+$J^{\mathrm{sym}}$ component of Eq.~\eqref{eq:freeenergy}, and the
+multiscale loop integrates $b^{\mathrm{phono}}$ but not
+$b^{\mathrm{asym}}$. The coupling-modes ablation reflects this:
+\textsc{symmetric-*} and \textsc{*-full} modes coincide to six
+decimals. Adding a linear-drift splitting step in the style of
+\cite{gallouet2017splitting} is a natural extension --- it would
+re-activate the effect of the $31.4\%$ of $\|J\|_F$ carried by
+$J^{\mathrm{asym}}$ and could shift the transient contraction rate
+$\hat\lambda$ without necessarily shifting the stationary entropy.
+We defer this to future work because the correct discretization
+(mass-preserving forward Euler vs.\ semi-Lagrangian advection vs.\
+matrix-exponential integrator) is not uniquely determined by the
+formalism alone and merits its own numerical study.
+
 \paragraph{Integration.} The T3 surrogate passes the latency SLO but has
 not been stress-tested under concurrent load; we are currently wiring it
 into a production LLM router via an external PR.
