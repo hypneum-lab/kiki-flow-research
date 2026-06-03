@@ -11,7 +11,7 @@ species, modules, hooks, telemetry). Track-specific code lives in subpackages:
 
 | Track | Purpose | Entry point |
 |---|---|---|
-| T1 `track1_perf` | nightly offline consolidation (40 hybrid species, Eulerian grid) | `track1_perf.offline_consolidator` |
+| T1 `track1_perf` | nightly offline consolidation (Eulerian grid, hybrid species — 40 in prod = 10 stacks × 4 canonical; CLI default `["code","math"]` = 8) | `track1_perf.offline_consolidator` |
 | T2 `track2_paper` | paper figures, N-particle Langevin x JKO, 4 Levelt-Baddeley species | `track2_paper.paper_run.run_paper` |
 | T3 `track3_deploy` | pure-NumPy streaming surrogate, advisory routing | `track3_deploy.streaming_runner` |
 
