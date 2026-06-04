@@ -1,0 +1,261 @@
+{
+  "experiment": "E1b_peyre_bias_preregistered",
+  "prereg": {
+    "model": "F=<x^2/2,rho>; exact-W2 Var->0; entropic OU stationary N(0,eps/2)",
+    "tau": 1.0,
+    "predicted_slope": 0.5,
+    "claim_1_1_pass": "slope in [0.45,0.55] AND R2>0.98",
+    "claim_1_3_pass": "|dDeltasigma2|<2% on x4 grid (model); >5% => grid artifact",
+    "null_pass": "|slope|<0.02 and Var_stat->0",
+    "stationarity": "last-10-step rel drift in Var < 1e-3",
+    "eps_over_tau_sweep": [
+      0.05,
+      0.1,
+      0.2,
+      0.3,
+      0.5
+    ],
+    "grid": 321,
+    "grid_fine": 1281,
+    "x_max": 8.0,
+    "k_max": 400,
+    "n_inner": 4000,
+    "seed": 0
+  },
+  "claim_1_1": {
+    "rows": [
+      {
+        "eps_over_tau": 0.05,
+        "reg": 0.05,
+        "grid": 321,
+        "var_stationary": 0.03000000770147336,
+        "var0": 0.999999999999934,
+        "stationary": true,
+        "k_to_stationary": 23,
+        "var_tail": [
+          0.03000044410576235,
+          0.030000197380338815,
+          0.03000008772459503,
+          0.030000038988708903,
+          0.030000017328315066,
+          0.03000000770147336
+        ],
+        "predicted_var_star": 0.025,
+        "delta_sigma2": 0.03000000770147336
+      },
+      {
+        "eps_over_tau": 0.1,
+        "reg": 0.1,
+        "grid": 321,
+        "var_stationary": 0.060000016792387804,
+        "var0": 0.999999999999934,
+        "stationary": true,
+        "k_to_stationary": 22,
+        "var_tail": [
+          0.060000968333698335,
+          0.06000043037053259,
+          0.06000019127579226,
+          0.06000008501146323,
+          0.060000037782872544,
+          0.060000016792387804
+        ],
+        "predicted_var_star": 0.05,
+        "delta_sigma2": 0.060000016792387804
+      },
+      {
+        "eps_over_tau": 0.2,
+        "reg": 0.2,
+        "grid": 321,
+        "var_stationary": 0.12000003537119984,
+        "var0": 0.999999999999934,
+        "stationary": true,
+        "k_to_stationary": 21,
+        "var_tail": [
+          0.12000203968161988,
+          0.1200009065251644,
+          0.12000040290007308,
+          0.12000017906669916,
+          0.12000007958519962,
+          0.12000003537119984
+        ],
+        "predicted_var_star": 0.1,
+        "delta_sigma2": 0.12000003537119984
+      },
+      {
+        "eps_over_tau": 0.3,
+        "reg": 0.3,
+        "grid": 321,
+        "var_stationary": 0.1800000329595271,
+        "var0": 0.999999999999934,
+        "stationary": true,
+        "k_to_stationary": 21,
+        "var_tail": [
+          0.18000190061241853,
+          0.18000084471663047,
+          0.18000037542961353,
+          0.180000166857606,
+          0.18000007415893599,
+          0.1800000329595271
+        ],
+        "predicted_var_star": 0.15,
+        "delta_sigma2": 0.1800000329595271
+      },
+      {
+        "eps_over_tau": 0.5,
+        "reg": 0.5,
+        "grid": 321,
+        "var_stationary": 0.3000000633064088,
+        "var0": 0.999999999999934,
+        "stationary": true,
+        "k_to_stationary": 20,
+        "var_tail": [
+          0.30000365056653555,
+          0.3000016224740158,
+          0.30000072109956255,
+          0.3000003204886945,
+          0.30000014243941975,
+          0.3000000633064088
+        ],
+        "predicted_var_star": 0.25,
+        "delta_sigma2": 0.3000000633064088
+      }
+    ],
+    "regression": {
+      "slope": 0.6000001153866068,
+      "intercept": 4.687279776488222e-09,
+      "r2": 0.9999999999999977,
+      "ci95_slope": 3.2698109793160796e-08
+    },
+    "all_stationary": true,
+    "verdict": "REFUTED"
+  },
+  "claim_1_3": {
+    "eps_over_tau": 0.2,
+    "grid_base": 321,
+    "grid_fine": 1281,
+    "delta_sigma2_base": 0.12000003537119984,
+    "delta_sigma2_fine": 0.12000003537119985,
+    "rel_change_pct": 1.1564819764332456e-14,
+    "fine_stationary": true,
+    "verdict": "MODEL_BIAS (Peyre, not numerical)"
+  },
+  "control_null": {
+    "rows": [
+      {
+        "eps_over_tau": 0.05,
+        "reg": 0.05,
+        "grid": 321,
+        "var_stationary": 2.8421731052570732e-15,
+        "var0": 0.999999999999934,
+        "stationary": true,
+        "k_to_stationary": 64,
+        "var_tail": [
+          2.842240134071578e-15,
+          2.8422055385544145e-15,
+          2.8421882407958325e-15,
+          2.8421795919165416e-15,
+          2.8421752674768963e-15,
+          2.8421731052570732e-15
+        ],
+        "predicted_var_star": 0.0,
+        "delta_sigma2": 2.8421731052570732e-15
+      },
+      {
+        "eps_over_tau": 0.1,
+        "reg": 0.1,
+        "grid": 321,
+        "var_stationary": 2.8421731052570732e-15,
+        "var0": 0.999999999999934,
+        "stationary": true,
+        "k_to_stationary": 64,
+        "var_tail": [
+          2.842240134071578e-15,
+          2.8422055385544145e-15,
+          2.8421882407958325e-15,
+          2.8421795919165416e-15,
+          2.8421752674768963e-15,
+          2.8421731052570732e-15
+        ],
+        "predicted_var_star": 0.0,
+        "delta_sigma2": 2.8421731052570732e-15
+      },
+      {
+        "eps_over_tau": 0.2,
+        "reg": 0.2,
+        "grid": 321,
+        "var_stationary": 2.8421731052570732e-15,
+        "var0": 0.999999999999934,
+        "stationary": true,
+        "k_to_stationary": 64,
+        "var_tail": [
+          2.842240134071578e-15,
+          2.8422055385544145e-15,
+          2.8421882407958325e-15,
+          2.8421795919165416e-15,
+          2.8421752674768963e-15,
+          2.8421731052570732e-15
+        ],
+        "predicted_var_star": 0.0,
+        "delta_sigma2": 2.8421731052570732e-15
+      },
+      {
+        "eps_over_tau": 0.3,
+        "reg": 0.3,
+        "grid": 321,
+        "var_stationary": 2.8421731052570732e-15,
+        "var0": 0.999999999999934,
+        "stationary": true,
+        "k_to_stationary": 64,
+        "var_tail": [
+          2.842240134071578e-15,
+          2.8422055385544145e-15,
+          2.8421882407958325e-15,
+          2.8421795919165416e-15,
+          2.8421752674768963e-15,
+          2.8421731052570732e-15
+        ],
+        "predicted_var_star": 0.0,
+        "delta_sigma2": 2.8421731052570732e-15
+      },
+      {
+        "eps_over_tau": 0.5,
+        "reg": 0.5,
+        "grid": 321,
+        "var_stationary": 2.8421731052570732e-15,
+        "var0": 0.999999999999934,
+        "stationary": true,
+        "k_to_stationary": 64,
+        "var_tail": [
+          2.842240134071578e-15,
+          2.8422055385544145e-15,
+          2.8421882407958325e-15,
+          2.8421795919165416e-15,
+          2.8421752674768963e-15,
+          2.8421731052570732e-15
+        ],
+        "predicted_var_star": 0.0,
+        "delta_sigma2": 2.8421731052570732e-15
+      }
+    ],
+    "regression": {
+      "slope": 2.3636605853301155e-30,
+      "intercept": 2.8421731052570724e-15,
+      "r2": -0.3999999999999999,
+      "ci95_slope": 3.300729366604262e-30
+    },
+    "verdict": "CONFIRMED (no entropic diffusion)"
+  },
+  "diagnostic_tau_to_zero": {
+    "note": "Prereg slope target 0.5 assumes the tau->0 first-order regime eps/(2tau). At the FIXED tau=1 used in Claim 1.1 the discrete fixed point gives g(tau=1)=0.60 exactly (R2=1, grid-invariant on 321/1281/3001/4001). Var* = (eps/tau)*g(tau), g(tau)->1/2 as tau->0.",
+    "g_of_tau_at_epsovertau_0.2": {
+      "tau_1.0": 0.6,
+      "tau_0.5": 0.5556,
+      "tau_0.2": 0.5238,
+      "tau_0.1": 0.5122,
+      "tau_0.05": 0.5062,
+      "tau_0.02": 0.5023
+    },
+    "limit": "g(tau)->0.5 as tau->0, recovering Peyre eps/(2tau) first-order slope",
+    "interpretation": "Bias is REAL Peyre model bias (grid-invariant). Prereg [0.45,0.55] band was set for the tau->0 regime but Claim 1.1 was run at tau=1 (finite-step correction => 0.60). Verdict vs prereg threshold kept as-is (no HARKing)."
+  }
+}
