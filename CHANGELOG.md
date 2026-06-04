@@ -2,6 +2,46 @@
 
 All notable releases of `kiki-flow-research`. Dates in YYYY-MM-DD.
 
+## [Unreleased] — 2026-06-04 (external-review experiment pass)
+
+### Fixed
+- `prox_w2` was a **fake proximal operator**: its gradient term
+  `transport @ cost_matrix.diagonal()` was identically zero (the
+  sqeuclidean self-distance diagonal is null), degenerating the JKO
+  step into pure anti-KL repulsion. The ε-sweep was therefore measuring
+  a constant parasitic floor (~10.48), invariant in ε — not the
+  entropic bias. Replaced with the **true entropic W2 proximal
+  operator** (Peyré: Dykstra scaling on the Gibbs kernel), validated
+  against finite differences and a Gaussian-variance contraction test
+  (`kiki_flow_core/wasserstein_ops.py`, `tests/test_wasserstein_ops.py`;
+  commit `ffee5d9`).
+
+### Added
+- **E1** (`experiments/e1_epsilon_sweep_var.py`): ε→0 OU sweep. With the
+  fixed prox, `Var(ρ_K)` now decreases **monotonically** toward the
+  exact reference `T(x)=x/(1+τ)`; the invariant parasitic floor is gone.
+  Caveat: low-reg runs needed a grid refinement (Gibbs-kernel underflow).
+- **E1b** (`experiments/e1b_peyre_bias_preregistered.py`,
+  commit `539076c`): pre-registered OU test. The parasitic diffusion is
+  the **real entropic Peyré model bias, not a grid artefact** —
+  grid-invariant (321→4001 pts: 0.000 % change), no-entropy null
+  `Var* ≈ 2.8e-15`. Pre-spec slope band [0.45, 0.55] honestly
+  **REFUTED at τ=1** (measured slope 0.60, R²=1.00), then reconciled as a
+  finite-step fixed point `Var* = (ε/τ)·g(τ)` with `g(τ)→0.5` as τ→0,
+  recovering the textbook `0.5 = ε/(2τ)` (Peyré 2015). No HARKing.
+- **E2** (`experiments/e2_poc_preconditions.py`): propagation-of-chaos
+  preconditions are met only **conditionally** (entropy-dominated
+  regime). Convexity on the simplex tangent (worst eig 2.831 > 0,
+  L ≈ 18.5, Bakry–Émery LSI ≥ 2.831) is supplied entirely by the
+  strongly-convex KL term; the symmetric coupling `J_sym` is indefinite
+  (min eig −0.288), so convexity is **not uniform** and no uniform
+  log-Sobolev constant holds. The "rigorous proxy" label stays qualified.
+
+### Changed
+- `REVIEW.md` / `EXPERIMENT-BACKLOG.md`: external-review open questions 1
+  and 4 resolved (E2, E1/E1b); "exact-Wasserstein rigorous proxy" framing
+  re-read as entropic-regularized JKO with a quantified, qualified bias.
+
 ## [Unreleased] — 2026-04-22 (post v0.7, refactor wave)
 
 ### Added

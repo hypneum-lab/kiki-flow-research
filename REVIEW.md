@@ -1,7 +1,33 @@
 # External reviewer critique — kiki-flow-research
 
 > Status: external review (deep-research harness, findings verified 3-0), 2026-06-03.
-> Leads to confirm.
+> Resolution pass merged 2026-06-04 — see "Resolution" block below.
+
+## Resolution (2026-06-04, merged)
+
+The critique was investigated, not deflected. Outcome (see `EXPERIMENT-BACKLOG.md`
+for full verdicts and artifacts):
+
+- **The discrepancy is real and now quantified, not hand-waved.** Investigating it
+  first surfaced a bug: `prox_w2` was a *fake* proximal operator (its gradient term
+  `transport @ cost.diagonal()` was identically zero), so the prior ε-sweep measured a
+  parasitic floor, not the entropic bias. Fixed to the true entropic W2 prox (Peyré
+  Dykstra scaling on the Gibbs kernel; commit `ffee5d9`).
+- **Open question 4 (numerical magnitude / would ε→0 change the conclusion):** the
+  pre-registered E1b OU test shows the parasitic diffusion is the **real entropic
+  Peyré model bias, grid-invariant (321→4001: 0%)**, not a discretisation artefact;
+  no-entropy null ≈ 2.8e-15. The stationary floor is `Var* = (ε/τ)·g(τ)` with
+  `g(τ)→0.5` as τ→0, i.e. the textbook `ε/(2τ)` law. At production ε=0.01 this floor
+  is non-negligible vs the density scale. **The reviewer is correct**: the
+  "exact-Wasserstein rigorous proxy" framing is overstated and is now read as an
+  entropic-regularized JKO with a quantified, qualified bias.
+- **Open question 1 (PoC / mean-field faithfulness):** E2 confirms PoC preconditions
+  are met only **conditionally** (entropy-dominated regime). `J_sym` is indefinite
+  (min eig −0.288); convexity comes solely from the strongly-convex KL term and is not
+  uniform → **no uniform log-Sobolev constant**. The "rigorous proxy" label stays
+  qualified.
+- Open questions 2 (psycholinguistic empirical content) and 3 (consolidation
+  baseline) remain open.
 
 ## Verdict
 The Optimal-Transport framing is **substantive, not decorative** — but the
