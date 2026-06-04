@@ -1,0 +1,57 @@
+{
+  "experiment": "E1",
+  "params": {
+    "grid": 321,
+    "x_max": 4.0,
+    "h_tau_per_step": 0.05,
+    "K_steps": 20,
+    "seed": 0,
+    "sigma0": 1.0,
+    "potential": "V(x)=x^2/2",
+    "exact_reference": "T(x)=x/(1+tau), Var=Var0*(1+tau)^(-2K)"
+  },
+  "tau_real_per_step": 0.05,
+  "tau_effective_total": 1.0,
+  "var0": 0.998978758351196,
+  "var_exact": 0.1419006193334798,
+  "production_epsilon": 0.01,
+  "floor_at_production_eps": 0.09999999999999999,
+  "var_diff_at_production_eps": 0.2936808960374346,
+  "rows": [
+    {
+      "epsilon": 0.01,
+      "var_K": 0.4355815153709144,
+      "var_exact": 0.1419006193334798,
+      "var_diff": 0.2936808960374346,
+      "floor_theory_eps_over_2tau": 0.09999999999999999
+    },
+    {
+      "epsilon": 0.005,
+      "var_K": 0.40381608899360677,
+      "var_exact": 0.1419006193334798,
+      "var_diff": 0.26191546966012696,
+      "floor_theory_eps_over_2tau": 0.049999999999999996
+    },
+    {
+      "epsilon": 0.002,
+      "var_K": 0.38475662455983106,
+      "var_exact": 0.1419006193334798,
+      "var_diff": 0.24285600522635126,
+      "floor_theory_eps_over_2tau": 0.02
+    },
+    {
+      "epsilon": 0.001,
+      "var_K": 0.3784034539286472,
+      "var_exact": 0.1419006193334798,
+      "var_diff": 0.2365028345951674,
+      "floor_theory_eps_over_2tau": 0.01
+    },
+    {
+      "epsilon": 0.0005,
+      "var_K": 0.3746673840870989,
+      "var_exact": 0.1419006193334798,
+      "var_diff": 0.23276676475361907,
+      "floor_theory_eps_over_2tau": 0.005
+    }
+  ]
+}

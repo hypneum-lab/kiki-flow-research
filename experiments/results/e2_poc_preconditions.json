@@ -1,0 +1,42 @@
+{
+  "experiment": "E2",
+  "status": "COMPLETE",
+  "params": {
+    "grid": 8,
+    "n_samples": 200,
+    "n_hessian_points": 30,
+    "seed": 0,
+    "fd_eps": 1e-05,
+    "coupling_variant": "levelt",
+    "turing_strength": 0.1
+  },
+  "a_convexity": {
+    "raw_hessian_min_eig_worst": -1.3539997825303594,
+    "raw_hessian_min_eig_mean": -0.9848810077605903,
+    "n_points_nonconvex_raw": 30,
+    "tangent_hessian_min_eig_worst": 2.8313135961993736,
+    "tangent_hessian_min_eig_mean": 3.3407932433775707,
+    "n_points_nonconvex_tangent": 0,
+    "is_convex_raw": false,
+    "is_convex_on_simplex_tangent": true,
+    "coupling_J_sym_eigs": [
+      -0.2883219712947474,
+      0.13183107318538476,
+      0.5869877027241664,
+      0.9695031953851965
+    ],
+    "coupling_operator_indefinite": true,
+    "convexity_is_structural": false,
+    "convexity_note": "Tangent convexity holds ONLY because the strongly-convex KL entropy term (Hess=diag(1/rho)) dominates the indefinite coupling energy at this grid/prior. The symmetric coupling J_sym is indefinite (negative eigenvalue), so convexity is conditional, not a structural guarantee, and is not uniform over grid size, prior sharpness, or coupling strength."
+  },
+  "b_gradient_lipschitz": {
+    "estimated_lipschitz_const": 18.505247710356805,
+    "note": "max over subsampled simplex pairs of ||dgrad||/||dx||; finite => locally Lipschitz on sampled region"
+  },
+  "c_log_sobolev_proxy": {
+    "bakry_emery_curvature_lower_bound": 2.8313135961993736,
+    "lsi_guaranteed": true,
+    "note": "Bakry-Emery: LSI const >= min tangent Hess F eigenvalue. Non-positive => no uniform LSI guarantee for exp(-F)."
+  },
+  "verdict": "PoC preconditions only CONDITIONALLY met, not structurally. At grid=8 with a uniform prior the total free energy is convex on the simplex tangent (worst tangent Hess eigenvalue 2.831 > 0) and finite-Lipschitz (L~18.5), giving a Bakry-Emery LSI const >= 2.831. BUT this convexity is entirely supplied by the strongly-convex KL entropy term: the symmetric coupling operator J_sym is indefinite (min eig -0.288 < 0). Convexity is therefore conditional on entropy strength vs ||J_sym||, grid resolution and prior sharpness, and is NOT uniform. A UNIFORM log-Sobolev constant over the relevant family is thus not established. The 'rigorous proxy' / propagation-of-chaos label is supported only in the entropy-dominated regime and should be qualified as such, not asserted for the general non-convex multi-species free energy."
+}
