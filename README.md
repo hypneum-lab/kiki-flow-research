@@ -30,7 +30,7 @@ quantitative results over five seeds.
 | Track | Purpose | Performance | Status |
 |---|---|---|---|
 | `track1_perf` | Nightly offline consolidation over the LoRA stack tensor (40 hybrid species). | ~30 min on Studio M3 Ultra. | tag `track1-v0.1` |
-| `track2_paper` | N-particle Langevin × JKO rigorous proxy for paper figures (4 Levelt-Baddeley species). | 2 min 31 s fast / 84 min rigorous on GrosMac M5. | tag `track2-v0.1` |
+| `track2_paper` | N-particle Langevin × JKO entropic-regularized proxy for paper figures (4 Levelt-Baddeley species). | 2 min 31 s fast / 84 min rigorous on GrosMac M5. | tag `track2-v0.1` |
 | `track3_deploy` | Pure-NumPy streaming surrogate, MiniLM query encoder, advisory-only routing. | p50 = 0.04 ms on GrosMac M5. | tag `track3-v0.1` |
 
 All three tracks share `kiki_flow_core/` (state, master equation,
@@ -120,12 +120,21 @@ uv run pytest --cov=kiki_flow_core
 | Real-LLM continual learning, 500-sample regime (Qwen3-4B 4-bit LoRA, 5 seeds) | SST-2: forgetting 0.085 ± 0.030; CoLA: apparent positive transfer; BoolQ: 0.565 ± 0.023 (data-limited) | `bench/cl_llm/runs/e2_5seeds_summary.json` |
 | Real-LLM continual learning, 5000-sample regime (5 seeds) | SST-2: forgetting **0.361 ± 0.010** (4.2× higher); CoLA: forgetting 0.129 ± 0.021; positive-transfer artefact disappears | `bench/cl_llm/runs/e3_5k_5seeds_summary.json` |
 | Sinkhorn entropic bias | KL(ρ_ε ‖ ρ_0.001) grows 0 → 8.3 bits, saturates at ε ≥ 0.05 | `paper/epsilon_sweep.json` |
+| Entropic JKO is the real Peyré bias, not a grid artefact (pre-registered OU test) | Grid-invariant 321→4001 pts (0 % change); no-entropy null Var* ≈ 2.8e-15; stationary floor Var* = (ε/τ)·g(τ) with g(τ)→0.5 as τ→0 (textbook ε/(2τ)) | `experiments/results/e1b_peyre_bias.json` |
+| Propagation-of-chaos preconditions (E2) | Convex on simplex tangent (worst eig 2.831), L ≈ 18.5, Bakry–Émery LSI ≥ 2.831 — but only because KL entropy dominates the indefinite coupling J_sym (min eig −0.288); **not uniform** | `experiments/results/e2_poc_preconditions.json` |
 | MLX Sinkhorn speedup vs POT | 5.13× faster on T2 JKO solver (GrosMac M5, `sinkhorn_backend="mlx"`) | `bench/T2_backend_speedup.jsonl` |
 
 Results that did **not** hold are reported honestly in the paper:
 the default flat-potential setup does not induce specialization
 (entropy ≈ maximum), and naive prior-averaged consolidation
 over-stabilizes on the first task at the expense of later ones.
+
+Following an external review (`REVIEW.md`), the `track2_paper` JKO scheme
+is described as an **entropic-regularized** JKO, not an exact-Wasserstein
+"rigorous proxy": the entropic Sinkhorn bias is a real model bias (the
+Peyré stationary floor ε/(2τ), grid-invariant — `EXPERIMENT-BACKLOG.md`
+E1/E1b), and the propagation-of-chaos preconditions hold only in the
+entropy-dominated regime, with no uniform log-Sobolev constant (E2).
 
 ## Integration with micro-kiki
 

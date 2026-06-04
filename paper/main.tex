@@ -682,6 +682,31 @@ reported in §\ref{sec:cl-real} and tracked in
 of the true Wasserstein; we report the bias explicitly
 (Figure \ref{fig:kleps}). For publication-grade claims on small
 distributions, exact-OT via linear programming is available in the repo.
+A pre-registered Ornstein--Uhlenbeck control (fixed thresholds, no
+post-hoc tuning) confirms that this bias is a genuine \emph{model} bias of
+the entropic scheme and not a discretization artefact: the stationary
+variance offset is grid-invariant ($321 \to 4001$ points: $0\%$ change),
+the entropy-free null collapses to a Dirac ($\mathrm{Var}^\star \approx
+2.8\times10^{-15}$), and the offset follows the Peyr\'e stationary floor
+$\mathrm{Var}^\star = (\varepsilon/\tau)\,g(\tau)$ with $g(\tau)\to 1/2$ as
+$\tau\to 0$, recovering the textbook $\varepsilon/(2\tau)$ first-order law.
+We therefore describe \texttt{track2\_paper} as an
+\emph{entropic-regularized} JKO scheme rather than an exact-Wasserstein
+gradient flow.
+
+\paragraph{Propagation-of-chaos preconditions.} The $N$-particle
+Langevin $\times$ JKO mean-field claim is supported only
+\emph{conditionally}. A numerical audit finds the total free energy convex
+on the simplex tangent (worst eigenvalue $2.831 > 0$, gradient-Lipschitz
+$L \approx 18.5$, Bakry--\'Emery LSI constant $\geq 2.831$), but this
+convexity is supplied entirely by the strongly-convex KL entropy term: the
+symmetric coupling operator $J^{\mathrm{sym}}$ is indefinite (minimum
+eigenvalue $-0.288$). Convexity is thus conditional on entropy strength
+versus coupling, grid resolution, and prior sharpness, and is not uniform;
+a uniform log-Sobolev constant is not established. The mean-field
+``rigorous proxy'' interpretation should be read as holding in the
+entropy-dominated regime, not as a structural guarantee for the general
+non-convex multi-species free energy.
 
 \paragraph{Four species is coarse.} The Levelt--Baddeley account abstracts
 over many sub-processes. Our T1 track scales to 40 hybrid species via a
