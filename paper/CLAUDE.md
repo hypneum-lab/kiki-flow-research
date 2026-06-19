@@ -3,7 +3,7 @@
 Publication directory. Contains the paper source (`main.tex`,
 `references.bib`), the figures it embeds, the JSON result files that
 back every numerical claim, and a packaged `arxiv_bundle/` +
-`kiki-flow-arxiv-v0.4.zip`.
+`kiki-flow-arxiv-v0.5.zip`.
 
 This is the **fast-path** run (target ~2 min 31 s on GrosMac M5). The
 companion **rigorous** run (84 min) lives in `paper_rigorous/`.
@@ -21,7 +21,7 @@ companion **rigorous** run (84 min) lives in `paper_rigorous/`.
   `hyperparam_sweep_dense.json` — single source of truth for every
   measured number in the paper.
 - `trajectories/` — cached particle trajectories for phase portraits.
-- `arxiv_bundle/` + `kiki-flow-arxiv-v0.4.zip` — packaged submission.
+- `arxiv_bundle/` + `kiki-flow-arxiv-v0.5.zip` — packaged submission.
   Regenerate both together; never hand-edit one.
 
 ## Editing discipline
