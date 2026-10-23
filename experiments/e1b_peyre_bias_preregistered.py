@@ -56,6 +56,9 @@ N_INNER = 4000            # Dykstra/Sinkhorn inner iterations
 SIGMA0 = 1.0
 SEED = 0
 STAT_TOL = 1e-3           # relative Var drift over last 10 steps to call stationary
+STAT_WINDOW = 10          # JKO steps over which the stationarity check runs
+LINREG_PARAMS = 2         # slope + intercept, offset for residual dof
+EPS_MATCH_TOL = 1e-12     # float tolerance when matching a row to eps/tau=0.2
 SLOPE_LO, SLOPE_HI = 0.45, 0.55
 R2_MIN = 0.98
 GRID_PASS = 0.02          # <2% -> model bias
@@ -78,8 +81,8 @@ def entropic_jko_step(
     rho_prev: np.ndarray, x: np.ndarray, gibbs: np.ndarray, reg: float, tau: float, n_iter: int
 ) -> np.ndarray:
     """One entropic-W2 JKO step for F=<V,.>, V=x^2/2 (Peyre 2015 Bregman)."""
-    V = 0.5 * x**2
-    a_func = np.exp(-tau * V / reg)             # linear-functional prox factor
+    v = 0.5 * x**2
+    a_func = np.exp(-tau * v / reg)            # linear-functional prox factor
     ref = np.clip(rho_prev, 1e-300, None)
     b = np.ones_like(ref)
     ka = gibbs @ a_func
@@ -107,7 +110,7 @@ def exact_jko_step(rho_prev: np.ndarray, x: np.ndarray, tau: float) -> np.ndarra
     y = x / (1.0 + tau)                 # target location of mass originally at x
     # push-forward rho_prev (mass at x) onto grid via linear interpolation in y
     new = np.zeros_like(rho_prev)
-    xmin, xmax = x[0], x[-1]
+    xmin = x[0]
     dx = x[1] - x[0]
     for i, yi in enumerate(y):
         pos = (yi - xmin) / dx
@@ -142,7 +145,7 @@ def run_flow(eps_over_tau: float, grid: int, *, entropic: bool) -> dict:
         else:
             rho = exact_jko_step(rho, x, TAU)
         var_traj.append(variance(rho, x))
-        if k >= 10:
+        if k >= STAT_WINDOW:
             tail = var_traj[-11:]
             drift = abs(tail[-1] - tail[0]) / max(abs(tail[0]), 1e-30)
             if drift < STAT_TOL:
@@ -165,19 +168,24 @@ def run_flow(eps_over_tau: float, grid: int, *, entropic: bool) -> dict:
 
 def regress(xv: list[float], yv: list[float]) -> dict:
     xa, ya = np.asarray(xv), np.asarray(yv)
-    A = np.vstack([xa, np.ones_like(xa)]).T
-    (slope, intercept), *_ = np.linalg.lstsq(A, ya, rcond=None)
+    design = np.vstack([xa, np.ones_like(xa)]).T
+    (slope, intercept), *_ = np.linalg.lstsq(design, ya, rcond=None)
     pred = slope * xa + intercept
     ss_res = float(np.sum((ya - pred) ** 2))
     ss_tot = float(np.sum((ya - ya.mean()) ** 2))
     r2 = 1.0 - ss_res / ss_tot if ss_tot > 0 else float("nan")
     n = len(xa)
-    if n > 2 and ss_tot > 0:
-        se = np.sqrt(ss_res / (n - 2) / np.sum((xa - xa.mean()) ** 2))
+    if n > LINREG_PARAMS and ss_tot > 0:
+        se = np.sqrt(ss_res / (n - LINREG_PARAMS) / np.sum((xa - xa.mean()) ** 2))
         ci = 1.96 * se
     else:
         ci = float("nan")
-    return {"slope": float(slope), "intercept": float(intercept), "r2": float(r2), "ci95_slope": float(ci)}
+    return {
+        "slope": float(slope),
+        "intercept": float(intercept),
+        "r2": float(r2),
+        "ci95_slope": float(ci),
+    }
 
 
 def main() -> None:
@@ -212,7 +220,7 @@ def main() -> None:
                         "verdict": "CONFIRMED" if claim11 else "REFUTED"}
 
     # --- Claim 1.3: grid refinement at eps/tau=0.2 ---
-    base = next(r for r in ent_rows if abs(r["eps_over_tau"] - 0.2) < 1e-12)
+    base = next(r for r in ent_rows if abs(r["eps_over_tau"] - 0.2) < EPS_MATCH_TOL)
     fine = run_flow(0.2, GRID_FINE, entropic=True)
     fine["delta_sigma2"] = fine["var_stationary"]
     d_base = base["delta_sigma2"]

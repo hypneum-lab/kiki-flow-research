@@ -32,6 +32,7 @@ from kiki_flow_core.track2_paper.full_jko_solver import FullJKOSolver
 # Backlog set (superset of the task-requested {1e-2,5e-3,1e-3,5e-4}).
 EPSILONS = [1e-2, 5e-3, 2e-3, 1e-3, 5e-4]
 PRODUCTION_EPS = 1e-2
+EPS_MATCH_TOL = 1e-15  # float tolerance when matching a row to PRODUCTION_EPS
 GRID = 321        # fine enough that exp(-cost/reg) does not underflow for reg>=5e-4
 X_MAX = 4.0
 H = 0.05          # JKO time-step == tau per step (matches track2 production h=0.05)
@@ -96,13 +97,13 @@ def swept_prox_w2(
     swept Sinkhorn reg ``reg`` is held independent of the time-step ``h``.
     """
     x = support[:, 0]
-    potential_V = 0.5 * x**2
+    potential_v = 0.5 * x**2
     cost_matrix = ot.dist(support, support, metric="sqeuclidean")
     sink_reg = max(reg, 1e-12)  # no production clamp: GRID is fine enough for reg>=5e-4
     gibbs = np.exp(-cost_matrix / sink_reg)
     ref = np.clip(reference, 1e-300, None)
     # Proximal factor of the linear functional h*<V,.> in the Gibbs geometry.
-    a_func = np.exp(-h * potential_V / sink_reg)
+    a_func = np.exp(-h * potential_v / sink_reg)
     b = np.ones_like(ref)
     for _ in range(n_iter):
         # First marginal carries the linear-functional prox (fixed factor a_func).
@@ -173,7 +174,7 @@ def main() -> None:
             f"eps/(2tau)={eps/(2*H):.4e}"
         )
 
-    prod = next(r for r in rows if abs(r["epsilon"] - PRODUCTION_EPS) < 1e-15)
+    prod = next(r for r in rows if abs(r["epsilon"] - PRODUCTION_EPS) < EPS_MATCH_TOL)
 
     out = {
         "experiment": "E1",
