@@ -93,8 +93,8 @@ def prox_w2(
         ka = gibbs @ a
         # Second-marginal projection: enforce column marginal == reference.
         b = ref / np.maximum(ka, 1e-300)
-    q = a * (gibbs @ b)
-    s = q.sum()
+    q: np.ndarray = a * (gibbs @ b)
+    s = float(q.sum())
     if not np.isfinite(s) or s <= 0:  # Sinkhorn/Dykstra blew up -> report, don't fake.
         raise FloatingPointError("prox_w2 Dykstra iteration did not converge (non-finite marginal)")
     return q / s
