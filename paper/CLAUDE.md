@@ -23,6 +23,9 @@ companion **rigorous** run (84 min) lives in `paper_rigorous/`.
 - `trajectories/` — cached particle trajectories for phase portraits.
 - `arxiv_bundle/` + `kiki-flow-arxiv-v0.5.zip` — packaged submission.
   Regenerate both together; never hand-edit one.
+  Status: the bundle is a v0.5 snapshot and lags `main.tex` /
+  `references.bib` (latest tag `paper-v0.11-draft`, plus untagged
+  2026-06 revisions). Regenerate before any submission.
 
 ## Editing discipline
 

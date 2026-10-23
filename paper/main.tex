@@ -95,8 +95,14 @@ on mean-field neural networks \cite{meimontanari2018} (where training
 dynamics is cast as a Wasserstein flow over parameter distributions) and
 practical denoising/diffusion generative models (where reverse-time
 flows produce samples). For numerical tractability we replace exact
-optimal transport with entropic Sinkhorn, accepting a quantifiable bias
-\cite{feydy2019interpolating} in exchange for computational feasibility.
+optimal transport with entropic Sinkhorn, following the entropic JKO
+scheme of Peyr\'e \cite{peyre2015entropic}, and accept a quantifiable
+bias \cite{feydy2019interpolating} in exchange for computational
+feasibility. With regularization $\varepsilon = \alpha\tau$, the
+entropic JKO scheme converges as $\tau \to 0$ to the target PDE plus
+a linear diffusion term $\tfrac{\alpha}{2}\Delta\rho$
+\cite{baradat2025sinkhorn}; a convergence rate is available under
+convexity assumptions as $\alpha, \tau \to 0$ \cite{baradat2026rate}.
 
 \paragraph{Continual learning and consolidation.}
 Elastic Weight Consolidation \cite{kirkpatrick2017ewc} regularizes
@@ -687,9 +693,16 @@ post-hoc tuning) confirms that this bias is a genuine \emph{model} bias of
 the entropic scheme and not a discretization artefact: the stationary
 variance offset is grid-invariant ($321 \to 4001$ points: $0\%$ change),
 the entropy-free null collapses to a Dirac ($\mathrm{Var}^\star \approx
-2.8\times10^{-15}$), and the offset follows the Peyr\'e stationary floor
+2.8\times10^{-15}$), and the offset follows the stationary floor of the
+entropic JKO scheme \cite{peyre2015entropic},
 $\mathrm{Var}^\star = (\varepsilon/\tau)\,g(\tau)$ with $g(\tau)\to 1/2$ as
-$\tau\to 0$, recovering the textbook $\varepsilon/(2\tau)$ first-order law.
+$\tau\to 0$, recovering the first-order law $\varepsilon/(2\tau)$ implied by
+the extra diffusion $\tfrac{\alpha}{2}\Delta\rho$, $\alpha=\varepsilon/\tau$
+\cite{baradat2025sinkhorn}. The available convergence rate
+\cite{baradat2026rate} assumes convexity and joint vanishing of
+$\alpha$ and $\tau$; here convexity holds only conditionally (see the
+propagation-of-chaos paragraph below) and $\varepsilon$ is held fixed, so
+the bound does not apply directly.
 We therefore describe \texttt{track2\_paper} as an
 \emph{entropic-regularized} JKO scheme rather than an exact-Wasserstein
 gradient flow.
