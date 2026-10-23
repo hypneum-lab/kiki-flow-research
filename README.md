@@ -109,7 +109,7 @@ Run the full test suite:
 uv run pytest --cov=kiki_flow_core
 ```
 
-## Quantitative results (paper v0.4)
+## Quantitative results (paper draft on `main`, last tag `paper-v0.11-draft`)
 
 | Claim | Measured value | Source |
 |---|---|---|
@@ -132,7 +132,8 @@ over-stabilizes on the first task at the expense of later ones.
 Following an external review (`REVIEW.md`), the `track2_paper` JKO scheme
 is described as an **entropic-regularized** JKO, not an exact-Wasserstein
 "rigorous proxy": the entropic Sinkhorn bias is a real model bias (the
-Peyré stationary floor ε/(2τ), grid-invariant — `EXPERIMENT-BACKLOG.md`
+stationary floor ε/(2τ) of the entropic JKO scheme (Peyré 2015;
+Baradat, Hraivoronska & Santambrogio 2025), grid-invariant — `EXPERIMENT-BACKLOG.md`
 E1/E1b), and the propagation-of-chaos preconditions hold only in the
 entropy-dominated regime, with no uniform log-Sobolev constant (E2).
 
@@ -192,7 +193,11 @@ the normative scaffolding for this engine.
 
 ## Citation
 
-Draft pre-print, tagged `paper-v0.4-draft`:
+Draft pre-print. The latest tagged paper version is `paper-v0.11-draft`
+(2026-04-22); `paper/main.tex` on `main` adds the untagged 2026-06
+external-review revisions (E1b, E2). The packaged
+`paper/kiki-flow-arxiv-v0.5.zip` / `paper/arxiv_bundle/` is an older
+v0.5 snapshot and must be regenerated before submission.
 
 ```bibtex
 @unpublished{kiki-flow-2026,
@@ -201,7 +206,7 @@ Draft pre-print, tagged `paper-v0.4-draft`:
             A Wasserstein Gradient Flow Perspective},
   year   = 2026,
   url    = {https://github.com/hypneum-lab/kiki-flow-research},
-  note   = {Draft; code, data, and figures released under MIT at tag paper-v0.4-draft}
+  note   = {Draft; code, data, and figures released under MIT at tag paper-v0.11-draft}
 }
 ```
 

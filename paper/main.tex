@@ -83,7 +83,14 @@ binding lexical, semantic, and temporal information. We take the four
 species $(\rho_{\text{phono}}, \rho_{\text{lex}}, \rho_{\text{syntax}},
 \rho_{\text{sem}})$ to correspond to activation densities at each of
 Levelt's four stages, with coupling strengths derived from the literature
-on spreading activation and interactive-activation models.
+on spreading activation and interactive-activation models. Direct
+evidence that LLMs represent such stage-specific factors is sparse; one
+example is \cite{kim2026allomorph}, who find that the phonological
+condition for English \emph{a}/\emph{an} selection is encoded along a
+single linear direction that causally drives article choice, with the
+model forecasting the phonology of the upcoming word. We therefore treat
+the four-species decomposition as a modelling hypothesis, not as an
+established description of LLM internals.
 
 \paragraph{Wasserstein gradient flows and the JKO scheme.}
 Jordan, Kinderlehrer, and Otto \cite{jko1998} introduced the JKO scheme:
@@ -95,8 +102,24 @@ on mean-field neural networks \cite{meimontanari2018} (where training
 dynamics is cast as a Wasserstein flow over parameter distributions) and
 practical denoising/diffusion generative models (where reverse-time
 flows produce samples). For numerical tractability we replace exact
-optimal transport with entropic Sinkhorn, accepting a quantifiable bias
-\cite{feydy2019interpolating} in exchange for computational feasibility.
+optimal transport with entropic Sinkhorn, following the entropic JKO
+scheme of Peyr\'e \cite{peyre2015entropic}, and accept a quantifiable
+bias \cite{feydy2019interpolating} in exchange for computational
+feasibility. With regularization $\varepsilon = \alpha\tau$, the
+entropic JKO scheme converges as $\tau \to 0$ to the target PDE plus
+a linear diffusion term $\tfrac{\alpha}{2}\Delta\rho$
+\cite{baradat2025sinkhorn}; a convergence rate is available under
+convexity assumptions as $\alpha, \tau \to 0$ \cite{baradat2026rate}.
+Recent work casts a broad class of generative models as parametric JKO
+discretizations of Wasserstein gradient flows \cite{caucheteux2026gwf},
+and W-Flow \cite{han2026wflow} trains a static one-step generator to
+compress a Wasserstein gradient flow whose energy is a Sinkhorn
+divergence; both are close in spirit to Track 3, which distills Track 2
+trajectories into a fast surrogate. Within an LLM pipeline, JKO-RAG
+\cite{segal2026jkorag} frames retrieval reranking as a $W_2$ free-energy
+JKO step and reports that the $W_2$ geometry damps the mass transport
+induced by query paraphrase, an independent use of a JKO step as a
+stability regularizer for LLM routing-type decisions.
 
 \paragraph{Continual learning and consolidation.}
 Elastic Weight Consolidation \cite{kirkpatrick2017ewc} regularizes
@@ -108,7 +131,14 @@ the $W_2$ proximal term of the JKO scheme, which prevents the new
 density from drifting too far from its predecessor. This shift from
 parameter-space to distribution-space regularization integrates naturally
 with mixture-of-experts and LoRA-stack architectures where the routing
-decision is itself a distributional choice.
+decision is itself a distributional choice. Sleep-inspired replay offers
+complementary consolidation baselines: \cite{bazhenov2026sleep} show that
+an unsupervised sleep-like replay phase applied after several
+sequentially trained tasks partially restores performance on all of
+them, whereas \cite{zhang2026silent} confine replay to the degrees of
+freedom left unused by the current input and so dispense with a
+separate offline phase. Our nightly offline consolidation (Track 1) is
+closer to the former; neither is compared against in this paper.
 
 \paragraph{Neuromorphic and mean-field inference.}
 The reaction-diffusion coupling we inherit from Levelt--Baddeley is
@@ -687,9 +717,16 @@ post-hoc tuning) confirms that this bias is a genuine \emph{model} bias of
 the entropic scheme and not a discretization artefact: the stationary
 variance offset is grid-invariant ($321 \to 4001$ points: $0\%$ change),
 the entropy-free null collapses to a Dirac ($\mathrm{Var}^\star \approx
-2.8\times10^{-15}$), and the offset follows the Peyr\'e stationary floor
+2.8\times10^{-15}$), and the offset follows the stationary floor of the
+entropic JKO scheme \cite{peyre2015entropic},
 $\mathrm{Var}^\star = (\varepsilon/\tau)\,g(\tau)$ with $g(\tau)\to 1/2$ as
-$\tau\to 0$, recovering the textbook $\varepsilon/(2\tau)$ first-order law.
+$\tau\to 0$, recovering the first-order law $\varepsilon/(2\tau)$ implied by
+the extra diffusion $\tfrac{\alpha}{2}\Delta\rho$, $\alpha=\varepsilon/\tau$
+\cite{baradat2025sinkhorn}. The available convergence rate
+\cite{baradat2026rate} assumes convexity and joint vanishing of
+$\alpha$ and $\tau$; here convexity holds only conditionally (see the
+propagation-of-chaos paragraph below) and $\varepsilon$ is held fixed, so
+the bound does not apply directly.
 We therefore describe \texttt{track2\_paper} as an
 \emph{entropic-regularized} JKO scheme rather than an exact-Wasserstein
 gradient flow.
