@@ -234,5 +234,12 @@ Still pending:
    specialisation, and phono/lex specialise least (on the fast path
    they specialise most). The fast rerun reproduces
    `paper/hyperparam_sweep_dense.json` exactly. Claim (ii) stays
-   scoped to the fast path. **[PI DECISION]** whether the abstract
-   and the sweep paragraph also report the rigorous-path figure.
+   scoped to the fast path. A widened sweep (138 points, 10 seeds,
+   `paper/rigorous_specialisation_wide_2026_10_24/`) confirms this:
+   the rigorous path specialises at every α > 0, with a gap that
+   saturates at 1.44 ± 0.05 bits (best point (15, 0.2, 0)). The
+   fast-path gap keeps growing with α (2.94 ± 0.03 bits at α = 30), so
+   (10, 1, 0) is the best point of the 72-point grid only. The β
+   trend has opposite signs on the two paths. **[PI DECISION]**
+   whether the abstract and the sweep paragraph also report the
+   rigorous-path figure.
