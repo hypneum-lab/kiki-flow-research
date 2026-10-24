@@ -67,6 +67,7 @@ class JKOStep:
         n_inner: int = 50,
         apply_w2_prox: bool = False,
         prox_fn: ProxFn | None = None,
+        reg: float | None = None,
     ) -> None:
         if h <= 0:
             raise ValueError("h must be positive")
@@ -75,6 +76,10 @@ class JKOStep:
         self.support = support
         self.n_inner = n_inner
         self.apply_w2_prox = apply_w2_prox
+        # Sinkhorn entropic regularisation of the prox. None keeps the prox's
+        # own default (reg = its proximal strength, i.e. h). The JKO step h is
+        # always the proximal pull strength.
+        self.reg = reg
         # Strategy pattern: Track-specific subclasses can inject an MLX-backed
         # prox without forcing a circular import here. Default remains the
         # POT-backed prox_w2.
@@ -95,12 +100,14 @@ class JKOStep:
                 rho = np.clip(rho, 1e-12, None)
                 rho = rho / rho.sum()
             if self.apply_w2_prox:
+                prox_kwargs: dict[str, float] = {} if self.reg is None else {"reg": self.reg}
                 rho = self.prox_fn(
                     rho,
                     reference=rho_tau,
                     epsilon=self.h,
                     support=self.support,
                     n_iter=100,
+                    **prox_kwargs,
                 )
             new_rho[name] = rho
         return state.model_copy(update={"rho": new_rho, "tau": state.tau + 1})
