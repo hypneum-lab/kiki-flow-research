@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.14"
 resolution-markers = [
     "sys_platform == 'win32'",
@@ -538,6 +538,14 @@ wheels = [
 ]
 
 [[package]]
+name = "fr-core-news-lg"
+version = "3.8.0"
+source = { url = "https://github.com/explosion/spacy-models/releases/download/fr_core_news_lg-3.8.0/fr_core_news_lg-3.8.0-py3-none-any.whl" }
+wheels = [
+    { url = "https://github.com/explosion/spacy-models/releases/download/fr_core_news_lg-3.8.0/fr_core_news_lg-3.8.0-py3-none-any.whl", hash = "sha256:da5bf7fc860af64293d88638b4416b3de3a29005b785bfff67d09b06c77345de" },
+]
+
+[[package]]
 name = "frozenlist"
 version = "1.8.0"
 source = { registry = "https://pypi.org/simple" }
@@ -876,6 +884,9 @@ dev = [
     { name = "pytest" },
     { name = "virtualenv" },
 ]
+labeler-models = [
+    { name = "fr-core-news-lg" },
+]
 
 [package.metadata]
 requires-dist = [
@@ -918,6 +929,7 @@ dev = [
     { name = "pytest", specifier = ">=9.0.3" },
     { name = "virtualenv", specifier = ">=21.2.4" },
 ]
+labeler-models = [{ name = "fr-core-news-lg", url = "https://github.com/explosion/spacy-models/releases/download/fr_core_news_lg-3.8.0/fr_core_news_lg-3.8.0-py3-none-any.whl" }]
 
 [[package]]
 name = "kiwisolver"

@@ -11,11 +11,25 @@ import pytest
 
 spacy = pytest.importorskip("spacy")
 
-# The French spaCy pipeline is a ~500 MB model package installed out of
-# band (`python -m spacy download fr_core_news_lg`), not a declared
-# dependency, so skip when it is absent (e.g. on CI runners).
+# The French spaCy pipeline is a ~500 MB model package in the test-only
+# `labeler-models` dependency group (`uv sync --group labeler-models`),
+# so skip when it is absent.
 if not spacy.util.is_package("fr_core_news_lg"):
     pytest.skip("spaCy model fr_core_news_lg not installed", allow_module_level=True)
+
+pytest.importorskip("phonemizer")
+
+from phonemizer.backend import EspeakBackend  # noqa: E402
+
+from kiki_flow_core.track3_deploy.data.heuristic_labeler import (  # noqa: E402
+    _configure_espeak_library,
+)
+
+# phonemizer needs the espeak-ng shared library (system package, or
+# PHONEMIZER_ESPEAK_LIBRARY; CI builds it via scripts/ci/build_espeak_ng.sh).
+_configure_espeak_library()
+if not EspeakBackend.is_available():
+    pytest.skip("espeak-ng library not available", allow_module_level=True)
 
 _N_QUERIES = 3
 _N_SPECIES = 4
