@@ -24,7 +24,7 @@ regenerate bit-stably, claims trace to JSONs.
 | Direction | Contract |
 |---|---|
 | `paper_run.run_paper(out_dir=Path("paper"))` | writes `paper/figures/fig{1..6}*` + `paper/stats.json` + `paper/trajectories/*.safetensors` |
-| `paper_run.run_paper(use_w2_prox=True, sinkhorn_backend="mlx", n_slow=100, out_dir=Path("paper_rigorous"))` | writes the 84-min rigorous artifacts |
+| `paper_run.run_paper(use_w2_prox=True, n_slow=100, out_dir=Path("paper_rigorous"))` | writes the rigorous artifacts (committed ones: POT backend, pre-`ffee5d9` prox; see `ERRATUM.md`) |
 | Figure naming | `fig{N}_<slug>` — match the slug used by `\includegraphics{figures/figN_name}` exactly; LaTeX picks PDF |
 | JSON schema | additive only; if you change a key, update `paper/main.tex` in the same commit (see `scripts/CLAUDE.md`) |
 

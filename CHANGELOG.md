@@ -2,6 +2,36 @@
 
 All notable releases of `kiki-flow-research`. Dates in YYYY-MM-DD.
 
+## [Unreleased] — 2026-10-24 (erratum reruns)
+
+### Changed
+- Reran the prox-dependent runs with the corrected `prox_w2` (macM1,
+  MLX on CPU, 5 seeds; new files only). Fast vs rigorous now differ
+  by KL 0.218 ± 0.026 nats (reduced setup) and 0.262 ± 0.014 nats
+  (paper scale), not 0.000638. The rigorous run takes 12 min 42 s on
+  CPU. The ε-sweep is re-measured (0.67 nats at ε = 0.1).
+- Fig. 1 is replaced by per-species mean position and entropy over
+  slow steps (`make_species_moments`). The old phase portrait plotted
+  a constant.
+- `paper/main.tex`: rigorous-path sections rewritten with the new
+  numbers, KL in nats, and the fast-path scope stated. `main.pdf` is
+  not regenerated (no LaTeX toolchain on the compute hosts).
+
+## [Unreleased] — 2026-10-24 (erratum)
+
+### Retracted
+- The "native MLX Sinkhorn accelerates the rigorous path by 5× /
+  5.13×" claim. `bench/sinkhorn_backend_bench.jsonl:1` timed the
+  defective `mlx_prox_w2` (fixed in PR #16) against the pre-`ffee5d9`
+  POT prox. With the corrected operator MLX is slower at the paper grid
+  sizes (NumPy/MLX = 0.10 at n = 16, 0.15 at n = 64) and faster only
+  from n ≈ 1024. See `ERRATUM.md`.
+
+### Added
+- `ERRATUM.md`: dependency map of every claim built on the old POT or
+  MLX prox, a one-seed spot-check, rerun costs and open PI decisions.
+- `experiments/erratum_2026_10_24_spot_prox.py`: the spot-check.
+
 ## [Unreleased] — 2026-06-04 (external-review experiment pass)
 
 ### Fixed
@@ -190,7 +220,8 @@ All notable releases of `kiki-flow-research`. Dates in YYYY-MM-DD.
 - `tests/track2_paper/test_mlx_prox_w2.py` (5 tests incl. POT parity).
 - `paper/figures/fig6_heatmap.{png,pdf}` entropy landscape.
 - `bench/sinkhorn_backend_bench.jsonl` with measured $5.13\times$
-  MLX-over-POT speedup on GrosMac M5.
+  MLX-over-POT speedup on GrosMac M5. **Retracted 2026-10-24** (both
+  sides timed a defective prox; see `ERRATUM.md`).
 
 ### Changed
 - Best specialization point moves to $(\alpha, \beta, \gamma) = (10, 1, 0)$

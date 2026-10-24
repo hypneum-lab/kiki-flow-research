@@ -24,9 +24,13 @@ artifact drop.
 
 Driven from the same `kiki_flow_core/track2_paper/paper_run.py` entry
 point as the fast path, with `backend={"simulator": "mlx", "w2_prox":
-true}` and `n_slow=100`. Expect ~84 min on GrosMac M5; roughly 5x
-faster with the native MLX Sinkhorn vs POT reference. Output directory
-is `paper_rigorous/`.
+true}` and `n_slow=100`. Output directory is `paper_rigorous/`.
+
+Erratum (2026-10-24): the committed artefacts here were produced with
+the pre-`ffee5d9` POT `prox_w2`, whose output ignored the reference.
+The ~84 min timing is for that old operator and the "roughly 5x faster
+with the native MLX Sinkhorn" note is withdrawn. A rerun with the
+fixed prox is pending (see `ERRATUM.md`).
 
 Never run this from an editor terminal that might be suspended —
 resuming a suspended MLX process leaves the Metal context in a bad

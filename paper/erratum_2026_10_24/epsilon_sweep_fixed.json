@@ -1,0 +1,41 @@
+{
+  "epsilons": [
+    0.001,
+    0.005,
+    0.01,
+    0.05,
+    0.1
+  ],
+  "kl_values_nats": [
+    0.0,
+    3.834209865439579e-10,
+    0.00046693647839020185,
+    0.22907999113827654,
+    0.6686839582757813
+  ],
+  "mean_x_out": [
+    0.9853073889480728,
+    0.9852947355188416,
+    0.97112927363908,
+    0.6552112611831892,
+    0.4179663724808319
+  ],
+  "mean_x_distribution": -0.9853073889480726,
+  "mean_x_reference": 0.9853073889480728,
+  "params": {
+    "grid": 16,
+    "n_iter": 50,
+    "setup": "peaked-left vs peaked-right 1D prox"
+  },
+  "runtime_s": 0.9688040829496458,
+  "provenance": {
+    "git_commit": "8a92b56",
+    "host": "MacBookPro.lan",
+    "machine": "arm64",
+    "python": "3.14.4",
+    "mlx_default_device": "Device(cpu, 0)",
+    "date_utc": "2026-10-24T13:28:19Z",
+    "prox": "kiki_flow_core.wasserstein_ops.prox_w2 (Dykstra, post-ffee5d9)",
+    "kl_units": "nats"
+  }
+}

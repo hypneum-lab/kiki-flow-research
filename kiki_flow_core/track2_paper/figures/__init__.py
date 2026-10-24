@@ -40,6 +40,7 @@ from kiki_flow_core.track2_paper.figures.fig8_bridge_impact import (  # noqa: E4
 )
 from kiki_flow_core.track2_paper.figures.kl_vs_epsilon import make_kl_vs_epsilon  # noqa: E402
 from kiki_flow_core.track2_paper.figures.phase_portrait import make_phase_portrait  # noqa: E402
+from kiki_flow_core.track2_paper.figures.species_moments import make_species_moments  # noqa: E402
 from kiki_flow_core.track2_paper.figures.turing_patterns import make_turing_patterns  # noqa: E402
 
 __all__ = [
@@ -47,6 +48,7 @@ __all__ = [
     "make_f_decay_curves",
     "make_kl_vs_epsilon",
     "make_phase_portrait",
+    "make_species_moments",
     "make_turing_patterns",
     "make_cl_forgetting",
     "make_bridge_impact",
