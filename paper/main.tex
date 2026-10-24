@@ -105,7 +105,11 @@ flows produce samples). For numerical tractability we replace exact
 optimal transport with entropic Sinkhorn, following the entropic JKO
 scheme of Peyr\'e \cite{peyre2015entropic}, and accept a quantifiable
 bias \cite{feydy2019interpolating} in exchange for computational
-feasibility. With regularization $\varepsilon = \alpha\tau$, the
+feasibility. The debiased Sinkhorn divergence approximates the squared
+Wasserstein-2 distance as $\varepsilon \to 0$, and
+\cite{mordant2026sinkhornmetric} prove that the associated Sinkhorn
+Riemannian metric converges as $\varepsilon \to 0$ for finitely
+supported measures, the particle setting used here. With regularization $\varepsilon = \alpha\tau$, the
 entropic JKO scheme converges as $\tau \to 0$ to the target PDE plus
 a linear diffusion term $\tfrac{\alpha}{2}\Delta\rho$
 \cite{baradat2025sinkhorn}; a convergence rate is available under
@@ -120,6 +124,13 @@ trajectories into a fast surrogate. Within an LLM pipeline, JKO-RAG
 JKO step and reports that the $W_2$ geometry damps the mass transport
 induced by query paraphrase, an independent use of a JKO step as a
 stability regularizer for LLM routing-type decisions.
+For the cross-diffusion systems that motivate the Turing coupling
+term, \cite{dus2026crossdiffusion} review the existence theory of
+Wasserstein gradient flows built from JKO schemes. In the searches
+behind this draft we found no Wasserstein or JKO treatment of the
+dynamics of language-model representations during consolidation;
+we report this as the absence of a hit in a literature search, not as a
+proof of novelty.
 
 \paragraph{Continual learning and consolidation.}
 Elastic Weight Consolidation \cite{kirkpatrick2017ewc} regularizes
@@ -536,6 +547,10 @@ between computational speed (large $\varepsilon$ converges faster) and
 transport fidelity; our choice of $\varepsilon = 0.01$ sits in the
 regime where the bias is moderate ($\sim\!8$ bits on this test problem,
 much smaller in typical mostly-uniform production states).
+The $\varepsilon\to 0$ limit of the Sinkhorn Riemannian metric is
+established for finitely supported measures
+\cite{mordant2026sinkhornmetric}; our fixed $\varepsilon$ does not
+fall under that limit, which is why we report the bias empirically.
 
 \begin{figure}[h]
   \centering
