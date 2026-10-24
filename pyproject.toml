@@ -95,3 +95,13 @@ dev = [
     "pytest>=9.0.3",
     "virtualenv>=21.2.4",
 ]
+# Test-only spaCy French pipeline for the HeuristicLabeler tests.
+# Pinned to the explosion/spacy-models release matching spacy 3.8.x;
+# uv.lock records the wheel sha256 (da5bf7fc...45de). License LGPL-LR.
+# Not a runtime dependency: install with `uv sync --group labeler-models`.
+labeler-models = [
+    "fr-core-news-lg==3.8.0",
+]
+
+[tool.uv.sources]
+fr-core-news-lg = { url = "https://github.com/explosion/spacy-models/releases/download/fr_core_news_lg-3.8.0/fr_core_news_lg-3.8.0-py3-none-any.whl" }

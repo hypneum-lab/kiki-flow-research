@@ -12,9 +12,39 @@ jobs:
         python-version: ["3.14"]
     steps:
       - uses: actions/checkout@v4
+      # No uv cache: setup-uv@v3 still uses the retired cache service
+      # (restore fails with HTTP 400), and the pinned 545 MB model wheel
+      # (uv.lock, sha256-verified) downloads in a few seconds anyway.
       - uses: astral-sh/setup-uv@v3
       - run: uv python install ${{ matrix.python-version }}
-      - run: uv sync --all-extras
+      - run: uv sync --all-extras --group labeler-models
+      # espeak-ng (GPL-3.0-or-later, CI/test-only, not redistributed) is
+      # built from the pinned upstream source archive, sha256-verified in
+      # scripts/ci/build_espeak_ng.sh. Needed by phonemizer.
+      - name: Set espeak-ng prefix
+        run: echo "ESPEAK_NG_PREFIX=$HOME/espeak-ng-1.52.0" >> "$GITHUB_ENV"
+      - name: Cache espeak-ng build
+        id: espeak-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/espeak-ng-1.52.0
+          key: espeak-ng-1.52.0-bb4338102ff3b49a81423da8a1a158b420124b055b60fa76cfb4b18677130a23-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('scripts/ci/build_espeak_ng.sh') }}
+      - name: Build espeak-ng
+        if: steps.espeak-cache.outputs.cache-hit != 'true'
+        run: bash scripts/ci/build_espeak_ng.sh "$ESPEAK_NG_PREFIX"
+      - name: Point phonemizer at espeak-ng
+        run: |
+          echo "PHONEMIZER_ESPEAK_LIBRARY=$ESPEAK_NG_PREFIX/lib/libespeak-ng.dylib" >> "$GITHUB_ENV"
+      - name: Check labeler test prerequisites
+        run: |
+          uv run python -c "
+          import spacy
+          from phonemizer.backend import EspeakBackend
+          assert spacy.util.is_package('fr_core_news_lg'), 'fr_core_news_lg missing'
+          assert EspeakBackend.is_available(), 'espeak-ng library missing'
+          print('fr_core_news_lg', spacy.util.get_package_version('fr_core_news_lg'))
+          print('espeak-ng', EspeakBackend.version(), EspeakBackend.library())
+          "
       - run: uv run ruff check .
       - run: uv run mypy kiki_flow_core
       - run: uv run pytest -v --cov=kiki_flow_core --cov-fail-under=0  # TODO(Task 11): bump to --cov-fail-under=80
