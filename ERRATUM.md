@@ -1,9 +1,9 @@
 # Erratum — W2 proximal operator defects (2026-10-24)
 
-Status: **draft for the PI**. Items marked **[PI DECISION]** are not
-settled by this document. No result JSON, PDF or zip has been edited or
-regenerated; this file and the source-text corrections in the same PR
-are the only changes.
+Status: sections 1–6 were written before the reruns (PR #18); section 7
+has the rerun results and section 8 the PI decisions (2026-10-24).
+No historical result JSON, PDF or zip has been edited: the reruns are
+written to new files.
 
 ## 1. The two defects
 
@@ -160,30 +160,64 @@ corrected code; none is claimed.
   `10.5281/zenodo.19666756` archives `paper-v0.8-draft`, which contains
   both claims.
 
-## 7. Pending reruns (not run here)
+## 7. Reruns with the corrected prox (done 2026-10-24)
 
-`FullJKOSolver` hard-imports MLX, so T2 reruns need Apple Silicon
-(electron-server cannot import it without a new dependency). Estimates
-are from the spot-check timings.
+Host macM1 (Apple M1 Max, `MacBookPro.lan`), Python 3.14.4, MLX pinned
+to the CPU device (Metal was busy with another campaign), `nice -n 19`,
+one job at a time. Driver: `experiments/erratum_reruns_2026_10_24.py`
+at `8a92b56` (Fig. 1 subcommand at `979b7e7`). Seeds 0–4. Each output
+JSON records its provenance. The historical outputs are kept unchanged.
 
-| Rerun | Cost estimate | Host |
+| Quantity | Old (defective prox) | New (corrected prox) | New file |
+|---|---|---|---|
+| Fast vs rigorous, reduced setup (grid 16, 500 particles, 20 slow), KL(rigorous‖fast) summed over 4 species, 5 seeds | 0.000638 ± 0.000265 (max 0.000937), reported as "bits", is nats | **0.218 ± 0.026 nats** (max 0.262); per seed 0.232, 0.186, 0.262, 0.206, 0.202 | `paper/erratum_2026_10_24/fast_vs_rigorous_kl_fixed.json` (43 s) |
+| Same at paper scale (grid 64, 10k particles, 100 slow), final step | not measured | **0.262 ± 0.014 nats** | `paper/erratum_2026_10_24/fig1_species_moments_summary.json` |
+| Rigorous runtime, 5 seeds × 100 slow × 10k particles | 84 min (GrosMac M5, MLX GPU simulator, old POT prox loop) | **12 min 42 s** (M1 Max, MLX on CPU) | `paper_rigorous_fixedprox/stats.json` |
+| Fast runtime, same scale | 2 min 31 s (GrosMac M5, GPU) | 3 min 37 s (M1 Max, CPU) | `paper_rigorous_fixedprox/fast/stats.json` |
+| Final entropy per species (bits), flat potentials | fast 5.99998 | fast 5.99998; **rigorous 5.896–5.912** (5.86–5.87 at step 1) | same |
+| ε-sweep KL(ρ_ε‖ρ_0.001) at ε = 0.005 / 0.01 / 0.05 / 0.1 | 4.68 / 8.02 / 8.34 / 8.35 (nats, reported as bits) | **3.8e-10 / 4.7e-4 / 0.229 / 0.669 nats** | `paper/erratum_2026_10_24/epsilon_sweep_fixed.json`, `paper/figures/fig4_kl_vs_epsilon_fixed.*` |
+
+Reading:
+
+- **The fast path is not a numerical stand-in for the rigorous path.**
+  With a working prox, the two differ by about 0.2–0.26 nats. The fast
+  path sits at the uniform histogram (5.99998 bits). The rigorous path,
+  whose prox anchors each update to the particle histogram, stays
+  around 5.90 bits. Results obtained only with the fast path (Figs.
+  2–3, aggregate statistics, specialisation sweeps, coupling ablation,
+  CL proxy) describe the projected-gradient scheme. Whether they hold
+  for the entropic-W2 scheme has not been tested.
+- **New Fig. 1** (`paper/figures/fig1_species_moments.*`) plots
+  per-species mean position and entropy over slow steps for both paths.
+  It shows no species separation under flat potentials: seed-mean
+  positions stay within about ±0.012 and the seed bands overlap. The
+  "trajectories explore distinct regions" text is removed.
+- In the ε-sweep test, ε sets both the prox strength and the Sinkhorn
+  regularisation, so Fig. 4 is not a clean entropic-bias measurement.
+  The paper now says so and points to the E1b control.
+
+Still pending:
+
+| Item | Cost | Host |
 |---|---|---|
-| `scripts/epsilon_sweep.py` (Fig. 4) | seconds | any Apple Silicon |
-| `scripts/fast_vs_rigorous_kl.py`, 5 seeds | about 1–2 min | macM1 after the N10-C campaign, or Studio |
-| `paper_rigorous/` (5 seeds × 100 slow × 10k particles, grid 64) | about 15–20 min on M-series with the MLX simulator: the fixed prox costs milliseconds per call at n = 64, and the 5× more inner gradient steps (`n_inner` 50 vs 10) dominate, as in the spot-check (7.1 s vs 1.5 s) | macM1 after N10-C, or Studio |
-| End-to-end NumPy vs MLX rigorous timing (to replace the 5.13× row with a real one, if wanted) | about 10–20 min | same machine for both sides |
-| `scripts/dump_t2_pairs.py` + T3 retraining | pairs: seconds; retraining: as the original | macM1 / Studio |
+| `paper/main.pdf` regeneration | minutes | needs a LaTeX toolchain: none is installed on macM1 or electron-server |
+| v0.5 arXiv bundle: regenerate or mark superseded | minutes | same |
+| T3 pairs (`dump_t2_pairs.py`) + retraining with the fixed prox | pairs: seconds; retraining: as the original | macM1 / Studio |
+| Specialisation sweep on the rigorous path (does the 2.04-bit gap hold?) | 72 configs × rigorous cost; estimate hours on CPU | macM1 / Studio |
+| End-to-end NumPy vs MLX rigorous timing | 10–20 min | one machine for both sides |
 
-## 8. [PI DECISION] items
+## 8. Decisions (PI, 2026-10-24)
 
-1. Withdraw or re-measure the end-to-end MLX vs NumPy rigorous timing.
-2. Rerun `paper_rigorous/` and `fast_vs_rigorous_kl.py` with the fixed
-   prox before editing the agreement paragraph, or remove that paragraph
-   now.
-3. Rerun `epsilon_sweep.py` (and fix units) or drop Fig. 4, given that
-   E1b already covers the entropic bias properly.
-4. Fix or drop Fig. 1 (constant plot).
-5. Public notice: a note on the GitHub releases / a new Zenodo version,
-   or only this file.
-6. Regenerate `paper/main.pdf` and the v0.5 bundle, or mark the bundle
-   superseded.
+1. MLX speed claim: withdrawn (PR #18).
+2. Reruns of `fast_vs_rigorous_kl`, `paper_rigorous/` and the ε-sweep:
+   done (§7). The agreement paragraph is rewritten with the new numbers.
+3. Fig. 4: replaced by the re-measured curve, in nats, with the
+   ε-conflation caveat.
+4. Fig. 1: replaced by per-species moments.
+5. Public notice: a note on the GitHub releases and a new Zenodo
+   version. Drafted, **not published**; awaiting PI confirmation.
+6. PDF / bundle: regeneration left to the PI (no LaTeX toolchain on the
+   compute hosts).
+7. **[PI DECISION]** Whether to rerun the specialisation sweep on the
+   rigorous path before claim (ii) of the abstract is kept. The
+   abstract now says the claim is about the fast path.
