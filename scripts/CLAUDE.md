@@ -15,6 +15,7 @@ given the same seeds.
 | `hyperparam_sweep_dense.py` | `paper/hyperparam_sweep_dense.json` | denser follow-up sweep |
 | `dump_t2_pairs.py` | `bench/runs/T2_pairs/*.safetensors` | T3 surrogate trainer input |
 | `dump_hybrid_pairs.py` | `bench/runs/T2_pairs_d128/*.safetensors` | T3 v0.2-d128 trainer input |
+| `drift_trigger_sweep.py` | stdout only (Markdown tables) | `DriftTrigger` hysteresis defaults (T1 cadence, not the paper) |
 | `cl_llm_bench/` (subpackage) | `bench/cl_llm/runs/<name>/result.json` + `paper/figures/fig7_cl_forgetting.*` | real-LLM CL §3.4 + issue #1 |
 
 Figures live under `paper/figures/`, emitted via the generators in

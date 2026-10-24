@@ -9,7 +9,7 @@ T1 subpackage. Eulerian-grid JKO over `MixedCanonicalSpecies` (4 canonical x N s
 | `offline_consolidator.py` | `run_once(config, aeon_fetcher, moe_snapshotter, advisory_publisher)` — single consolidation step; `main()` is the CLI stub, not the prod entry |
 | `eulerian_grid_solver.py` | `EulerianGridSolver.step` — scheduler -> phono-loop source -> `AdvectionDiffusion.step_1d` -> `JKOStep.step` (in this order) |
 | `phenomenological_f.py` | `T1FreeEnergy = alpha*<rho,V_curr> + beta*entropy + gamma*reaction(J_full)` — uses `species.coupling_matrix()` directly (no J_sym/J_asym split, that is T2-only) |
-| `trigger_heuristic.py` | `DriftTrigger.should_fire(aeon, last_manifest)` — fires when new/total concepts in window > threshold (default 0.05 over 24h) |
+| `trigger_heuristic.py` | `DriftTrigger.should_fire(aeon, last_manifest)` — fires when new/total concepts in window > threshold (default 0.05 over 24h); optional hysteresis/cooldown/persisted state, see below |
 | `checkpoint.py` | `save_checkpoint`/`load_checkpoint` — safetensors + sibling JSON manifest with `git_sha`, `tau`, `rho_keys` |
 | `__init__.py` | Public re-exports for `run_once`, `EulerianGridSolver`, `T1FreeEnergy`, `DriftTrigger` |
 
@@ -36,6 +36,23 @@ T1 subpackage. Eulerian-grid JKO over `MixedCanonicalSpecies` (4 canonical x N s
 - Designed for nightly cron, not mid-day. T1 holds the MoE-LoRA snapshot lock and writes `bench/runs/T1/latest.{safetensors,json}`; running concurrently with T3 production routing is contention, not a race fix.
 - Checkpoint atomicity: `save_checkpoint` writes safetensors then JSON non-atomically. A crash between the two leaves a stale manifest — `load_checkpoint` will read mismatched `tau`. Acceptable offline; do not port to T3.
 - `DriftTrigger.should_fire` is the only sanctioned scheduler entrypoint. Calling `run_once` on every cron tick regardless of drift wastes the JKO budget and inflates `tau` artificially (R1 reproducibility hashes embed `tau`).
+
+## DriftTrigger parameters
+
+| Parameter | Default | Meaning |
+|---|---|---|
+| `threshold` (alias `threshold_on`) | 0.05 | fire when `rate > threshold` (strict) |
+| `window_h` | 24 | Aeon window in hours |
+| `threshold_off` | `None` | hysteresis: after a fire, disarmed until a tick sees `rate < threshold_off` (strict); must satisfy `0 <= threshold_off < threshold` |
+| `cooldown_s` | `None` | refractory period: a fire also needs `clock() - last_fire >= cooldown_s`; a blocked tick does not disarm |
+| `state_path` | `None` | JSON file holding `armed` + `last_fire_ts`, read at every `should_fire` and rewritten atomically (tmp + `os.replace`) on change; corrupt file -> `ValueError` |
+| `clock` | `time.time` | wall clock (persisted across processes, so not monotonic); inject a fake for tests/sweeps |
+
+- `threshold_off=None` and `cooldown_s=None` reproduce the legacy memoryless trigger exactly (tested).
+- An empty window (no episodes / no concepts) returns `False` and leaves the state untouched.
+- Persistence: a cron job that builds a new `DriftTrigger` per tick MUST pass `state_path` (e.g. `bench/runs/T1/drift_trigger_state.json`), otherwise the armed flag resets every tick and hysteresis is a no-op. Do not store it in `latest.json`: that manifest is the R1 hash anchor and is only rewritten on a fire, while re-arming happens on non-firing ticks.
+- `drift_rate(aeon, manifest)` and `update(rate)` are the two halves of `should_fire`; `scripts/drift_trigger_sweep.py` drives `update` on synthetic traces. The defaults stay at legacy until the PI picks values.
+- Caveat: `save_checkpoint` does not write `known_concepts`, so passing the raw `latest.json` as `last_snapshot_manifest` gives `rate = 1.0` on any non-empty window. The caller must supply the known-concept set.
 
 ## Anti-patterns (T1-specific)
 
