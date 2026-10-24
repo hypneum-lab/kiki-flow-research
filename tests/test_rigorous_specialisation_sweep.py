@@ -11,7 +11,9 @@ import importlib.util
 import sys
 from pathlib import Path
 
+import mlx.core as mx
 import numpy as np
+import pytest
 
 from kiki_flow_core.track2_paper.full_jko_solver import FullJKOSolver
 
@@ -56,6 +58,19 @@ def test_make_jko_rigorous_and_fast() -> None:
     assert mod.make_jko(f_func, support, beta=0.0, rigorous=True).n_inner == 1
 
 
+def test_import_leaves_mlx_device_untouched() -> None:
+    if not mx.metal.is_available():
+        pytest.skip("needs a non-CPU default device to detect the change")
+    before = mx.default_device()
+    mx.set_default_device(mx.gpu)
+    try:
+        sys.modules.pop("exp_rigorous_spec_fresh_import", None)
+        _load(_SCRIPT, "exp_rigorous_spec_fresh_import")
+        assert mx.default_device() == mx.gpu
+    finally:
+        mx.set_default_device(before)
+
+
 def test_outputs_never_overwrite_fast_results() -> None:
     mod = _load(_SCRIPT, "exp_rigorous_spec")
     historical = Path("paper/hyperparam_sweep_dense.json")
@@ -65,6 +80,7 @@ def test_outputs_never_overwrite_fast_results() -> None:
 
 def test_run_one_returns_bits_per_species() -> None:
     mod = _load(_SCRIPT, "exp_rigorous_spec")
-    ent = mod.run_one(alpha=10.0, beta=0.5, gamma=0.0, rigorous=True, seed=0, n_slow=2)
+    with mx.stream(mx.cpu):
+        ent = mod.run_one(alpha=10.0, beta=0.5, gamma=0.0, rigorous=True, seed=0, n_slow=2)
     assert set(ent) == {"phono", "lex", "syntax", "sem"}
     assert all(0.0 <= v <= np.log2(mod.GRID) + 1e-9 for v in ent.values())

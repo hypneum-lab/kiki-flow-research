@@ -29,14 +29,12 @@ from typing import Any
 import mlx.core as mx
 import numpy as np
 
-mx.set_default_device(mx.cpu)
-
-from kiki_flow_core.master_equation import JKOStep  # noqa: E402
-from kiki_flow_core.species import CanonicalSpecies  # noqa: E402
-from kiki_flow_core.track2_paper.full_jko_solver import FullJKOSolver  # noqa: E402
-from kiki_flow_core.track2_paper.mlx_particle_simulator import MLXParticleSimulator  # noqa: E402
-from kiki_flow_core.track2_paper.multiscale_loop import MultiscaleLoop  # noqa: E402
-from kiki_flow_core.track2_paper.paper_f import T2FreeEnergy  # noqa: E402
+from kiki_flow_core.master_equation import JKOStep
+from kiki_flow_core.species import CanonicalSpecies
+from kiki_flow_core.track2_paper.full_jko_solver import FullJKOSolver
+from kiki_flow_core.track2_paper.mlx_particle_simulator import MLXParticleSimulator
+from kiki_flow_core.track2_paper.multiscale_loop import MultiscaleLoop
+from kiki_flow_core.track2_paper.paper_f import T2FreeEnergy
 
 GRID = 16
 MAX_ENTROPY_BITS = float(np.log2(GRID))
@@ -256,6 +254,9 @@ def write_outputs(records: list[dict[str, Any]], seeds: list[int]) -> None:
 
 
 def main() -> None:
+    # Set here, not at import, so importing this module (tests) leaves the
+    # process-wide MLX device untouched.
+    mx.set_default_device(mx.cpu)
     warnings.filterwarnings("ignore")
     ap = argparse.ArgumentParser()
     ap.add_argument("--seeds", type=int, nargs="+", default=SEEDS)
