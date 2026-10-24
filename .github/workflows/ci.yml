@@ -10,26 +10,24 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.14"]
-    env:
-      ESPEAK_NG_PREFIX: ${{ github.workspace }}/../espeak-ng-1.52.0
     steps:
       - uses: actions/checkout@v4
+      # No uv cache: setup-uv@v3 still uses the retired cache service
+      # (restore fails with HTTP 400), and the pinned 545 MB model wheel
+      # (uv.lock, sha256-verified) downloads in a few seconds anyway.
       - uses: astral-sh/setup-uv@v3
-        with:
-          # Cache keyed on uv.lock, which pins the fr_core_news_lg wheel
-          # URL + sha256; keep downloaded wheels (the ~545 MB model).
-          enable-cache: true
-          prune-cache: false
       - run: uv python install ${{ matrix.python-version }}
       - run: uv sync --all-extras --group labeler-models
       # espeak-ng (GPL-3.0-or-later, CI/test-only, not redistributed) is
       # built from the pinned upstream source archive, sha256-verified in
       # scripts/ci/build_espeak_ng.sh. Needed by phonemizer.
+      - name: Set espeak-ng prefix
+        run: echo "ESPEAK_NG_PREFIX=$HOME/espeak-ng-1.52.0" >> "$GITHUB_ENV"
       - name: Cache espeak-ng build
         id: espeak-cache
         uses: actions/cache@v4
         with:
-          path: ${{ env.ESPEAK_NG_PREFIX }}
+          path: ~/espeak-ng-1.52.0
           key: espeak-ng-1.52.0-bb4338102ff3b49a81423da8a1a158b420124b055b60fa76cfb4b18677130a23-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('scripts/ci/build_espeak_ng.sh') }}
       - name: Build espeak-ng
         if: steps.espeak-cache.outputs.cache-hit != 'true'
