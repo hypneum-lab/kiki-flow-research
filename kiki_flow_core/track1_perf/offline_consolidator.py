@@ -16,7 +16,11 @@ from kiki_flow_core.master_equation import JKOStep
 from kiki_flow_core.modules import AdvectionDiffusion, PhonologicalLoop, ScaffoldingScheduler
 from kiki_flow_core.species import MixedCanonicalSpecies
 from kiki_flow_core.state import FlowState
-from kiki_flow_core.track1_perf.checkpoint import load_checkpoint, save_checkpoint
+from kiki_flow_core.track1_perf.checkpoint import (
+    load_checkpoint,
+    load_known_concepts,
+    save_checkpoint,
+)
 from kiki_flow_core.track1_perf.eulerian_grid_solver import EulerianGridSolver
 from kiki_flow_core.track1_perf.phenomenological_f import T1FreeEnergy
 
@@ -79,14 +83,19 @@ def run_once(
     solver = EulerianGridSolver(species, scheduler, adv_diff, jko, phono)
     new_state = solver.step(state)
 
+    # The manifest records every concept seen so far so that DriftTrigger
+    # measures novelty against it (previously absent: rate was always 1.0).
+    # Fetched before publishing so an Aeon failure leaves no side effect.
+    known = load_known_concepts(latest)
+    for episode in aeon.fetch_recent_episodes(window_h=24):
+        known.update(episode.get("concepts", []))
+
     advisory: dict[str, Any] = {
         "tau": new_state.tau,
         "stack_weights": {s: 1.0 / len(stack_names) for s in stack_names},
     }
     routing.publish_advisory(advisory)
-    save_checkpoint(new_state, latest)
-
-    _ = aeon.fetch_recent_episodes(window_h=24)
+    save_checkpoint(new_state, latest, known_concepts=known)
 
     return {"status": "ok", "tau": new_state.tau, "advisory": advisory}
 
