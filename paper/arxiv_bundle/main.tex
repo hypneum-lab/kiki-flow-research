@@ -21,8 +21,12 @@ loop that couples Langevin particle dynamics with an implicit JKO step,
 we show that (i) the flow is numerically tractable at scale on commodity
 Apple Silicon (5 seeds $\times$ 10k particles $\times$ 100 slow steps in
 under three minutes with a fast path, under ninety minutes with the full
-Wasserstein-regularized path; a native MLX Sinkhorn further accelerates
-the rigorous path by $5\times$); (ii) the flow induces emergent
+Wasserstein-regularized path%
+% ERRATUM 2026-10-24: the former clause "a native MLX Sinkhorn further
+% accelerates the rigorous path by 5x" is withdrawn (it timed a defective
+% MLX prox). The 90-min figure was measured with the pre-ffee5d9 prox_w2
+% and is pending rerun -- PI decision, see ERRATUM.md.
+); (ii) the flow induces emergent
 species-level specialization when the attraction-to-species-regions is
 strong enough, with a measured entropy gap of $2.04$ bits below the
 maximum at the best point of a 72-configuration sweep ($51\%$ below max),
@@ -173,6 +177,9 @@ $(\varepsilon = 0.01)$. Both paths use the MLX particle simulator on
 Apple Silicon.
 
 \subsection{Phase portrait (5 seeds)}
+% ERRATUM 2026-10-24: every fig1 panel (both paths, all seeds) is the
+% same single point (1/64, 1/64): the plotted mean of a normalised
+% histogram is constant. PI decision pending, see ERRATUM.md.
 Figure \ref{fig:phase} shows the trajectory of
 $(\bar\rho_{\text{phono}}, \bar\rho_{\text{lex}})$ over 100 slow steps
 for five independent seeds. Despite identical priors and couplings,
@@ -207,9 +214,28 @@ illustrating the metastability of the consolidated state.
 Fast path: 5 seeds $\times$ 100 slow $\times$ 10\,000 particles completes
 in \textbf{2\,min 31\,s} on a GrosMac M5. Rigorous path (with POT Sinkhorn
 prox) completes in \textbf{84\,min} on the same hardware
-(35\,$\times$ slower per JKO step). A native-MLX Sinkhorn reduces
-the rigorous overhead to $5.13\times$ (bench/sinkhorn\_backend\_bench.jsonl).
+(35\,$\times$ slower per JKO step).
+% ERRATUM 2026-10-24: the 84-min / 35x figures above were measured with
+% the pre-ffee5d9 prox_w2, whose output ignored the reference; they do
+% not time the corrected operator. Pending rerun -- PI decision, see
+% ERRATUM.md.
+An earlier draft reported that a native-MLX Sinkhorn reduces the
+rigorous overhead by $5.13\times$. That measurement timed a defective
+MLX proximal operator, which returned its input unchanged, against the
+pre-correction POT loop; it is withdrawn (see \texttt{ERRATUM.md}).
+With the corrected operator, a per-call benchmark of the Dykstra
+proximal step (200 iterations, median of 7 runs, Apple M1 Max) gives
+NumPy-to-MLX time ratios of $0.10$, $0.15$, $0.36$, $1.32$ and $4.26$
+at $n = 16, 64, 256, 1024, 2048$ grid points: MLX is slower at the
+grid sizes used in this paper and only faster from $n \approx 1024$.
+We therefore make no MLX speedup claim for the rigorous path.
 
+% ERRATUM 2026-10-24: the KL below compares the fast path with a
+% rigorous path whose pre-ffee5d9 prox ignored the reference (it was
+% close to identity on these near-uniform histograms), and it is in
+% nats, not bits. A one-seed spot-check with the corrected prox gives
+% KL(rigorous||fast) = 0.22 nats, i.e. 300-1000x the reported value.
+% PI decision pending, see ERRATUM.md.
 \paragraph{Quantitative agreement.} On matched seeds
 (reduced setup: grid 16, 500 particles, 20 slow steps), the two paths
 yield final distributions differing by
@@ -280,6 +306,10 @@ threshold to produce visible Turing-style patterning at this scale.
 \end{figure}
 
 \subsection{Entropic Sinkhorn bias (measured)}
+% ERRATUM 2026-10-24: epsilon_sweep.json / fig4 were produced with the
+% pre-ffee5d9 prox_w2, whose output ignores the reference; the values
+% are in nats. The bias described below is an artefact of that bug.
+% PI decision pending, see ERRATUM.md.
 Figure \ref{fig:kleps} reports $\mathrm{KL}(\rho_\varepsilon \|
 \rho_{\varepsilon=0.001})$ on a log-log scale, measured by applying a
 single \texttt{prox\_w2} step to a smoothly peaked source distribution

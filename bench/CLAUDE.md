@@ -8,7 +8,10 @@ Two kinds of artifact live here; they are not the same thing.
   per `{machine, weights, state_dim}` combination. Referenced in the
   README quantitative-results table.
 - `sinkhorn_backend_bench.jsonl` — POT vs MLX Sinkhorn wall-clock on the
-  rigorous setup. Backs the "~5x speedup" claim in the paper abstract.
+  rigorous setup. Row 1 (5.13×) timed the defective pre-PR-#16 MLX prox
+  against the pre-`ffee5d9` POT prox; the "~5x speedup" claim it backed
+  is **withdrawn** (see `ERRATUM.md`). Keep the row (append-only); a
+  new measurement goes on a new line.
 
 Rules:
 
