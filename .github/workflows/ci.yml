@@ -11,11 +11,16 @@ jobs:
       matrix:
         python-version: ["3.14"]
     steps:
-      - uses: actions/checkout@v4
-      # No uv cache: setup-uv@v3 still uses the retired cache service
-      # (restore fails with HTTP 400), and the pinned 545 MB model wheel
-      # (uv.lock, sha256-verified) downloads in a few seconds anyway.
-      - uses: astral-sh/setup-uv@v3
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      # setup-uv v10 bundles @actions/cache 4.x (cache service v2), so the
+      # uv cache works again (v3 hit HTTP 400 on the retired v1 service).
+      # uv itself is pinned and sha256-verified (aarch64-apple-darwin;
+      # bump version + checksum together, after HITL review).
+      - uses: astral-sh/setup-uv@18d369b23da25a81e9458561248e1aafff6a70fa # v10.3.1
+        with:
+          version: "0.13.1"
+          checksum: "cfe454573412ff7380d15fc7dae5997ab53ffce72fce0a78e91ddbc84001acd2"
+          enable-cache: true
       - run: uv python install ${{ matrix.python-version }}
       - run: uv sync --all-extras --group labeler-models
       # espeak-ng (GPL-3.0-or-later, CI/test-only, not redistributed) is
@@ -25,7 +30,7 @@ jobs:
         run: echo "ESPEAK_NG_PREFIX=$HOME/espeak-ng-1.52.0" >> "$GITHUB_ENV"
       - name: Cache espeak-ng build
         id: espeak-cache
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ~/espeak-ng-1.52.0
           key: espeak-ng-1.52.0-bb4338102ff3b49a81423da8a1a158b420124b055b60fa76cfb4b18677130a23-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('scripts/ci/build_espeak_ng.sh') }}
