@@ -34,10 +34,11 @@ class FullJKOSolver(JKOStep):
 class MLXFullJKOSolver(JKOStep):
     """JKOStep with Wasserstein prox routed through the native MLX Sinkhorn.
 
-    Mirrors ``FullJKOSolver`` but uses ``mlx_prox_w2`` for the proximal
-    step. Expected to be 5 to 10 times faster on Apple Silicon for the
-    rigorous path; falls back silently if MLX is unavailable by routing
-    through the POT default.
+    Mirrors ``FullJKOSolver`` but uses ``mlx_prox_w2`` (a float32 Metal
+    port of ``wasserstein_ops.prox_w2``) for the proximal step. It is not
+    faster on small grids: on an M1 Max it is slower than NumPy up to
+    n=256 and faster from n~1024 (``test_mlx_prox_w2.py``). MLX is a
+    hard import; there is no silent fallback.
     """
 
     def __init__(
