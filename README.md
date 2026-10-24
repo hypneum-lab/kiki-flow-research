@@ -111,6 +111,11 @@ uv run pytest --cov=kiki_flow_core
 
 ## Quantitative results (paper draft on `main`, last tag `paper-v0.11-draft`)
 
+> **Erratum (2026-10-24).** Two W2 proximal-operator defects affect
+> some rows below: the 84 min rigorous timing, the Sinkhorn
+> entropic-bias row and the MLX speedup (withdrawn). Rigorous-path
+> results are pending rerun. See [`ERRATUM.md`](ERRATUM.md).
+
 | Claim | Measured value | Source |
 |---|---|---|
 | Flow tractable at scale | 2 min 31 s fast / 84 min rigorous on 5 seeds × 100 slow × 10k particles | `paper/stats.json`, `paper_rigorous/stats.json` |
@@ -122,7 +127,7 @@ uv run pytest --cov=kiki_flow_core
 | Sinkhorn entropic bias | KL(ρ_ε ‖ ρ_0.001) grows 0 → 8.3 bits, saturates at ε ≥ 0.05 | `paper/epsilon_sweep.json` |
 | Entropic JKO is the real Peyré bias, not a grid artefact (pre-registered OU test) | Grid-invariant 321→4001 pts (0 % change); no-entropy null Var* ≈ 2.8e-15; stationary floor Var* = (ε/τ)·g(τ) with g(τ)→0.5 as τ→0 (textbook ε/(2τ)) | `experiments/results/e1b_peyre_bias.json` |
 | Propagation-of-chaos preconditions (E2) | Convex on simplex tangent (worst eig 2.831), L ≈ 18.5, Bakry–Émery LSI ≥ 2.831 — but only because KL entropy dominates the indefinite coupling J_sym (min eig −0.288); **not uniform** | `experiments/results/e2_poc_preconditions.json` |
-| MLX Sinkhorn speedup vs POT | 5.13× faster on T2 JKO solver (GrosMac M5, `sinkhorn_backend="mlx"`) | `bench/T2_backend_speedup.jsonl` |
+| MLX vs NumPy W2 prox (corrected operator, per call) | MLX **slower** at the paper grid sizes (NumPy/MLX = 0.10 at n = 16, 0.15 at n = 64) and faster only from n ≈ 1024 (1.32 at 1024, 4.26 at 2048; M1 Max). The former "5.13× faster than POT" claim is **withdrawn** — see `ERRATUM.md` | `PERFORMANCE.md`, `tests/track2_paper/test_mlx_prox_w2.py` |
 
 Results that did **not** hold are reported honestly in the paper:
 the default flat-potential setup does not induce specialization

@@ -11,9 +11,26 @@ to this file are not allowed (run the script and regenerate).
 | Run | Setup | Wall time | Machine | Source |
 |---|---|---|---|---|
 | Fast path | 5 seeds × 100 slow × 10 k particles, grid 64, `use_w2_prox=False` | **2 min 31 s** | GrosMac M5 | `paper/stats.json` |
-| Rigorous path | same, `use_w2_prox=True`, POT Sinkhorn | **84 min** | GrosMac M5 | `paper_rigorous/stats.json` |
-| Rigorous reduced | grid 16, 5 slow, 100 particles, POT | 29.72 s | GrosMac M5 | `bench/sinkhorn_backend_bench.jsonl` |
-| Rigorous reduced | same, MLX backend | **5.79 s** (5.13 × faster than POT) | GrosMac M5 | `bench/sinkhorn_backend_bench.jsonl` |
+| Rigorous path | same, `use_w2_prox=True`, POT Sinkhorn | 84 min (pre-fix prox, pending rerun; see `ERRATUM.md`) | GrosMac M5 | `paper_rigorous/stats.json` |
+| Rigorous reduced | grid 16, 5 slow, 100 particles, POT | 29.72 s (pre-fix prox; see `ERRATUM.md`) | GrosMac M5 | `bench/sinkhorn_backend_bench.jsonl` |
+| Rigorous reduced | same, MLX backend | 5.79 s — **withdrawn**: timed a defective MLX prox; the former "5.13× faster than POT" claim does not hold (see `ERRATUM.md`) | GrosMac M5 | `bench/sinkhorn_backend_bench.jsonl` |
+
+### Corrected `prox_w2` per-call benchmark (PR #16)
+
+Dykstra W2 prox, 200 iterations, median of 7, NumPy float64 vs MLX
+float32, parity checked before timing. Source:
+`tests/track2_paper/test_mlx_prox_w2.py::test_mlx_prox_w2_vs_numpy_benchmark`.
+
+| n | NumPy | MLX | NumPy/MLX | Machine |
+|---|---|---|---|---|
+| 16 | 0.80 ms | 7.86 ms | 0.10 | M1 Max (macM1) |
+| 64 | 1.16 ms | 7.96 ms | 0.15 | M1 Max (macM1) |
+| 256 | 3.75 ms | 10.45 ms | 0.36 | M1 Max (macM1) |
+| 1024 | 41.35 ms | 31.35 ms | 1.32 | M1 Max (macM1) |
+| 2048 | 382.94 ms | 89.93 ms | 4.26 | M1 Max (macM1) |
+
+MLX is slower at the paper grid sizes (16, 64) and faster only from
+n ≈ 1024. No end-to-end MLX speedup is claimed.
 
 ## Streaming surrogate latency (T3)
 
