@@ -2,6 +2,15 @@
 
 All notable releases of `kiki-flow-research`. Dates in YYYY-MM-DD.
 
+## [Unreleased] — 2026-10-24 (drift trigger hysteresis)
+
+### Added
+- `DriftTrigger`: optional `threshold_off` (hysteresis), `cooldown_s`
+  and `state_path` (persisted armed flag for one-process-per-tick cron),
+  plus `drift_rate()` / `update()`. Defaults keep the legacy behaviour.
+- `scripts/drift_trigger_sweep.py`: fires / recall / detection delay
+  over synthetic drift traces.
+
 ## [Unreleased] — 2026-10-24 (erratum reruns)
 
 ### Changed

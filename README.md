@@ -33,6 +33,14 @@ quantitative results over five seeds.
 | `track2_paper` | N-particle Langevin × JKO entropic-regularized proxy for paper figures (4 Levelt-Baddeley species). | 2 min 31 s fast / 84 min rigorous on GrosMac M5. | tag `track2-v0.1` |
 | `track3_deploy` | Pure-NumPy streaming surrogate, MiniLM query encoder, advisory-only routing. | p50 = 0.04 ms on GrosMac M5. | tag `track3-v0.1` |
 
+T1 runs are gated by `DriftTrigger` (new-concept rate in the last 24 h of
+Aeon episodes > `threshold`, default 0.05). Optional `threshold_off`
+(hysteresis), `cooldown_s` and `state_path` (persisted armed flag for
+one-process-per-tick cron) stop it from re-firing while the rate hovers
+around the threshold; defaults keep the legacy behaviour. Details in
+`kiki_flow_core/track1_perf/CLAUDE.md`; sweep in
+`scripts/drift_trigger_sweep.py`.
+
 All three tracks share `kiki_flow_core/` (state, master equation,
 Wasserstein ops, species, modules, hooks, telemetry). 93 tests, 95 %
 coverage, strict ruff + mypy.
