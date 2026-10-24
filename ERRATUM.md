@@ -202,7 +202,6 @@ Still pending:
 | Item | Cost | Host |
 |---|---|---|
 | T3 pairs (`dump_t2_pairs.py`) + retraining with the fixed prox | pairs: seconds; retraining: as the original | macM1 / Studio |
-| Specialisation sweep on the rigorous path (does the 2.04-bit gap hold?) | 72 configs × rigorous cost; estimate hours on CPU | macM1 / Studio |
 | End-to-end NumPy vs MLX rigorous timing | 10–20 min | one machine for both sides |
 
 ## 8. Decisions (PI, 2026-10-24)
@@ -222,6 +221,18 @@ Still pending:
    left unchanged: its source still has the withdrawn KL agreement,
    the old Fig. 1 and the old epsilon sweep, so rebuilding its PDF
    alone would republish them.
-7. **[PI DECISION]** Whether to rerun the specialisation sweep on the
-   rigorous path before claim (ii) of the abstract is kept. The
-   abstract now says the claim is about the fast path.
+7. Specialisation sweep on the rigorous path: rerun (PI approval
+   2026-10-24). Same 72-point grid as the dense sweep, `FullJKOSolver`
+   with the corrected prox, seeds 0–4, macM1 CPU, 20 min for both
+   paths. Driver `experiments/rigorous_specialisation_2026_10_24.py`;
+   data and analysis in `paper/rigorous_specialisation_2026_10_24/`.
+   Specialisation holds but is smaller: best gap 1.35 ± 0.06 bits
+   (34 % below max, (α, β, γ) = (8, 0.5, 5); 1.42 bits at seed 0)
+   against 2.03 ± 0.03 bits on the fast path (2.04 at seed 0). At
+   (10, 1, 0) the rigorous gap is 1.23 ± 0.03 bits. With no potential
+   it is 0.15–0.17 bits. On the rigorous path a larger β reduces
+   specialisation, and phono/lex specialise least (on the fast path
+   they specialise most). The fast rerun reproduces
+   `paper/hyperparam_sweep_dense.json` exactly. Claim (ii) stays
+   scoped to the fast path. **[PI DECISION]** whether the abstract
+   and the sweep paragraph also report the rigorous-path figure.
