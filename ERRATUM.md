@@ -254,7 +254,8 @@ whatever `epsilon` was configured. The paper defines ε as the Sinkhorn
 regularisation, distinct from the step h, and states ε = 0.01 for the
 rigorous path. Fix: `JKOStep` forwards an optional `reg`, and the full
 solvers set `reg = epsilon`. h stays the proximal pull. `max_iter` is
-still not forwarded (`n_iter = 100`), unchanged.
+still not forwarded (`n_iter = 100`), unchanged. (Forwarded on
+2026-10-25, see §10.)
 
 Which runs the defect affects:
 
@@ -289,3 +290,59 @@ Max change of a rigorous point's mean entropy: 0.061 bits (mean
 −0.036). The qualitative findings of §7–8 are unchanged. The Fig. 4
 curve is now a measurement of the Sinkhorn regularisation alone; the
 conflation caveat is removed from the paper.
+
+## 10. Fourth defect: `FullJKOSolver.max_iter` ignored (fixed 2026-10-25)
+
+`FullJKOSolver` and `MLXFullJKOSolver` stored `max_iter` (default
+1000) but `JKOStep.step` called the prox with `n_iter = 100`. Fix:
+`JKOStep` takes `prox_n_iter` (default 100, so plain
+`JKOStep(apply_w2_prox=True)` is unchanged) and the full solvers set
+it to `max_iter`.
+
+Which runs the defect affects: every rigorous run the paper cites
+builds `FullJKOSolver` with the default `max_iter = 1000` (grep of
+`FullJKOSolver(` in `experiments/`, `scripts/`, `kiki_flow_core/`), so
+all of them ran 100 Dykstra iterations instead of 1000.
+`scripts/dump_t2_pairs.py` sets `max_iter = 50` (it ran 100; its
+output `bench/runs/T2_pairs/` is not in the repository). E1 injects its
+own prox, a single projection that a second iteration leaves
+unchanged: rerun with the fix, it reproduces
+`experiments/results/e1_epsilon_sweep_var.json` exactly. The ε-sweep
+calls `prox_w2` directly with `n_iter = 50` and is not affected.
+
+Convergence (`experiments/full_jko_max_iter_2026_10_25.py` →
+`paper/erratum_2026_10_25_maxiter/convergence.json`): prox inputs
+recorded from the paper-scale run (grid 64, ε = 0.01, seed 0) and from
+four specialisation points (grid 16, ε = 0.01), replayed at 10–2000
+iterations. Maximum over 20 calls per group:
+
+| Iterations | Marginal residual (L1) | Output vs converged (L1) |
+|---|---|---|
+| 50 | 3.4e-3 (paper) / 5.2e-3–0.13 (sweep) | 2.2e-4 / 1.8e-4–1.4e-2 |
+| 100 (what ran) | 2.9e-5 / 4.2e-5–1.2e-3 | 9.1e-7 / 8.2e-7–1.7e-5 |
+| 200 | 2.1e-9 / 3.0e-9–8.5e-8 | 1.5e-11 / 3.3e-11–8.4e-10 |
+| ≥ 500 | < 1e-16 | 0 |
+
+100 iterations are close to, but not at, convergence at ε = 0.01; the
+default of 1000 converges to machine precision. Defaults unchanged.
+
+Reruns with the forwarded `max_iter = 1000`
+(`experiments/erratum_maxiter_reruns_2026_10_25.py`, macM1 CPU, nice
+19, one process), new files only:
+
+| Quantity | n_iter = 100 | max_iter = 1000 |
+|---|---|---|
+| KL(rigorous‖fast), reduced setup (ε = 0.05), 5 seeds | 0.217778459642966 | 0.217778459642966 (identical) |
+| KL(rigorous‖fast), paper scale, final step | 0.272035 ± 0.014158 | 0.272034 ± 0.014158 |
+| Rigorous entropy, first / last slow step | 5.854314–5.865569 / 5.891695–5.908777 | same to 6 decimals (max change < 7e-7 bits) |
+| Specialisation sweep, seeds 0–1 (276 rigorous runs, 138 points) | — | max \|Δ gap\| 8.6e-6 bits per run, 4.6e-6 per point mean; max \|Δ H\| per species 2.0e-5 bits |
+
+Files: `paper/erratum_2026_10_25_maxiter/`, `paper_rigorous_maxiter/`,
+`paper/figures/fig1_species_moments_maxiter.*`,
+`paper/rigorous_specialisation_wide_2026_10_25_maxiter/` (`partial.jsonl`
+for seeds 0–1 and `comparison.json` against
+`paper/rigorous_specialisation_wide_2026_10_24_reg/`). Seeds 2–9 of the
+sweep were not rerun: with changes six orders of magnitude below the
+reported precision (0.01 bit) on seeds 0–1, the full rerun was not
+worth the compute. No number in `paper/main.tex` changes; the paper and
+its PDF are not edited.

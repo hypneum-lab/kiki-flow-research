@@ -1,0 +1,81 @@
+{
+  "n_seeds": 5,
+  "params": {
+    "grid": 16,
+    "n_particles": 500,
+    "n_fast": 200,
+    "n_slow": 20,
+    "epsilon": 0.05
+  },
+  "per_seed": [
+    {
+      "seed": 0,
+      "kl_per_species": {
+        "phono": 0.06341777779209778,
+        "lex": 0.07234890342490267,
+        "syntax": 0.05152187089073898,
+        "sem": 0.045162045078320175
+      },
+      "total_kl": 0.23245059718605962
+    },
+    {
+      "seed": 1,
+      "kl_per_species": {
+        "phono": 0.0335793954524653,
+        "lex": 0.03162424125388147,
+        "syntax": 0.07111186252877177,
+        "sem": 0.050145914601747436
+      },
+      "total_kl": 0.18646141383686599
+    },
+    {
+      "seed": 2,
+      "kl_per_species": {
+        "phono": 0.02797419272147935,
+        "lex": 0.07768679293004549,
+        "syntax": 0.07757771897090229,
+        "sem": 0.07845523362624385
+      },
+      "total_kl": 0.261693938248671
+    },
+    {
+      "seed": 3,
+      "kl_per_species": {
+        "phono": 0.06968122979359923,
+        "lex": 0.03384816940732326,
+        "syntax": 0.029450170721132738,
+        "sem": 0.07309496338739563
+      },
+      "total_kl": 0.20607453330945086
+    },
+    {
+      "seed": 4,
+      "kl_per_species": {
+        "phono": 0.05208995754633354,
+        "lex": 0.036664009898466104,
+        "syntax": 0.07638108011813999,
+        "sem": 0.037076768070842876
+      },
+      "total_kl": 0.20221181563378252
+    }
+  ],
+  "mean_total_kl": 0.217778459642966,
+  "std_total_kl": 0.02647225164810109,
+  "max_total_kl": 0.261693938248671,
+  "runtime_s": 44.16896887496114,
+  "provenance": {
+    "git_commit": "c496c7b735dc7d68314e315308d0e6a47a524a94",
+    "host": "MacBookPro.lan",
+    "machine": "arm64",
+    "python": "3.14.4",
+    "mlx_default_device": "Device(cpu, 0)",
+    "date_utc": "2026-10-24T22:21:53Z",
+    "prox": "kiki_flow_core.wasserstein_ops.prox_w2 (Dykstra, post-ffee5d9)",
+    "prox_params": {
+      "epsilon": "h = 0.05 (JKO step, proximal pull)",
+      "reg": "FullJKOSolver.epsilon (Sinkhorn entropic regularisation)",
+      "n_iter": "FullJKOSolver.max_iter = 1000 (forwarded)"
+    },
+    "entropy_units": "bits"
+  }
+}
