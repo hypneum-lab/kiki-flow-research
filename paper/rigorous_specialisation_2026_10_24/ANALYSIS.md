@@ -7,7 +7,8 @@ Question (ERRATUM.md §7–8): does the specialisation of the dense sweep
 ## Setup
 
 - Driver: `experiments/rigorous_specialisation_2026_10_24.py` at
-  `c55c784`. Same 72-point grid, potentials, β → `n_inner` map, grid 16,
+  `c55c784` (the provenance SHA in the JSONs). That commit was rebased
+  onto `main` before merge as `97d3d52`, with the same driver file. Same 72-point grid, potentials, β → `n_inner` map, grid 16,
   500 particles, 200 fast / 30 slow steps as `scripts/hyperparam_sweep_dense.py`.
 - Rigorous = `FullJKOSolver`: the same projected-gradient substeps, then
   the corrected entropic W2 prox (`prox_w2`, Dykstra, post-`ffee5d9`).
