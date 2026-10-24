@@ -111,20 +111,22 @@ uv run pytest --cov=kiki_flow_core
 
 ## Quantitative results (paper draft on `main`, last tag `paper-v0.11-draft`)
 
-> **Erratum (2026-10-24).** Two W2 proximal-operator defects affect
-> some rows below: the 84 min rigorous timing, the Sinkhorn
-> entropic-bias row and the MLX speedup (withdrawn). Rigorous-path
-> results are pending rerun. See [`ERRATUM.md`](ERRATUM.md).
+> **Erratum (2026-10-24).** Two W2 proximal-operator defects affected
+> the rigorous timing, the fast-vs-rigorous agreement, the ε-sweep and
+> the MLX speedup (withdrawn). The rows below give the values re-measured
+> with the corrected operator. Fast-path-only results describe the
+> projected-gradient scheme. See [`ERRATUM.md`](ERRATUM.md).
 
 | Claim | Measured value | Source |
 |---|---|---|
-| Flow tractable at scale | 2 min 31 s fast / 84 min rigorous on 5 seeds × 100 slow × 10k particles | `paper/stats.json`, `paper_rigorous/stats.json` |
+| Flow tractable at scale | 5 seeds × 100 slow × 10k particles: fast 2 min 31 s (M5, GPU) or 3 min 37 s (M1 Max, CPU); rigorous with the corrected prox 12 min 42 s (M1 Max, CPU). The old 84 min timed the defective prox | `paper/stats.json`, `paper_rigorous_fixedprox/stats.json` |
+| Fast vs rigorous agreement (corrected prox) | **They do not agree**: KL(rigorous‖fast) = 0.218 ± 0.026 nats (reduced setup, 5 seeds), 0.262 ± 0.014 nats at paper scale; previously reported 0.000638 with the defective prox | `paper/erratum_2026_10_24/` |
 | Emergent specialization under asymmetric potentials | Mean entropy 2.60 bits vs max 4.00 bits (gap 1.40 bits, 35 % below max) at `(α, β, γ) = (5, 1, 0)` | `paper/hyperparam_sweep.json` |
 | Streaming surrogate latency | p50 = 0.04 ms, p99 = 0.06 ms (v0.1, `state_dim=16`); p50 = 0.37 ms (v0.2-d128, `state_dim=128`) | `bench/T3_latency.jsonl` |
 | Continual-learning retention (honest trade-off) | Task 1 with cons. 0.90 ± 0.07 / without 0.29 ± 0.07; Task 3 with 0.004 / without 0.81 | `paper/cl_benchmark.json` |
 | Real-LLM continual learning, 500-sample regime (Qwen3-4B 4-bit LoRA, 5 seeds) | SST-2: forgetting 0.085 ± 0.030; CoLA: apparent positive transfer; BoolQ: 0.565 ± 0.023 (data-limited) | `bench/cl_llm/runs/e2_5seeds_summary.json` |
 | Real-LLM continual learning, 5000-sample regime (5 seeds) | SST-2: forgetting **0.361 ± 0.010** (4.2× higher); CoLA: forgetting 0.129 ± 0.021; positive-transfer artefact disappears | `bench/cl_llm/runs/e3_5k_5seeds_summary.json` |
-| Sinkhorn entropic bias | KL(ρ_ε ‖ ρ_0.001) grows 0 → 8.3 bits, saturates at ε ≥ 0.05 | `paper/epsilon_sweep.json` |
+| ε-dependence of one entropic prox step (corrected) | KL(ρ_ε ‖ ρ_0.001) = 4.7e-4 nats at ε = 0.01, 0.23 at 0.05, 0.67 at 0.1. The former "0 → 8.3 bits" was an artefact of the defective prox | `paper/erratum_2026_10_24/epsilon_sweep_fixed.json` |
 | Entropic JKO is the real Peyré bias, not a grid artefact (pre-registered OU test) | Grid-invariant 321→4001 pts (0 % change); no-entropy null Var* ≈ 2.8e-15; stationary floor Var* = (ε/τ)·g(τ) with g(τ)→0.5 as τ→0 (textbook ε/(2τ)) | `experiments/results/e1b_peyre_bias.json` |
 | Propagation-of-chaos preconditions (E2) | Convex on simplex tangent (worst eig 2.831), L ≈ 18.5, Bakry–Émery LSI ≥ 2.831 — but only because KL entropy dominates the indefinite coupling J_sym (min eig −0.288); **not uniform** | `experiments/results/e2_poc_preconditions.json` |
 | MLX vs NumPy W2 prox (corrected operator, per call) | MLX **slower** at the paper grid sizes (NumPy/MLX = 0.10 at n = 16, 0.15 at n = 64) and faster only from n ≈ 1024 (1.32 at 1024, 4.26 at 2048; M1 Max). The former "5.13× faster than POT" claim is **withdrawn** — see `ERRATUM.md` | `PERFORMANCE.md`, `tests/track2_paper/test_mlx_prox_w2.py` |

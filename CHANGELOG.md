@@ -2,6 +2,21 @@
 
 All notable releases of `kiki-flow-research`. Dates in YYYY-MM-DD.
 
+## [Unreleased] — 2026-10-24 (erratum reruns)
+
+### Changed
+- Reran the prox-dependent runs with the corrected `prox_w2` (macM1,
+  MLX on CPU, 5 seeds; new files only). Fast vs rigorous now differ
+  by KL 0.218 ± 0.026 nats (reduced setup) and 0.262 ± 0.014 nats
+  (paper scale), not 0.000638. The rigorous run takes 12 min 42 s on
+  CPU. The ε-sweep is re-measured (0.67 nats at ε = 0.1).
+- Fig. 1 is replaced by per-species mean position and entropy over
+  slow steps (`make_species_moments`). The old phase portrait plotted
+  a constant.
+- `paper/main.tex`: rigorous-path sections rewritten with the new
+  numbers, KL in nats, and the fast-path scope stated. `main.pdf` is
+  not regenerated (no LaTeX toolchain on the compute hosts).
+
 ## [Unreleased] — 2026-10-24 (erratum)
 
 ### Retracted
