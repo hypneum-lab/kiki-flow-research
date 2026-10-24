@@ -78,3 +78,47 @@ def test_plain_jko_with_prox_keeps_default_reg():
     calls = _record_prox_kwargs(jko)  # type: ignore[arg-type]
     jko.step(make_state(np.full(8, 1.0 / 8)))
     assert "reg" not in calls[0] or calls[0]["reg"] is None
+
+
+def _peaked_state() -> tuple[np.ndarray, FlowState]:
+    support = np.linspace(-2, 2, 16).reshape(-1, 1)
+    x = support[:, 0]
+    rho = np.exp(-0.5 * ((x - 0.5) / 0.4) ** 2)
+    return support, make_state(rho / rho.sum())
+
+
+def test_full_jko_max_iter_changes_the_step():
+    support, state = _peaked_state()
+    out = [
+        FullJKOSolver(f_functional=ZeroF(), h=0.05, support=support, epsilon=0.01, max_iter=n)
+        .step(state)
+        .rho["phono"]
+        for n in (5, 100)
+    ]
+    assert np.abs(out[0] - out[1]).sum() > 1e-6  # noqa: PLR2004
+
+
+def test_full_jko_forwards_max_iter_as_prox_n_iter():
+    support, state = _peaked_state()
+    solver = FullJKOSolver(f_functional=ZeroF(), h=0.05, support=support, epsilon=0.01, max_iter=37)
+    calls = _record_prox_kwargs(solver)
+    solver.step(state)
+    assert calls[0]["n_iter"] == 37  # noqa: PLR2004
+
+
+def test_full_jko_default_max_iter_reaches_the_prox():
+    support, state = _peaked_state()
+    solver = FullJKOSolver(f_functional=ZeroF(), h=0.05, support=support, epsilon=0.01)
+    calls = _record_prox_kwargs(solver)
+    solver.step(state)
+    assert calls[0]["n_iter"] == solver.max_iter == 1000  # noqa: PLR2004
+
+
+def test_plain_jko_with_prox_keeps_100_iterations():
+    from kiki_flow_core.master_equation import JKOStep  # noqa: PLC0415
+
+    support = np.linspace(-2, 2, 8).reshape(-1, 1)
+    jko = JKOStep(f_functional=ZeroF(), h=0.05, support=support, apply_w2_prox=True)
+    calls = _record_prox_kwargs(jko)  # type: ignore[arg-type]
+    jko.step(make_state(np.full(8, 1.0 / 8)))
+    assert calls[0]["n_iter"] == 100  # noqa: PLR2004

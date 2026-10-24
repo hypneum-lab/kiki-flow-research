@@ -15,6 +15,8 @@ class FullJKOSolver(JKOStep):
     ``epsilon`` is the Sinkhorn entropic regularisation of the prox (``reg``).
     Before 2026-10-24 ``epsilon`` was stored but not passed on, so the prox
     used ``reg = h`` whatever ``epsilon`` was (see ERRATUM.md).
+    ``max_iter`` is the number of Dykstra iterations of the prox; before
+    2026-10-25 it was stored but not passed on, so the prox ran 100.
     """
 
     def __init__(
@@ -33,6 +35,7 @@ class FullJKOSolver(JKOStep):
             n_inner=n_inner,
             apply_w2_prox=True,
             reg=epsilon,
+            prox_n_iter=max_iter,
         )
         self.epsilon = epsilon
         self.max_iter = max_iter
@@ -65,6 +68,7 @@ class MLXFullJKOSolver(JKOStep):
             apply_w2_prox=True,
             prox_fn=mlx_prox_w2,
             reg=epsilon,
+            prox_n_iter=max_iter,
         )
         self.epsilon = epsilon
         self.max_iter = max_iter
