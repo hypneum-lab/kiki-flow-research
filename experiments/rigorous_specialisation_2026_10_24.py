@@ -103,10 +103,22 @@ def problem(alpha: float, gamma: float) -> tuple[CanonicalSpecies, np.ndarray, T
     return species, support, f_func
 
 
-def make_jko(f_func: T2FreeEnergy, support: np.ndarray, beta: float, rigorous: bool) -> JKOStep:
+def make_jko(
+    f_func: T2FreeEnergy,
+    support: np.ndarray,
+    beta: float,
+    rigorous: bool,
+    epsilon: float | None = None,
+) -> JKOStep:
+    """``epsilon`` is the Sinkhorn regularisation of the rigorous prox
+    (``FullJKOSolver.epsilon``, forwarded as ``reg``); ``None`` keeps the
+    solver default (0.01). The JKO step ``H`` stays the proximal pull. The
+    fast path has no prox and ignores ``epsilon``.
+    """
     n_inner = max(1, int(10 * beta)) if beta > 0 else 1
     if rigorous:
-        return FullJKOSolver(f_functional=f_func, h=H, support=support, n_inner=n_inner)
+        eps_kw: dict[str, float] = {} if epsilon is None else {"epsilon": epsilon}
+        return FullJKOSolver(f_functional=f_func, h=H, support=support, n_inner=n_inner, **eps_kw)
     return JKOStep(f_functional=f_func, h=H, support=support, n_inner=n_inner, apply_w2_prox=False)
 
 
