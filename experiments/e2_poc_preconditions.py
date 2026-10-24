@@ -28,6 +28,9 @@ GRID = 8
 N_SAMPLES = 200          # random simplex points for convexity / Lipschitz scan
 SEED = 0
 FD_EPS = 1e-5            # finite-difference step for Hessian / gradient
+EIG_TOL = 1e-6           # eigenvalue significance threshold (convexity / LSI calls)
+DX_MIN = 1e-9            # simplex pairs closer than this are skipped for Lipschitz
+PAIR_STRIDE = 4          # subsampling stride over pairs for the Lipschitz scan
 
 
 def make_state(rhos: dict[str, np.ndarray]) -> FlowState:
@@ -130,9 +133,9 @@ def main() -> None:
         tan_sorted = np.sort(tan_eigs)
         tan_min_meaningful = float(tan_sorted[len(names)])  # first non-null mode
         tan_min_eigs.append(tan_min_meaningful)
-        if raw_eigs.min() < -1e-6:
+        if raw_eigs.min() < -EIG_TOL:
             n_nonconvex_raw += 1
-        if tan_min_meaningful < -1e-6:
+        if tan_min_meaningful < -EIG_TOL:
             n_nonconvex_tan += 1
 
     # (b) Gradient Lipschitz constant: max over sampled pairs of
@@ -141,10 +144,10 @@ def main() -> None:
     grads = [stacked_grad(f, names, s) for s in samples]
     flats = [np.concatenate([s[n] for n in names]) for s in samples]
     lip_est = 0.0
-    for i in range(0, len(samples), 4):  # subsample pairs for cost
-        for j in range(i + 1, len(samples), 4):
+    for i in range(0, len(samples), PAIR_STRIDE):  # subsample pairs for cost
+        for j in range(i + 1, len(samples), PAIR_STRIDE):
             dx = np.linalg.norm(flats[i] - flats[j])
-            if dx < 1e-9:
+            if dx < DX_MIN:
                 continue
             dg = np.linalg.norm(grads[i] - grads[j])
             lip_est = max(lip_est, dg / dx)
@@ -168,7 +171,7 @@ def main() -> None:
     j = species.coupling_matrix()
     j_sym = 0.5 * (j + j.T)
     j_sym_eigs = np.linalg.eigvalsh(j_sym)
-    coupling_indefinite = bool(j_sym_eigs.min() < -1e-6)
+    coupling_indefinite = bool(j_sym_eigs.min() < -EIG_TOL)
 
     out = {
         "experiment": "E2",
@@ -205,12 +208,18 @@ def main() -> None:
         },
         "b_gradient_lipschitz": {
             "estimated_lipschitz_const": float(lip_est),
-            "note": "max over subsampled simplex pairs of ||dgrad||/||dx||; finite => locally Lipschitz on sampled region",
+            "note": (
+                "max over subsampled simplex pairs of ||dgrad||/||dx||; "
+                "finite => locally Lipschitz on sampled region"
+            ),
         },
         "c_log_sobolev_proxy": {
             "bakry_emery_curvature_lower_bound": be_curvature_lb,
-            "lsi_guaranteed": be_curvature_lb > 1e-6,
-            "note": "Bakry-Emery: LSI const >= min tangent Hess F eigenvalue. Non-positive => no uniform LSI guarantee for exp(-F).",
+            "lsi_guaranteed": be_curvature_lb > EIG_TOL,
+            "note": (
+                "Bakry-Emery: LSI const >= min tangent Hess F eigenvalue. "
+                "Non-positive => no uniform LSI guarantee for exp(-F)."
+            ),
         },
         "verdict": (
             "PoC preconditions only CONDITIONALLY met, not structurally. At grid="
@@ -244,7 +253,7 @@ def main() -> None:
     print(f"  (b) gradient Lipschitz const (est) = {lip_est:.4e}")
     print(
         f"  (c) Bakry-Emery curvature LB = {be_curvature_lb:.4e}  "
-        f"LSI guaranteed={be_curvature_lb > 1e-6}"
+        f"LSI guaranteed={be_curvature_lb > EIG_TOL}"
     )
     print(f"\nWrote {out_path}")
 
