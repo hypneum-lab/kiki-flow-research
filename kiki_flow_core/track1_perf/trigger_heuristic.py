@@ -1,14 +1,19 @@
 """Drift heuristic: fires when new-concept rate in recent Aeon exceeds threshold.
 
-Optional hysteresis (``threshold_off``) and refractory period (``cooldown_s``)
-suppress chattering when the drift rate hovers around ``threshold``.
+Hysteresis (``threshold_off``, on by default) and an optional refractory
+period (``cooldown_s``) suppress chattering when the drift rate hovers
+around ``threshold``. Defaults (0.07 / 0.05, no cooldown) come from
+``scripts/drift_trigger_sweep.py`` on synthetic traces; recalibrate them on a
+recorded Aeon trace.
 """
 
 from __future__ import annotations
 
+import enum
 import json
 import os
 import time
+import warnings
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -16,13 +21,22 @@ from typing import Any
 from kiki_flow_core.hooks import AeonAdapter
 
 _STATE_VERSION = 1
+DEFAULT_THRESHOLD_ON = 0.07
+DEFAULT_THRESHOLD_OFF = 0.05
+
+
+class _Default(enum.Enum):
+    TOKEN = 0
 
 
 class DriftTrigger:
     """Fires when ``rate = |new_concepts| / |concepts_in_window| > threshold``.
 
-    Legacy mode (``threshold_off=None``, ``cooldown_s=None``, the default) is
-    memoryless: every tick with ``rate > threshold`` fires.
+    Defaults: ``threshold=0.07``, ``threshold_off=0.05``, no cooldown. Legacy
+    mode (``threshold_off=None``, ``cooldown_s=None``) is memoryless: every
+    tick with ``rate > threshold`` fires. Passing ``threshold <= 0.05`` without
+    an explicit ``threshold_off`` raises, since the default ``threshold_off``
+    would not be below it.
 
     Hysteresis mode (``threshold_off`` set, ``0 <= threshold_off < threshold``):
     after a fire the trigger is *disarmed* and cannot fire again until a tick
@@ -35,8 +49,9 @@ class DriftTrigger:
     not fire and does not disarm.
 
     State (``armed``, ``last_fire_ts``) lives in memory by default, which only
-    helps a long-lived scheduler process. A cron job that builds a new
-    ``DriftTrigger`` per tick must pass ``state_path``: the state is then read
+    helps a long-lived scheduler process; ``should_fire`` then emits a
+    ``RuntimeWarning`` whenever hysteresis or cooldown is active. A cron job
+    that builds a new ``DriftTrigger`` per tick must pass ``state_path``: the state is then read
     at the start of every ``should_fire`` call and atomically rewritten when it
     changes. Ticks with an empty window (no episodes or no concepts) return
     ``False`` and leave the state untouched.
@@ -44,13 +59,21 @@ class DriftTrigger:
 
     def __init__(
         self,
-        threshold: float = 0.05,
+        threshold: float = DEFAULT_THRESHOLD_ON,
         window_h: int = 24,
-        threshold_off: float | None = None,
+        threshold_off: float | None | _Default = _Default.TOKEN,
         cooldown_s: float | None = None,
         state_path: Path | str | None = None,
         clock: Callable[[], float] = time.time,
     ) -> None:
+        if isinstance(threshold_off, _Default):
+            if threshold <= DEFAULT_THRESHOLD_OFF:
+                raise ValueError(
+                    f"threshold={threshold} is not above the default threshold_off="
+                    f"{DEFAULT_THRESHOLD_OFF}; pass threshold_off explicitly "
+                    "(None restores the legacy memoryless trigger)"
+                )
+            threshold_off = DEFAULT_THRESHOLD_OFF
         if threshold_off is not None and not 0.0 <= threshold_off < threshold:
             raise ValueError(
                 f"threshold_off must satisfy 0 <= threshold_off < threshold "
@@ -103,6 +126,16 @@ class DriftTrigger:
         return True
 
     def should_fire(self, aeon: AeonAdapter, last_snapshot_manifest: dict[str, Any]) -> bool:
+        if self.state_path is None and (
+            self.threshold_off is not None or self.cooldown_s is not None
+        ):
+            warnings.warn(
+                "DriftTrigger hysteresis/cooldown state is held in memory only "
+                "(state_path=None); a cron job that builds a new trigger per tick "
+                "re-arms it on every tick. Pass state_path to persist it.",
+                RuntimeWarning,
+                stacklevel=2,
+            )
         rate = self.drift_rate(aeon, last_snapshot_manifest)
         if rate is None:
             return False

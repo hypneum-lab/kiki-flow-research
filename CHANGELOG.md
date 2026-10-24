@@ -2,6 +2,25 @@
 
 All notable releases of `kiki-flow-research`. Dates in YYYY-MM-DD.
 
+## [Unreleased] — 2026-10-24 (drift trigger defaults)
+
+### Changed
+- `DriftTrigger` defaults are now `threshold_on=0.07`,
+  `threshold_off=0.05`, no cooldown (PI decision). Sweep on synthetic
+  traces: about 6 fires/yr instead of 121 for the old 0.05 memoryless
+  trigger, recall 0.99, mean delay 0.76 tick. To be recalibrated on a
+  recorded Aeon trace. `threshold_off=None` restores the old behaviour;
+  `threshold <= 0.05` without an explicit `threshold_off` now raises.
+- `should_fire` warns (`RuntimeWarning`) when hysteresis or cooldown
+  state is kept in memory only (`state_path=None`).
+
+### Fixed
+- `save_checkpoint` now writes `known_concepts` and `run_once` fills it
+  (previous set plus the current Aeon window). The manifest had no such
+  field, so the drift rate computed from `latest.json` was always 1.0.
+  Older manifests read as an empty set (one rate-1.0 check, then the
+  next run seeds the field).
+
 ## [Unreleased] — 2026-10-24 (drift trigger hysteresis)
 
 ### Added

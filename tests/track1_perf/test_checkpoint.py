@@ -4,7 +4,11 @@ from pathlib import Path
 import numpy as np
 
 from kiki_flow_core.state import FlowState
-from kiki_flow_core.track1_perf.checkpoint import load_checkpoint, save_checkpoint
+from kiki_flow_core.track1_perf.checkpoint import (
+    load_checkpoint,
+    load_known_concepts,
+    save_checkpoint,
+)
 
 
 def make_state() -> FlowState:
@@ -35,3 +39,27 @@ def test_manifest_contains_git_sha(tmp_path: Path):
     manifest = json.loads((path.with_suffix(".json")).read_text())
     assert "git_sha" in manifest
     assert "timestamp" in manifest
+
+
+def test_manifest_writes_sorted_known_concepts(tmp_path: Path):
+    path = tmp_path / "ckpt"
+    save_checkpoint(make_state(), path, known_concepts={"b", "a", "c"})
+    manifest = json.loads(path.with_suffix(".json").read_text())
+    assert manifest["known_concepts"] == ["a", "b", "c"]
+
+
+def test_manifest_known_concepts_defaults_to_empty(tmp_path: Path):
+    path = tmp_path / "ckpt"
+    save_checkpoint(make_state(), path)
+    assert json.loads(path.with_suffix(".json").read_text())["known_concepts"] == []
+
+
+def test_load_known_concepts_tolerates_legacy_manifest(tmp_path: Path):
+    path = tmp_path / "ckpt"
+    assert load_known_concepts(path) == set()  # no manifest yet
+    save_checkpoint(make_state(), path, known_concepts=["x"])
+    assert load_known_concepts(path) == {"x"}
+    manifest = json.loads(path.with_suffix(".json").read_text())
+    del manifest["known_concepts"]  # pre-fix manifest
+    path.with_suffix(".json").write_text(json.dumps(manifest))
+    assert load_known_concepts(path) == set()
