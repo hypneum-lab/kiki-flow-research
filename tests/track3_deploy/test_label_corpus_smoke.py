@@ -11,6 +11,12 @@ import pytest
 
 spacy = pytest.importorskip("spacy")
 
+# The French spaCy pipeline is a ~500 MB model package installed out of
+# band (`python -m spacy download fr_core_news_lg`), not a declared
+# dependency, so skip when it is absent (e.g. on CI runners).
+if not spacy.util.is_package("fr_core_news_lg"):
+    pytest.skip("spaCy model fr_core_news_lg not installed", allow_module_level=True)
+
 _N_QUERIES = 3
 _N_SPECIES = 4
 _N_BINS = 32
