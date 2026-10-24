@@ -44,3 +44,17 @@ def test_mlx_full_jko_solver_passes_epsilon_as_reg():
     support = np.linspace(0, 1, 4).reshape(-1, 1)
     solver = MLXFullJKOSolver(f_functional=ZeroF(), h=0.05, support=support, epsilon=0.02)
     assert solver.reg == 0.02  # noqa: PLR2004
+
+
+def test_mlx_full_jko_solver_forwards_max_iter():
+    support = np.linspace(-2, 2, 16).reshape(-1, 1)
+    x = support[:, 0]
+    rho = np.exp(-0.5 * ((x - 0.5) / 0.4) ** 2)
+    state = _make_state(rho / rho.sum())
+    out = [
+        MLXFullJKOSolver(f_functional=ZeroF(), h=0.05, support=support, epsilon=0.01, max_iter=n)
+        .step(state)
+        .rho["phono"]
+        for n in (5, 100)
+    ]
+    assert np.abs(out[0] - out[1]).sum() > 1e-6  # noqa: PLR2004

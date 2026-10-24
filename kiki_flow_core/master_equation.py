@@ -68,6 +68,7 @@ class JKOStep:
         apply_w2_prox: bool = False,
         prox_fn: ProxFn | None = None,
         reg: float | None = None,
+        prox_n_iter: int = 100,
     ) -> None:
         if h <= 0:
             raise ValueError("h must be positive")
@@ -80,6 +81,8 @@ class JKOStep:
         # own default (reg = its proximal strength, i.e. h). The JKO step h is
         # always the proximal pull strength.
         self.reg = reg
+        # Dykstra iterations of the prox (100 unless a subclass forwards its own).
+        self.prox_n_iter = prox_n_iter
         # Strategy pattern: Track-specific subclasses can inject an MLX-backed
         # prox without forcing a circular import here. Default remains the
         # POT-backed prox_w2.
@@ -106,7 +109,7 @@ class JKOStep:
                     reference=rho_tau,
                     epsilon=self.h,
                     support=self.support,
-                    n_iter=100,
+                    n_iter=self.prox_n_iter,
                     **prox_kwargs,
                 )
             new_rho[name] = rho
