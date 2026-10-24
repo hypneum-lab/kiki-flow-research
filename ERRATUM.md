@@ -2,8 +2,9 @@
 
 Status: sections 1–6 were written before the reruns (PR #18); section 7
 has the rerun results and section 8 the PI decisions (2026-10-24).
-No historical result JSON, PDF or zip has been edited: the reruns are
-written to new files.
+No historical result JSON or zip has been edited: the reruns are
+written to new files. `paper/main.pdf` was rebuilt from the corrected
+source (§8, item 6); earlier PDFs remain in the tags and releases.
 
 ## 1. The two defects
 
@@ -200,8 +201,6 @@ Still pending:
 
 | Item | Cost | Host |
 |---|---|---|
-| `paper/main.pdf` regeneration | minutes | needs a LaTeX toolchain: none is installed on macM1 or electron-server |
-| v0.5 arXiv bundle: regenerate or mark superseded | minutes | same |
 | T3 pairs (`dump_t2_pairs.py`) + retraining with the fixed prox | pairs: seconds; retraining: as the original | macM1 / Studio |
 | Specialisation sweep on the rigorous path (does the 2.04-bit gap hold?) | 72 configs × rigorous cost; estimate hours on CPU | macM1 / Studio |
 | End-to-end NumPy vs MLX rigorous timing | 10–20 min | one machine for both sides |
@@ -216,8 +215,13 @@ Still pending:
 4. Fig. 1: replaced by per-species moments.
 5. Public notice: a note on the GitHub releases and a new Zenodo
    version. Drafted, **not published**; awaiting PI confirmation.
-6. PDF / bundle: regeneration left to the PI (no LaTeX toolchain on the
-   compute hosts).
+6. PDF / bundle: `paper/main.pdf` rebuilt from `paper/main.tex` at
+   `087d1f6` on 2026-10-24 (electron-server, Tectonic 0.17.0, TeX
+   bundle `tlextras-2022.0r0`, 16 pages, no undefined reference or
+   citation). The v0.5 arXiv bundle and zip are marked superseded and
+   left unchanged: its source still has the withdrawn KL agreement,
+   the old Fig. 1 and the old epsilon sweep, so rebuilding its PDF
+   alone would republish them.
 7. **[PI DECISION]** Whether to rerun the specialisation sweep on the
    rigorous path before claim (ii) of the abstract is kept. The
    abstract now says the claim is about the fast path.
