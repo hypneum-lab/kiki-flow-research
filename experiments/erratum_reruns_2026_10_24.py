@@ -32,6 +32,10 @@ mx.set_default_device(mx.cpu)
 from kiki_flow_core.master_equation import JKOStep  # noqa: E402
 from kiki_flow_core.species import CanonicalSpecies  # noqa: E402
 from kiki_flow_core.track2_paper.figures.kl_vs_epsilon import make_kl_vs_epsilon  # noqa: E402
+from kiki_flow_core.track2_paper.figures.species_moments import (  # noqa: E402
+    make_species_moments,
+    species_moments,
+)
 from kiki_flow_core.track2_paper.full_jko_solver import FullJKOSolver  # noqa: E402
 from kiki_flow_core.track2_paper.mlx_particle_simulator import MLXParticleSimulator  # noqa: E402
 from kiki_flow_core.track2_paper.multiscale_loop import MultiscaleLoop  # noqa: E402
@@ -194,10 +198,62 @@ def run_full(kind: str, seeds: list[int], n_slow: int, out_dir: Path) -> None:
     (out_dir / "stats.json").write_text(json.dumps(stats, indent=2))
 
 
+# ------------------------------------------------------------- figure 1
+def _load(traj_dir: Path, seeds: list[int], n_slow: int) -> np.ndarray:
+    from safetensors.numpy import load_file  # noqa: PLC0415
+
+    names = CanonicalSpecies().species_names()
+    out = []
+    for seed in seeds:
+        t = load_file(str(traj_dir / f"seed{seed}.safetensors"))
+        out.append(
+            [[t[f"tau{k:03d}::{n}"].astype(np.float64) for n in names] for k in range(n_slow)]
+        )
+    arr = np.asarray(out)
+    return arr / arr.sum(axis=-1, keepdims=True)
+
+
+def run_fig1(seeds: list[int], n_slow: int) -> None:
+    """Fig. 1 from the paper-scale fast and rigorous reruns (same host and device)."""
+    x = np.linspace(-2, 2, 64)
+    runs = {
+        "fast": _load(RIG_DIR / "fast" / "trajectories", seeds, n_slow),
+        "rigorous": _load(RIG_DIR / "trajectories", seeds, n_slow),
+    }
+    make_species_moments(runs, x, out_dir=Path("paper/figures"), filename="fig1_species_moments")
+    names = CanonicalSpecies().species_names()
+    summary: dict[str, Any] = {"seeds": seeds, "n_slow": n_slow, "entropy_units": "bits"}
+    for label, arr in runs.items():
+        mean, ent = species_moments(arr, x)
+        summary[label] = {
+            n: {
+                "mean_x_first": float(mean[:, 0, i].mean()),
+                "mean_x_final": float(mean[:, -1, i].mean()),
+                "mean_x_final_sd": float(mean[:, -1, i].std()),
+                "entropy_bits_first": float(ent[:, 0, i].mean()),
+                "entropy_bits_final": float(ent[:, -1, i].mean()),
+                "entropy_bits_final_sd": float(ent[:, -1, i].std()),
+            }
+            for i, n in enumerate(names)
+        }
+    fin_kl = [
+        sum(kl(runs["rigorous"][s, -1, i], runs["fast"][s, -1, i]) for i in range(len(names)))
+        for s in range(len(seeds))
+    ]
+    summary["final_kl_rigorous_vs_fast_nats_sum4"] = {
+        "per_seed": fin_kl,
+        "mean": float(np.mean(fin_kl)),
+        "std": float(np.std(fin_kl)),
+    }
+    summary["provenance"] = provenance()
+    ERR_DIR.mkdir(parents=True, exist_ok=True)
+    (ERR_DIR / "fig1_species_moments_summary.json").write_text(json.dumps(summary, indent=2))
+
+
 def main() -> None:
     warnings.filterwarnings("ignore")
     ap = argparse.ArgumentParser()
-    ap.add_argument("what", choices=["eps", "fvr", "rigorous", "fast"])
+    ap.add_argument("what", choices=["eps", "fvr", "rigorous", "fast", "fig1"])
     ap.add_argument("--seeds", type=int, nargs="+", default=SEEDS)
     ap.add_argument("--n-slow", type=int, default=100)
     ap.add_argument("--out", type=Path, default=None)
@@ -206,6 +262,8 @@ def main() -> None:
         run_eps()
     elif args.what == "fvr":
         run_fvr()
+    elif args.what == "fig1":
+        run_fig1(args.seeds, args.n_slow)
     else:
         default = RIG_DIR if args.what == "rigorous" else RIG_DIR / "fast"
         run_full(args.what, args.seeds, args.n_slow, args.out or default)
