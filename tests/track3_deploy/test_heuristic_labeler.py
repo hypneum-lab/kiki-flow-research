@@ -6,6 +6,13 @@ import numpy as np
 import pytest
 
 spacy = pytest.importorskip("spacy")
+
+# The French spaCy pipeline is a ~500 MB model package installed out of
+# band (`python -m spacy download fr_core_news_lg`), not a declared
+# dependency, so skip when it is absent (e.g. on CI runners).
+if not spacy.util.is_package("fr_core_news_lg"):
+    pytest.skip("spaCy model fr_core_news_lg not installed", allow_module_level=True)
+
 phonemizer = pytest.importorskip("phonemizer")
 
 from kiki_flow_core.track3_deploy.data.heuristic_labeler import HeuristicLabeler  # noqa: E402

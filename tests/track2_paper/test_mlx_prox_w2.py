@@ -82,6 +82,13 @@ def test_mlx_prox_w2_both_backends_produce_valid_simplex():
 
 
 @pytest.mark.slow
+@pytest.mark.skip(
+    reason=(
+        "obsolete premise: since ffee5d9 prox_w2 is a numpy Dykstra "
+        "scaling (no POT gradient loop), so it no longer mirrors the "
+        "MLX projected-gradient solver and the speed race is meaningless"
+    )
+)
 def test_mlx_prox_w2_faster_than_pot_at_scale():
     import time  # noqa: PLC0415
 
