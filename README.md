@@ -33,11 +33,14 @@ quantitative results over five seeds.
 | `track2_paper` | N-particle Langevin × JKO entropic-regularized proxy for paper figures (4 Levelt-Baddeley species). | 2 min 31 s fast / 84 min rigorous on GrosMac M5. | tag `track2-v0.1` |
 | `track3_deploy` | Pure-NumPy streaming surrogate, MiniLM query encoder, advisory-only routing. | p50 = 0.04 ms on GrosMac M5. | tag `track3-v0.1` |
 
-T1 runs are gated by `DriftTrigger` (new-concept rate in the last 24 h of
-Aeon episodes > `threshold`, default 0.05). Optional `threshold_off`
-(hysteresis), `cooldown_s` and `state_path` (persisted armed flag for
-one-process-per-tick cron) stop it from re-firing while the rate hovers
-around the threshold; defaults keep the legacy behaviour. Details in
+T1 runs are gated by `DriftTrigger`: it fires when the new-concept rate in
+the last 24 h of Aeon episodes (against `known_concepts` in
+`bench/runs/T1/latest.json`) exceeds `threshold_on` = 0.07, then stays
+disarmed until the rate drops below `threshold_off` = 0.05 (hysteresis, no
+cooldown). These defaults come from a synthetic sweep (about 6 fires per
+year instead of 121, recall 0.99) and should be recalibrated on a recorded
+Aeon trace. A per-tick cron must pass `state_path` to persist the armed
+flag; `threshold_off=None` restores the old memoryless trigger. Details in
 `kiki_flow_core/track1_perf/CLAUDE.md`; sweep in
 `scripts/drift_trigger_sweep.py`.
 

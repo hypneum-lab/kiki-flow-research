@@ -18,13 +18,14 @@ def test_drift_trigger_holds_when_low_drift():
 
 def test_drift_trigger_handles_empty_aeon():
     aeon = AeonAdapter(fetcher=lambda h: [])
-    trigger = DriftTrigger(threshold=0.05)
+    trigger = DriftTrigger(threshold=0.05, threshold_off=None)
     assert trigger.should_fire(aeon, {"known_concepts": []}) is False
 
 
 # --- Hysteresis (threshold_on / threshold_off), cooldown, persistence ---
 
 import json  # noqa: E402
+import warnings  # noqa: E402
 from pathlib import Path  # noqa: E402
 
 import pytest  # noqa: E402
@@ -52,11 +53,40 @@ def test_drift_rate_exposed():
     assert trigger.drift_rate(AeonAdapter(fetcher=lambda h: []), {}) is None
 
 
-def test_legacy_default_chatters_like_before():
-    """threshold_off=None keeps the memoryless behaviour (fires every tick)."""
-    trigger = DriftTrigger(threshold=0.05)
+def test_threshold_off_none_keeps_legacy_memoryless_behaviour():
+    """Explicit threshold_off=None reproduces the pre-hysteresis trigger."""
+    trigger = DriftTrigger(threshold=0.05, threshold_off=None)
     assert trigger.threshold_off is None
+    assert trigger.cooldown_s is None
     assert _run(trigger, [6, 4, 6, 6, 5, 6]) == [True, False, True, True, False, True]
+
+
+def test_defaults_are_hysteresis_007_005_no_cooldown():
+    trigger = DriftTrigger()
+    assert trigger.threshold_on == pytest.approx(0.07)
+    assert trigger.threshold_off == pytest.approx(0.05)
+    assert trigger.cooldown_s is None
+    # Hovering around 0.07 fires once; a dip below 0.05 re-arms it.
+    assert _run(trigger, [8, 6, 8, 7, 8, 5, 8, 4, 8]) == [True] + [False] * 7 + [True]
+
+
+def test_default_threshold_off_needs_threshold_above_it():
+    """Old call sites passing threshold <= 0.05 must opt out explicitly."""
+    with pytest.raises(ValueError, match="threshold_off"):
+        DriftTrigger(threshold=0.05)
+    assert DriftTrigger(threshold=0.2).threshold_off == pytest.approx(0.05)
+
+
+def test_stateful_trigger_without_state_path_warns():
+    with pytest.warns(RuntimeWarning, match="state_path"):
+        DriftTrigger().should_fire(_aeon(), _manifest_at(8))
+
+
+def test_no_warning_with_state_path_or_legacy(tmp_path: Path):
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        DriftTrigger(state_path=tmp_path / "s.json").should_fire(_aeon(), _manifest_at(8))
+        DriftTrigger(threshold=0.05, threshold_off=None).should_fire(_aeon(), _manifest_at(8))
 
 
 def test_hysteresis_chattering_fires_once():
@@ -88,7 +118,7 @@ def test_threshold_off_must_be_below_threshold_on():
     with pytest.raises(ValueError, match="threshold_off"):
         DriftTrigger(threshold=0.05, threshold_off=-0.01)
     with pytest.raises(ValueError, match="cooldown"):
-        DriftTrigger(threshold=0.05, cooldown_s=-1.0)
+        DriftTrigger(threshold=0.05, threshold_off=None, cooldown_s=-1.0)
 
 
 def test_empty_window_leaves_state_untouched():
@@ -101,7 +131,9 @@ def test_empty_window_leaves_state_untouched():
 
 def test_cooldown_blocks_refire_until_elapsed():
     now = [0.0]
-    trigger = DriftTrigger(threshold=0.05, cooldown_s=100.0, clock=lambda: now[0])
+    trigger = DriftTrigger(
+        threshold=0.05, threshold_off=None, cooldown_s=100.0, clock=lambda: now[0]
+    )
     assert _run(trigger, [6]) == [True]
     now[0] = 99.0
     assert _run(trigger, [6]) == [False]
@@ -138,7 +170,13 @@ def test_state_persists_across_instances(tmp_path: Path):
 def test_cooldown_persists_across_instances(tmp_path: Path):
     state = tmp_path / "s.json"
     now = [1000.0]
-    kw = {"threshold": 0.05, "cooldown_s": 60.0, "state_path": state, "clock": lambda: now[0]}
+    kw = {
+        "threshold": 0.05,
+        "threshold_off": None,
+        "cooldown_s": 60.0,
+        "state_path": state,
+        "clock": lambda: now[0],
+    }
     assert _run(DriftTrigger(**kw), [6]) == [True]
     now[0] = 1030.0
     assert _run(DriftTrigger(**kw), [6]) == [False]

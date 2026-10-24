@@ -106,7 +106,7 @@ def score(fires: list[int], events: list[Event]) -> tuple[int, int, int, list[in
 
 
 CONFIGS: list[tuple[float, float | None, int]] = [
-    (0.05, None, 0),  # legacy default
+    (0.05, None, 0),  # pre-2026-10-24 default (memoryless)
     (0.05, None, 3),
     (0.05, None, 7),
     (0.05, 0.045, 0),
@@ -117,7 +117,7 @@ CONFIGS: list[tuple[float, float | None, int]] = [
     (0.06, 0.04, 0),
     (0.06, 0.03, 0),
     (0.07, None, 0),
-    (0.07, 0.05, 0),
+    (0.07, 0.05, 0),  # current default
     (0.07, 0.04, 0),
     (0.08, None, 0),
     (0.08, 0.05, 0),
