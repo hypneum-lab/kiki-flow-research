@@ -9,7 +9,13 @@ from kiki_flow_core.track2_paper.mlx_wasserstein import mlx_prox_w2
 
 
 class FullJKOSolver(JKOStep):
-    """JKOStep with apply_w2_prox=True and tighter Sinkhorn params for paper rigor."""
+    """JKOStep with apply_w2_prox=True and tighter Sinkhorn params for paper rigor.
+
+    ``h`` is the JKO time step (the proximal pull strength of ``prox_w2``);
+    ``epsilon`` is the Sinkhorn entropic regularisation of the prox (``reg``).
+    Before 2026-10-24 ``epsilon`` was stored but not passed on, so the prox
+    used ``reg = h`` whatever ``epsilon`` was (see ERRATUM.md).
+    """
 
     def __init__(
         self,
@@ -26,6 +32,7 @@ class FullJKOSolver(JKOStep):
             support=support,
             n_inner=n_inner,
             apply_w2_prox=True,
+            reg=epsilon,
         )
         self.epsilon = epsilon
         self.max_iter = max_iter
@@ -57,6 +64,7 @@ class MLXFullJKOSolver(JKOStep):
             n_inner=n_inner,
             apply_w2_prox=True,
             prox_fn=mlx_prox_w2,
+            reg=epsilon,
         )
         self.epsilon = epsilon
         self.max_iter = max_iter

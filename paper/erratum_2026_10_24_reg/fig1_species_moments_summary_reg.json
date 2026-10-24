@@ -1,0 +1,98 @@
+{
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "n_slow": 100,
+  "entropy_units": "bits",
+  "fast": {
+    "phono": {
+      "mean_x_final": -0.00012399309413892376,
+      "mean_x_final_sd": 0.000346845398696752,
+      "entropy_bits_first": 5.999980150187059,
+      "entropy_bits_final": 5.999980863351099,
+      "entropy_bits_final_sd": 5.844352764957182e-06
+    },
+    "lex": {
+      "mean_x_final": 0.00022584972780809523,
+      "mean_x_final_sd": 0.0005439003731340595,
+      "entropy_bits_first": 5.999943109680343,
+      "entropy_bits_final": 5.999955479638238,
+      "entropy_bits_final_sd": 5.8524084960516465e-06
+    },
+    "syntax": {
+      "mean_x_final": -9.330099535809349e-05,
+      "mean_x_final_sd": 0.00027186598168587694,
+      "entropy_bits_first": 5.999977201216192,
+      "entropy_bits_final": 5.99998383417996,
+      "entropy_bits_final_sd": 2.86183056278298e-06
+    },
+    "sem": {
+      "mean_x_final": -6.334588931055998e-05,
+      "mean_x_final_sd": 0.00019669055288630818,
+      "entropy_bits_first": 5.999988235358364,
+      "entropy_bits_final": 5.999984469834491,
+      "entropy_bits_final_sd": 3.260887670504498e-06
+    }
+  },
+  "rigorous": {
+    "phono": {
+      "mean_x_final": -0.007726825687068126,
+      "mean_x_final_sd": 0.022366964297086758,
+      "entropy_bits_first": 5.854314065444774,
+      "entropy_bits_final": 5.891695139678173,
+      "entropy_bits_final_sd": 0.013001930906363169
+    },
+    "lex": {
+      "mean_x_final": 0.0029751746597005994,
+      "mean_x_final_sd": 0.009271890933156491,
+      "entropy_bits_first": 5.8616150212042095,
+      "entropy_bits_final": 5.9087771311183666,
+      "entropy_bits_final_sd": 0.006288893948831573
+    },
+    "syntax": {
+      "mean_x_final": 0.0046006620785790705,
+      "mean_x_final_sd": 0.02160350717924903,
+      "entropy_bits_first": 5.865569114600549,
+      "entropy_bits_final": 5.903178165736302,
+      "entropy_bits_final_sd": 0.008109595079394499
+    },
+    "sem": {
+      "mean_x_final": -0.0031400034451487804,
+      "mean_x_final_sd": 0.015316178250121246,
+      "entropy_bits_first": 5.859272272484391,
+      "entropy_bits_final": 5.903384350719714,
+      "entropy_bits_final_sd": 0.011015794327193271
+    }
+  },
+  "final_kl_rigorous_vs_fast_nats_sum4": {
+    "per_seed": [
+      0.24694285097244084,
+      0.2782468528057947,
+      0.27839867359442816,
+      0.2886682642869338,
+      0.2679194711750444
+    ],
+    "mean": 0.27203522256692836,
+    "std": 0.014158407098391175
+  },
+  "fast_trajectories": "paper_rigorous_fixedprox/fast/trajectories",
+  "provenance": {
+    "git_commit": "0d5683f7e6b66180e83afcc4728b90d43ce2dfc4",
+    "host": "MacBookPro.lan",
+    "machine": "arm64",
+    "python": "3.14.4",
+    "mlx_default_device": "Device(cpu, 0)",
+    "date_utc": "2026-10-24T20:54:22Z",
+    "prox": "kiki_flow_core.wasserstein_ops.prox_w2 (Dykstra, post-ffee5d9)",
+    "prox_params": {
+      "epsilon": "h = 0.05 (JKO step, proximal pull)",
+      "reg": "FullJKOSolver.epsilon (Sinkhorn entropic regularisation)",
+      "n_iter": 100
+    },
+    "entropy_units": "bits"
+  }
+}

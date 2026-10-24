@@ -221,25 +221,71 @@ Still pending:
    left unchanged: its source still has the withdrawn KL agreement,
    the old Fig. 1 and the old epsilon sweep, so rebuilding its PDF
    alone would republish them.
-7. Specialisation sweep on the rigorous path: rerun (PI approval
-   2026-10-24). Same 72-point grid as the dense sweep, `FullJKOSolver`
-   with the corrected prox, seeds 0–4, macM1 CPU, 20 min for both
-   paths. Driver `experiments/rigorous_specialisation_2026_10_24.py`;
-   data and analysis in `paper/rigorous_specialisation_2026_10_24/`.
-   Specialisation holds but is smaller: best gap 1.35 ± 0.06 bits
-   (34 % below max, (α, β, γ) = (8, 0.5, 5); 1.42 bits at seed 0)
-   against 2.03 ± 0.03 bits on the fast path (2.04 at seed 0). At
-   (10, 1, 0) the rigorous gap is 1.23 ± 0.03 bits. With no potential
-   it is 0.15–0.17 bits. On the rigorous path a larger β reduces
-   specialisation, and phono/lex specialise least (on the fast path
-   they specialise most). The fast rerun reproduces
-   `paper/hyperparam_sweep_dense.json` exactly. Claim (ii) stays
-   scoped to the fast path. A widened sweep (138 points, 10 seeds,
-   `paper/rigorous_specialisation_wide_2026_10_24/`) confirms this:
-   the rigorous path specialises at every α > 0, with a gap that
-   saturates at 1.44 ± 0.05 bits (best point (15, 0.2, 0)). The
-   fast-path gap keeps growing with α (2.94 ± 0.03 bits at α = 30), so
-   (10, 1, 0) is the best point of the 72-point grid only. The β
-   trend has opposite signs on the two paths. **[PI DECISION]**
-   whether the abstract and the sweep paragraph also report the
-   rigorous-path figure.
+7. Specialisation on the rigorous path (PI approval 2026-10-24).
+   First sweep: the 72-point dense grid, seeds 0–4
+   (`paper/rigorous_specialisation_2026_10_24/`). Widened sweep: 138
+   points, 10 seeds (`paper/rigorous_specialisation_wide_2026_10_24/`).
+   Both ran before the ε fix of §9, with reg = 0.05; the rigorous half
+   was rerun with ε = 0.01
+   (`paper/rigorous_specialisation_wide_2026_10_24_reg/`, numbers
+   below). The rigorous path specialises for α ≥ 3 (at α = 1 it is
+   within 0.07 bits of the α = 0 control). Its gap saturates at
+   1.46 ± 0.05 bits (37 % below max, best point (15, 0.2, 0)). It is
+   1.28 ± 0.07 bits at (10, 1, 0) and 1.39 ± 0.06 bits at the best
+   point of the original 72-point grid ((8, 0.5, 5), seeds 0–4). The
+   fast-path gap keeps growing with α (2.94 ± 0.03 bits at
+   (30, 4, 0)), so (10, 1, 0) is the best point of the 72-point grid
+   only. The β trend has opposite signs on the two paths. On the
+   rigorous path phono/lex de-specialise at large α. The fast rerun
+   reproduces `paper/hyperparam_sweep_dense.json` exactly.
+   **Applied (PI decision 2026-10-24 ~22:40):** the abstract's claim
+   (ii) now gives the fast-path gap (2.04 bits at the best of 72
+   configurations, 2.94 at stronger attraction) and the saturating
+   rigorous gap (1.46 bits over the widened sweep). The sweep
+   paragraph no longer calls (10, 1, 0) "the best point" without
+   qualification.
+
+## 9. Third defect: `FullJKOSolver.epsilon` ignored (fixed 2026-10-24)
+
+`FullJKOSolver` and `MLXFullJKOSolver` stored `epsilon` but
+`JKOStep.step` never passed it on. The prox ran with `epsilon = h`
+(the JKO step, 0.05) and, by its default, Sinkhorn `reg = h = 0.05`,
+whatever `epsilon` was configured. The paper defines ε as the Sinkhorn
+regularisation, distinct from the step h, and states ε = 0.01 for the
+rigorous path. Fix: `JKOStep` forwards an optional `reg`, and the full
+solvers set `reg = epsilon`. h stays the proximal pull. `max_iter` is
+still not forwarded (`n_iter = 100`), unchanged.
+
+Which runs the defect affects:
+
+| Run | Configured ε | Affected | Action |
+|---|---|---|---|
+| `paper_rigorous_fixedprox/` (paper scale) and Fig. 1 | 0.01 | yes | rerun → `paper_rigorous_fixedeps/`, `paper/erratum_2026_10_24_reg/fig1_*`, `paper/figures/fig1_species_moments_reg.*` |
+| Specialisation sweeps, rigorous half (`experiments/rigorous_specialisation*.py`) | 0.01 (default) | yes | rerun → `paper/rigorous_specialisation_wide_2026_10_24_reg/` |
+| ε-sweep (Fig. 4; calls `prox_w2` directly) | swept, but tied to the prox step | conflated | rerun with ε as `reg` only, prox step h = 0.05 → `paper/erratum_2026_10_24_reg/epsilon_sweep_reg.json`, `fig4_kl_vs_epsilon_reg.*` |
+| Fast-vs-rigorous, reduced setup (`fast_vs_rigorous_kl_fixed.json`), spot-check, `scripts/fast_vs_rigorous_kl.py`, `scripts/dump_t2_pairs.py` | 0.05 = h | no (identical) | none |
+| E1 (`experiments/e1_epsilon_sweep_var.py`) | swept | no: injects its own decoupled prox; committed JSON reproduced exactly with the fix | none |
+| `paper_rigorous/` (historical, pre-`ffee5d9` prox) | 0.01 | superseded | none |
+| Fast path (all) | — | no prox | none |
+
+Old (reg = 0.05) vs new (ε = 0.01), driver
+`experiments/erratum_reg_reruns_2026_10_24.py` at `0d5683f` (fix
+`016d71a`), macM1 CPU:
+
+| Quantity | Old | New |
+|---|---|---|
+| KL(rigorous‖fast), paper scale, final step | 0.262 ± 0.014 nats | **0.272 ± 0.014 nats** |
+| Rigorous entropy, first / last slow step | 5.86–5.87 / 5.896–5.912 bits | **5.85–5.87 / 5.892–5.909 bits** |
+| Rigorous runtime, 5 seeds × 100 slow | 12 min 42 s | **12 min 35 s** |
+| Seed-mean position per species, final | within ±0.008 | within ±0.008 (unchanged) |
+| Specialisation, rigorous best (138 pts, 10 seeds) | 1.44 ± 0.05 bits (15, 0.2, 0) | **1.46 ± 0.05 bits (15, 0.2, 0)** |
+| at (10, 1, 0), 10 seeds | 1.24 ± 0.06 | **1.28 ± 0.07** |
+| best of the 72-point grid, seeds 0–4 | 1.35 ± 0.06 (8, 0.5, 5) | **1.39 ± 0.06 (8, 0.5, 5)** |
+| α = 0 control gap | 0.15–0.17 | **0.19–0.22** |
+| α > 0 points with S's 95 % CI ≤ 0 | 0 / 116 | 1 / 116 (α = 1, β = 0.3: S = 0.003) |
+| ε-sweep KL at ε = 0.005 / 0.01 / 0.05 / 0.1 | 3.8e-10 / 4.7e-4 / 0.229 / 0.669 nats (ε also set the prox step) | **9.7e-6 / 3.5e-4 / 0.011 / 0.016 nats** (prox step fixed at h) |
+
+Max change of a rigorous point's mean entropy: 0.061 bits (mean
+−0.036). The qualitative findings of §7–8 are unchanged. The Fig. 4
+curve is now a measurement of the Sinkhorn regularisation alone; the
+conflation caveat is removed from the paper.

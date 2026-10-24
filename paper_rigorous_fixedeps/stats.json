@@ -1,0 +1,87 @@
+{
+  "n_seeds": 5,
+  "per_seed": [
+    {
+      "seed": 0,
+      "n_slow_completed": 100,
+      "runtime_s": 149.80100295797456
+    },
+    {
+      "seed": 1,
+      "n_slow_completed": 100,
+      "runtime_s": 151.10647116601467
+    },
+    {
+      "seed": 2,
+      "n_slow_completed": 100,
+      "runtime_s": 150.40001912496518
+    },
+    {
+      "seed": 3,
+      "n_slow_completed": 100,
+      "runtime_s": 151.16013437497895
+    },
+    {
+      "seed": 4,
+      "n_slow_completed": 100,
+      "runtime_s": 152.76933491707314
+    }
+  ],
+  "params": {
+    "grid": 64,
+    "n_particles": 10000,
+    "n_fast": 1000,
+    "n_slow": 100
+  },
+  "backend": {
+    "simulator": "mlx (cpu device)",
+    "w2_prox": true,
+    "prox": "numpy Dykstra prox_w2 (post-ffee5d9)",
+    "epsilon": 0.01
+  },
+  "aggregate": {
+    "phono": {
+      "peak_mean": 0.02423919671081923,
+      "peak_std": 0.0008523402035757987,
+      "entropy_bits_mean": 5.89169513780122,
+      "entropy_bits_std": 0.013001930737633345,
+      "peak_idx_mean": 30.6,
+      "peak_idx_std": 3.2
+    },
+    "lex": {
+      "peak_mean": 0.023400103105656028,
+      "peak_std": 0.0003025164683186973,
+      "entropy_bits_mean": 5.908777131970648,
+      "entropy_bits_std": 0.006288894608735523,
+      "peak_idx_mean": 31.8,
+      "peak_idx_std": 1.7204650534085253
+    },
+    "syntax": {
+      "peak_mean": 0.023354310215842854,
+      "peak_std": 0.0008466573802065442,
+      "entropy_bits_mean": 5.903178164701721,
+      "entropy_bits_std": 0.008109595041569521,
+      "peak_idx_mean": 32.0,
+      "peak_idx_std": 1.6733200530681511
+    },
+    "sem": {
+      "peak_mean": 0.023845204356380507,
+      "peak_std": 0.000617219837139297,
+      "entropy_bits_mean": 5.903384350675774,
+      "entropy_bits_std": 0.011015795223698499,
+      "peak_idx_mean": 30.8,
+      "peak_idx_std": 1.9390719429665315
+    }
+  },
+  "runtime_s": 755.2714549589437,
+  "provenance": {
+    "git_commit": "0d5683f7e6b66180e83afcc4728b90d43ce2dfc4",
+    "host": "MacBookPro.lan",
+    "machine": "arm64",
+    "python": "3.14.4",
+    "mlx_default_device": "Device(cpu, 0)",
+    "date_utc": "2026-10-24T20:54:18Z",
+    "prox": "kiki_flow_core.wasserstein_ops.prox_w2 (Dykstra, post-ffee5d9)",
+    "kl_units": "nats"
+  }
+}

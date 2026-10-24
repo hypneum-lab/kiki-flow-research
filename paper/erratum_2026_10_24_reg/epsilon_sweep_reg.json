@@ -1,0 +1,48 @@
+{
+  "epsilons": [
+    0.001,
+    0.005,
+    0.01,
+    0.05,
+    0.1
+  ],
+  "kl_values_nats": [
+    0.0,
+    9.682603350481321e-06,
+    0.00034815048956898017,
+    0.010769486136724515,
+    0.015834429802107745
+  ],
+  "mean_x_out": [
+    0.7193452952590373,
+    0.7193466521749123,
+    0.7081884317984892,
+    0.6552112611831892,
+    0.6538000814389695
+  ],
+  "mean_x_distribution": -0.9853073889480726,
+  "mean_x_reference": 0.9853073889480728,
+  "params": {
+    "grid": 16,
+    "n_iter": 50,
+    "prox_epsilon": 0.05,
+    "swept": "reg (Sinkhorn entropic regularisation)",
+    "setup": "peaked-left vs peaked-right 1D prox"
+  },
+  "runtime_s": 0.3088660839712247,
+  "provenance": {
+    "git_commit": "0d5683f7e6b66180e83afcc4728b90d43ce2dfc4",
+    "host": "MacBookPro.lan",
+    "machine": "arm64",
+    "python": "3.14.4",
+    "mlx_default_device": "Device(cpu, 0)",
+    "date_utc": "2026-10-24T20:41:41Z",
+    "prox": "kiki_flow_core.wasserstein_ops.prox_w2 (Dykstra, post-ffee5d9)",
+    "prox_params": {
+      "epsilon": "h = 0.05 (JKO step, proximal pull)",
+      "reg": "FullJKOSolver.epsilon (Sinkhorn entropic regularisation)",
+      "n_iter": 100
+    },
+    "entropy_units": "bits"
+  }
+}

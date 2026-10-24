@@ -38,3 +38,9 @@ def test_full_jko_solver_epsilon_and_max_iter_persist():
     solver = FullJKOSolver(f_functional=ZeroF(), h=0.1, support=support, epsilon=0.02, max_iter=500)
     assert solver.epsilon == 0.02  # noqa: PLR2004
     assert solver.max_iter == 500  # noqa: PLR2004
+
+
+def test_mlx_full_jko_solver_passes_epsilon_as_reg():
+    support = np.linspace(0, 1, 4).reshape(-1, 1)
+    solver = MLXFullJKOSolver(f_functional=ZeroF(), h=0.05, support=support, epsilon=0.02)
+    assert solver.reg == 0.02  # noqa: PLR2004
