@@ -1,13 +1,33 @@
+import time
+
 import numpy as np
 import pytest
 
+from kiki_flow_core.master_equation import ZeroF
+from kiki_flow_core.state import FlowState
+from kiki_flow_core.track2_paper.full_jko_solver import FullJKOSolver, MLXFullJKOSolver
 from kiki_flow_core.track2_paper.mlx_wasserstein import mlx_prox_w2, mlx_sinkhorn_cost
 from kiki_flow_core.wasserstein_ops import prox_w2, sinkhorn_cost
+
+# Parity tolerance between the float32 MLX port and the float64 NumPy
+# reference ``wasserstein_ops.prox_w2``. Both run the same Dykstra
+# fixed point (MLX in the log domain); the gap is float32 round-off.
+# Measured on macM1 (M1 Max, MLX 0.31.1): max-abs gap <= 4e-8 and L1
+# gap <= 2.1e-7 on n in {16, 64, 100 (2-D), 256, 1024}; the bounds
+# below leave ~25x headroom for other Metal devices.
+PARITY_ATOL = 1e-6
+PARITY_L1 = 1e-5
 
 
 def _cost_matrix(support: np.ndarray) -> np.ndarray:
     diff = support[:, None, :] - support[None, :, :]
     return (diff**2).sum(axis=-1)
+
+
+def _gauss(x: np.ndarray, mu: float, sigma: float) -> np.ndarray:
+    g = np.exp(-0.5 * ((x - mu) / sigma) ** 2)
+    out: np.ndarray = g / g.sum()
+    return out
 
 
 def test_mlx_sinkhorn_matches_pot_within_tolerance():
@@ -19,122 +39,126 @@ def test_mlx_sinkhorn_matches_pot_within_tolerance():
     cost = _cost_matrix(support)
     mlx_val = mlx_sinkhorn_cost(a, b, cost, epsilon=0.05, n_iter=300)
     pot_val = sinkhorn_cost(a, b, cost, epsilon=0.05, n_iter=300)
-    # 1 percent tolerance on the regularized cost
+    # 5 percent tolerance on the regularized cost
     assert abs(mlx_val - pot_val) / max(abs(pot_val), 1e-9) < 0.05  # noqa: PLR2004
 
 
 def test_mlx_prox_w2_returns_simplex():
     support = np.linspace(-2, 2, 16).reshape(-1, 1).astype(np.float32)
     x = support[:, 0]
-    distribution = np.exp(-0.5 * ((x + 0.8) / 0.5) ** 2)
-    distribution = distribution / distribution.sum()
-    reference = np.exp(-0.5 * ((x - 0.8) / 0.5) ** 2)
-    reference = reference / reference.sum()
     result = mlx_prox_w2(
-        distribution.astype(np.float32),
-        reference=reference.astype(np.float32),
+        _gauss(x, -0.8, 0.5).astype(np.float32),
+        reference=_gauss(x, 0.8, 0.5).astype(np.float32),
         epsilon=0.05,
         support=support,
         n_iter=50,
     )
-    # Valid probability distribution: sums to 1, non-negative, finite
     assert abs(result.sum() - 1.0) < 1e-4  # noqa: PLR2004
     assert (result >= 0).all()
     assert np.isfinite(result).all()
 
 
-def test_mlx_prox_w2_both_backends_produce_valid_simplex():
-    """Both MLX and POT variants should produce valid probability distributions.
+def test_mlx_prox_w2_depends_on_reference():
+    """Changing ``reference`` must change the output.
 
-    We do NOT assert the two backends converge to the same point because the
-    POT reference implementation is known to be sensitive to its hyper-params
-    (step size, n_iter) and sometimes pushes mass to a boundary corner. MLX
-    and POT agree on the Sinkhorn cost (covered by the other test) but can
-    differ on the proximal step trajectory.
+    Regression for the zero-gradient bug: the old MLX loop used
+    ``transport @ diag(cost)`` with a squared self-distance cost whose
+    diagonal is zero, so the output never depended on ``reference``
+    (it returned ``distribution`` unchanged).
     """
-    support = np.linspace(-2, 2, 16).reshape(-1, 1).astype(np.float32)
+    support = np.linspace(-2, 2, 32).reshape(-1, 1)
     x = support[:, 0]
-    distribution = np.exp(-0.5 * ((x + 0.8) / 0.5) ** 2)
-    distribution = distribution / distribution.sum()
-    reference = np.exp(-0.5 * ((x - 0.8) / 0.5) ** 2)
-    reference = reference / reference.sum()
+    dist = _gauss(x, 0.0, 0.5)
+    out_left = mlx_prox_w2(dist, reference=_gauss(x, -1.0, 0.4), epsilon=0.1, support=support)
+    out_right = mlx_prox_w2(dist, reference=_gauss(x, 1.0, 0.4), epsilon=0.1, support=support)
+    assert np.abs(out_left - out_right).sum() > 0.1  # noqa: PLR2004
+    assert np.abs(out_left - dist).sum() > 0.05  # noqa: PLR2004
+    # The pull is towards the reference: means move in opposite directions.
+    assert float(out_left @ x) < float(dist @ x) < float(out_right @ x)
 
-    mlx_out = mlx_prox_w2(
-        distribution.astype(np.float32),
-        reference=reference.astype(np.float32),
-        epsilon=0.05,
-        support=support,
-        n_iter=50,
+
+@pytest.mark.parametrize(
+    ("n", "dim", "epsilon", "n_iter"),
+    [
+        (16, 1, 0.05, 200),  # small, 1-D
+        (64, 1, 0.1, 400),  # medium, 1-D
+        (64, 1, 0.02, 400),  # medium, 1-D, sharper kernel
+        (100, 2, 0.1, 300),  # medium, 2-D (10x10 grid)
+    ],
+)
+def test_mlx_prox_w2_matches_numpy_prox_w2(n: int, dim: int, epsilon: float, n_iter: int):
+    rng = np.random.default_rng(n + dim)
+    if dim == 1:
+        support = np.linspace(-2, 2, n).reshape(-1, 1)
+    else:
+        side = int(round(n**0.5))
+        g = np.linspace(-1, 1, side)
+        support = np.stack(np.meshgrid(g, g), axis=-1).reshape(-1, 2)
+    dist = rng.dirichlet(np.ones(n))
+    ref = rng.dirichlet(np.ones(n))
+    expected = prox_w2(dist, reference=ref, epsilon=epsilon, support=support, n_iter=n_iter)
+    got = mlx_prox_w2(dist, reference=ref, epsilon=epsilon, support=support, n_iter=n_iter)
+    assert got.dtype == np.float64
+    np.testing.assert_allclose(got, expected, rtol=0, atol=PARITY_ATOL)
+    assert np.abs(got - expected).sum() < PARITY_L1
+
+
+def test_mlx_prox_w2_honours_explicit_reg():
+    support = np.linspace(-2, 2, 32).reshape(-1, 1)
+    rng = np.random.default_rng(7)
+    dist = rng.dirichlet(np.ones(32))
+    ref = rng.dirichlet(np.ones(32))
+    expected = prox_w2(dist, ref, epsilon=0.05, support=support, n_iter=300, reg=0.2)
+    got = mlx_prox_w2(dist, ref, epsilon=0.05, support=support, n_iter=300, reg=0.2)
+    np.testing.assert_allclose(got, expected, rtol=0, atol=PARITY_ATOL)
+
+
+def test_mlx_full_jko_step_matches_numpy_full_jko_step():
+    support = np.linspace(-2, 2, 32).reshape(-1, 1)
+    x = support[:, 0]
+    rho = _gauss(x, 0.6, 0.3)
+    state = FlowState(
+        rho={"phono": rho},
+        P_theta=np.zeros(4),
+        mu_curr=np.array([1.0]),
+        tau=0,
+        metadata={"track_id": "T2"},
     )
-    pot_out = prox_w2(
-        distribution.astype(np.float64),
-        reference=reference.astype(np.float64),
-        epsilon=0.05,
-        support=support.astype(np.float64),
-        n_iter=50,
-    )
-    tol_mass = 1e-3
-    tol_neg = -1e-6
-    for out in (mlx_out, pot_out):
-        assert abs(out.sum() - 1.0) < tol_mass
-        assert (out >= tol_neg).all()
-        assert np.isfinite(out).all()
+    kw = {"f_functional": ZeroF(), "h": 0.05, "support": support, "epsilon": 0.05, "n_inner": 3}
+    out_np = FullJKOSolver(**kw).step(state).rho["phono"]
+    out_mlx = MLXFullJKOSolver(**kw).step(state).rho["phono"]
+    np.testing.assert_allclose(out_mlx, out_np, rtol=0, atol=PARITY_ATOL)
 
 
 @pytest.mark.slow
-@pytest.mark.skip(
-    reason=(
-        "obsolete premise: since ffee5d9 prox_w2 is a numpy Dykstra "
-        "scaling (no POT gradient loop), so it no longer mirrors the "
-        "MLX projected-gradient solver and the speed race is meaningless"
-    )
-)
-def test_mlx_prox_w2_faster_than_pot_at_scale():
-    import time  # noqa: PLC0415
+def test_mlx_prox_w2_vs_numpy_benchmark():
+    """Honest wall-clock comparison of two equivalent computations.
 
-    support = np.linspace(-2, 2, 64).reshape(-1, 1).astype(np.float32)
-    x = support[:, 0]
-    distribution = np.exp(-0.5 * ((x + 1.0) / 0.4) ** 2)
-    distribution = distribution / distribution.sum()
-    reference = np.exp(-0.5 * ((x - 1.0) / 0.4) ** 2)
-    reference = reference / reference.sum()
+    Both backends run the identical Dykstra fixed point for the same
+    number of iterations, and the outputs are checked to agree within
+    ``PARITY_ATOL`` first, so the timings compare like with like. No
+    speed claim is asserted: the ratio depends on grid size, host and
+    Metal warm-up, and is reported in the captured stdout instead.
+    """
+    timings = {}
+    for n in (64, 256, 1024):
+        support = np.linspace(-2, 2, n).reshape(-1, 1)
+        x = support[:, 0]
+        dist = _gauss(x, -1.0, 0.4)
+        ref = _gauss(x, 1.0, 0.4)
+        kw = {"epsilon": 0.1, "support": support, "n_iter": 200}
+        mlx_prox_w2(dist, ref, **kw)  # warm-up (kernel compile)
+        prox_w2(dist, ref, **kw)
 
-    # Warm up both backends
-    _ = mlx_prox_w2(
-        distribution.astype(np.float32),
-        reference=reference.astype(np.float32),
-        epsilon=0.01,
-        support=support,
-        n_iter=20,
-    )
-    _ = prox_w2(
-        distribution.astype(np.float64),
-        reference=reference.astype(np.float64),
-        epsilon=0.01,
-        support=support.astype(np.float64),
-        n_iter=20,
-    )
+        t0 = time.perf_counter()
+        got = mlx_prox_w2(dist, ref, **kw)
+        t_mlx = time.perf_counter() - t0
+        t0 = time.perf_counter()
+        expected = prox_w2(dist, ref, **kw)
+        t_np = time.perf_counter() - t0
 
-    t0 = time.perf_counter()
-    mlx_prox_w2(
-        distribution.astype(np.float32),
-        reference=reference.astype(np.float32),
-        epsilon=0.01,
-        support=support,
-        n_iter=100,
-    )
-    t_mlx = time.perf_counter() - t0
-
-    t0 = time.perf_counter()
-    prox_w2(
-        distribution.astype(np.float64),
-        reference=reference.astype(np.float64),
-        epsilon=0.01,
-        support=support.astype(np.float64),
-        n_iter=100,
-    )
-    t_pot = time.perf_counter() - t0
-
-    # The expectation is that MLX is at least as fast as POT on 64x64;
-    # we use 1.5x as a lenient CI threshold given Metal warm-up jitter.
-    assert t_mlx < t_pot * 1.5, f"mlx={t_mlx:.3f}s vs pot={t_pot:.3f}s"
+        np.testing.assert_allclose(got, expected, rtol=0, atol=PARITY_ATOL)
+        timings[n] = (t_np, t_mlx)
+        ms_np, ms_mlx = t_np * 1e3, t_mlx * 1e3
+        print(f"n={n:5d} numpy={ms_np:8.2f} ms mlx={ms_mlx:8.2f} ms ratio={t_np / t_mlx:.2f}")
+    assert all(t > 0 for pair in timings.values() for t in pair)
