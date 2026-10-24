@@ -1,0 +1,87 @@
+{
+  "n_seeds": 5,
+  "per_seed": [
+    {
+      "seed": 0,
+      "n_slow_completed": 100,
+      "runtime_s": 152.2156671670964
+    },
+    {
+      "seed": 1,
+      "n_slow_completed": 100,
+      "runtime_s": 152.38050275004935
+    },
+    {
+      "seed": 2,
+      "n_slow_completed": 100,
+      "runtime_s": 153.03435374994297
+    },
+    {
+      "seed": 3,
+      "n_slow_completed": 100,
+      "runtime_s": 153.68366179196164
+    },
+    {
+      "seed": 4,
+      "n_slow_completed": 100,
+      "runtime_s": 150.64657208300196
+    }
+  ],
+  "params": {
+    "grid": 64,
+    "n_particles": 10000,
+    "n_fast": 1000,
+    "n_slow": 100
+  },
+  "backend": {
+    "simulator": "mlx (cpu device)",
+    "w2_prox": true,
+    "prox": "numpy Dykstra prox_w2 (post-ffee5d9)",
+    "epsilon": 0.01
+  },
+  "aggregate": {
+    "phono": {
+      "peak_mean": 0.023870079095641605,
+      "peak_std": 0.000765836691486848,
+      "entropy_bits_mean": 5.895932259397258,
+      "entropy_bits_std": 0.012469283110412501,
+      "peak_idx_mean": 30.6,
+      "peak_idx_std": 3.2
+    },
+    "lex": {
+      "peak_mean": 0.02306379846861465,
+      "peak_std": 0.0002824171377143341,
+      "entropy_bits_mean": 5.912291616125262,
+      "entropy_bits_std": 0.006067028146363294,
+      "peak_idx_mean": 31.8,
+      "peak_idx_std": 1.7204650534085253
+    },
+    "syntax": {
+      "peak_mean": 0.023102552577351842,
+      "peak_std": 0.0007945682570233578,
+      "entropy_bits_mean": 5.90695884002079,
+      "entropy_bits_std": 0.007820116295650529,
+      "peak_idx_mean": 31.4,
+      "peak_idx_std": 0.7999999999999999
+    },
+    "sem": {
+      "peak_mean": 0.023420057711433052,
+      "peak_std": 0.0005188943714205187,
+      "entropy_bits_mean": 5.907127869721175,
+      "entropy_bits_std": 0.010538447417237766,
+      "peak_idx_mean": 31.0,
+      "peak_idx_std": 1.2649110640673518
+    }
+  },
+  "runtime_s": 762.0017975829542,
+  "provenance": {
+    "git_commit": "8a92b56",
+    "host": "MacBookPro.lan",
+    "machine": "arm64",
+    "python": "3.14.4",
+    "mlx_default_device": "Device(cpu, 0)",
+    "date_utc": "2026-10-24T13:41:49Z",
+    "prox": "kiki_flow_core.wasserstein_ops.prox_w2 (Dykstra, post-ffee5d9)",
+    "kl_units": "nats"
+  }
+}
