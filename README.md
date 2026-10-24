@@ -204,7 +204,10 @@ Draft pre-print. The latest tagged paper version is `paper-v0.11-draft`
 (2026-04-22); `paper/main.tex` on `main` adds the untagged 2026-06
 external-review revisions (E1b, E2). The packaged
 `paper/kiki-flow-arxiv-v0.5.zip` / `paper/arxiv_bundle/` is an older
-v0.5 snapshot and must be regenerated before submission.
+v0.5 snapshot, **superseded** since the 2026-10-24 erratum: it still
+carries the withdrawn fast-vs-rigorous agreement, the old Fig. 1 and the
+old ε-sweep (see `ERRATUM.md`). Use `paper/main.pdf`; the bundle must be
+regenerated from `paper/main.tex` before any submission.
 
 ```bibtex
 @unpublished{kiki-flow-2026,
