@@ -13,6 +13,8 @@ were configured. This driver reruns them with the fixed solver:
                fig1 *_maxiter (fast trajectories reused: the fast path has no prox)
   spec      -> paper/rigorous_specialisation_wide_2026_10_25_maxiter/ (rigorous
                path of the 138-point, 10-seed grid; fast records copied)
+  spec-compare -> comparison.json in the same directory: the rerun records
+               present so far against the epsilon rerun, same seeds
   e1        -> no file: checks that E1 (own single-projection prox) reproduces
                ``experiments/results/e1_epsilon_sweep_var.json`` exactly
 
@@ -228,6 +230,36 @@ def run_spec() -> None:
     )
 
 
+def compare_spec() -> None:
+    """Compare the rerun records present in ``partial.jsonl`` with the epsilon rerun."""
+    old = json.loads((reg.SPEC_DIR / "sweep_wide_records.json").read_text())["results"]
+    old_by = {wide.key(r["path"], r["seed"], (r["alpha"], r["beta"], r["gamma"])): r for r in old}
+    new = [json.loads(line) for line in output_paths()["spec_partial"].read_text().splitlines()]
+    d_gap, d_h = [], []
+    by_point: dict[tuple[float, float, float], list[float]] = {}
+    for r in new:
+        p = (r["alpha"], r["beta"], r["gamma"])
+        o = old_by[wide.key("rigorous", r["seed"], p)]
+        d_gap.append(r["gap_bits"] - o["gap_bits"])
+        d_h.extend(r["per_species"][n] - o["per_species"][n] for n in r["per_species"])
+        by_point.setdefault(p, []).append(d_gap[-1])
+    point_means = [float(np.mean(v)) for v in by_point.values()]
+    out = {
+        "n_runs": len(new),
+        "seeds": sorted({r["seed"] for r in new}),
+        "n_points": len(by_point),
+        "baseline": str(reg.SPEC_DIR / "sweep_wide_records.json"),
+        "max_abs_delta_gap_bits_per_run": float(np.max(np.abs(d_gap))),
+        "mean_delta_gap_bits_per_run": float(np.mean(d_gap)),
+        "max_abs_delta_point_mean_gap_bits": float(np.max(np.abs(point_means))),
+        "max_abs_delta_species_entropy_bits": float(np.max(np.abs(d_h))),
+        "note": "new (max_iter = 1000 forwarded) minus old (n_iter = 100), same seeds",
+        "provenance": provenance(),
+    }
+    (SPEC_DIR / "comparison.json").write_text(json.dumps(out, indent=2))
+    print(json.dumps({k: v for k, v in out.items() if k != "provenance"}, indent=2))
+
+
 # ------------------------------------------------------------------- e1
 def run_e1() -> None:
     e1 = _load("experiments_e1_epsilon_sweep_var", "e1_epsilon_sweep_var.py")
@@ -244,7 +276,7 @@ def run_e1() -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("what", choices=["fvr", "rigorous", "fig1", "spec", "e1"])
+    ap.add_argument("what", choices=["fvr", "rigorous", "fig1", "spec", "spec-compare", "e1"])
     ap.add_argument("--n-slow", type=int, default=100)
     args = ap.parse_args()
     mx.set_default_device(mx.cpu)
@@ -254,6 +286,7 @@ def main() -> None:
         "rigorous": lambda: run_rigorous(args.n_slow),
         "fig1": lambda: run_fig1(args.n_slow),
         "spec": run_spec,
+        "spec-compare": compare_spec,
         "e1": run_e1,
     }[args.what]()
 
