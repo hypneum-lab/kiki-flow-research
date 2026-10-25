@@ -28,6 +28,13 @@ right of the barrier are recorded for every step. A short multi-step
 trajectory compares the composite scheme with the exact JKO sequence at
 fixed final time.
 
+``--scheme jko_entropic`` runs the same check on the corrected step
+(``JKOStep(scheme="jko_entropic")``: entropic JKO step of F itself, log-domain
+generalised Sinkhorn on ``F.kl_prox_log``); ``--regs`` sets the Sinkhorn
+regularisations to sweep (floats, ``h`` for the prox default, ``h^2`` for a
+step-scaled regularisation). With that scheme ``n_inner`` and the gradient
+convention play no role, so only ``n_inner = 50`` / ``numerical`` are run.
+
 Deterministic (no random component). NumPy + SciPy + POT only (SciPy is a
 transitive dependency of the lock through scikit-learn); no MLX, no JAX.
 Outputs (new files): ``results/jko_step_check_2026_10_25/{results.json,
@@ -54,9 +61,10 @@ import scipy
 from scipy.linalg import expm
 from scipy.optimize import minimize
 
-from kiki_flow_core.master_equation import FreeEnergy, JKOStep
+from kiki_flow_core.master_equation import SCHEMES, FreeEnergy, JKOStep
 from kiki_flow_core.state import FlowState
 from kiki_flow_core.track2_paper.full_jko_solver import FullJKOSolver
+from kiki_flow_core.wasserstein_ops import KLProxLog
 
 try:  # optional conic cross-check of the exact reference (scratch venv only)
     import cvxpy as cp
@@ -79,8 +87,11 @@ GRID = 48
 X_MIN, X_MAX = -1.0, 1.0
 H_GRID = [0.4, 0.2, 0.1, 0.05, 0.025, 0.0125, 0.00625]
 N_INNER_GRID = [1, 10, 50]
-# Sinkhorn regularisation of the prox; None = the prox default (reg = h).
-REG_GRID: list[float | None] = [0.005, 0.01, 0.05, None]
+# Sinkhorn regularisation of the prox; None = the prox default (reg = h);
+# the string "h^2" = step-scaled regularisation gamma = h^2.
+RegSpec = float | str | None
+REG_GRID: list[RegSpec] = [0.005, 0.01, 0.05, None]
+FIX_REG_GRID: list[RegSpec] = [0.05, 0.01, 0.005, 0.002, 0.001, "h^2"]
 GRAD_MODES = ("numerical", "tangential", "raw")
 PROX_N_ITER = 1000  # FullJKOSolver default max_iter (forwarded since 2026-10-25)
 PAPER_H = 0.05
@@ -228,13 +239,22 @@ class PotentialEntropyF(FreeEnergy):
         safe = np.clip(rho, RHO_FLOOR, None)
         return self.potential + self.theta * (np.log(safe) + 1.0)
 
-    def kl_prox(self) -> KLProx:
-        """prox of tau * F in the KL geometry on R^n_+ (closed form)."""
+    def kl_prox_fn(self) -> KLProx:
+        """prox of tau * F in the KL geometry on R^n_+ (closed form, linear domain)."""
         potential, theta = self.potential, self.theta
 
         def prox(p: np.ndarray, tau: float) -> np.ndarray:
             logp = np.log(np.maximum(p, TINY))
             return np.exp((logp - tau * potential - tau * theta) / (1.0 + tau * theta))
+
+        return prox
+
+    def kl_prox_log(self, state: FlowState, species_name: str) -> KLProxLog:
+        """Same prox in log form, the interface of ``JKOStep(scheme="jko_entropic")``."""
+        potential, theta = self.potential, self.theta
+
+        def prox(log_p: np.ndarray, tau: float) -> np.ndarray:
+            return (log_p - tau * potential - tau * theta) / (1.0 + tau * theta)
 
         return prox
 
@@ -322,14 +342,18 @@ def kiki_step(
     *,
     rigorous: bool,
     reg: float | None = None,
+    scheme: str = "legacy_split",
 ) -> np.ndarray:
     """One ``JKOStep`` on rho_tau: fast path (no prox) or rigorous path.
 
     The rigorous path is ``FullJKOSolver`` with ``epsilon = reg`` forwarded as
     the Sinkhorn regularisation and ``max_iter = PROX_N_ITER``; ``reg = None``
     keeps the prox default (Sinkhorn reg = h) through plain ``JKOStep``.
+    ``scheme`` is forwarded as is (``legacy_split`` or ``jko_entropic``).
     """
     sup = x.reshape(-1, 1)
+    if scheme not in SCHEMES:
+        raise ValueError(f"scheme must be one of {SCHEMES}, got {scheme!r}")
     if not rigorous:
         jko: JKOStep = JKOStep(
             f_functional=f, h=h, support=sup, n_inner=n_inner, apply_w2_prox=False
@@ -342,6 +366,7 @@ def kiki_step(
             n_inner=n_inner,
             apply_w2_prox=True,
             prox_n_iter=PROX_N_ITER,
+            scheme=scheme,  # type: ignore[arg-type]
         )
     else:
         jko = FullJKOSolver(
@@ -351,6 +376,7 @@ def kiki_step(
             epsilon=reg,
             max_iter=PROX_N_ITER,
             n_inner=n_inner,
+            scheme=scheme,  # type: ignore[arg-type]
         )
     return jko.step(make_state(rho_tau)).rho[SPECIES]
 
@@ -612,13 +638,13 @@ def reference_record(
     x: np.ndarray,
     cost: np.ndarray,
     h: float,
-    regs: Sequence[float | None],
+    regs: Sequence[RegSpec],
     gen: np.ndarray,
 ) -> dict[str, Any]:
     rho_tau = spec.rho_tau
     rho_flow = fp_flow(gen, rho_tau, h)
     warm_fast = kiki_step(f, rho_tau, x, h, PAPER_N_INNER, rigorous=False)
-    warm_peyre, _ = jko_entropic(f.kl_prox(), rho_tau, cost, h, WARM_GAMMA)
+    warm_peyre, _ = jko_entropic(f.kl_prox_fn(), rho_tau, cost, h, WARM_GAMMA)
     t0 = time.perf_counter()
     exact = jko_exact(
         f.energy, f.first_variation, rho_tau, cost, h, warm_starts=[warm_peyre, warm_fast]
@@ -627,8 +653,9 @@ def reference_record(
     w2sq_disp = w2sq_exact(exact.rho, rho_tau, cost)
     peyre: dict[str, Any] = {}
     for reg in regs:
-        gamma = h if reg is None else reg
-        q, info = jko_entropic(f.kl_prox(), rho_tau, cost, h, gamma)
+        resolved = resolve_reg(reg, h)
+        gamma = h if resolved is None else resolved
+        q, info = jko_entropic(f.kl_prox_fn(), rho_tau, cost, h, gamma)
         peyre[reg_key(reg)] = {
             "gamma": gamma,
             "rho": q,
@@ -678,8 +705,36 @@ def reference_record(
     return record
 
 
-def reg_key(reg: float | None) -> str:
-    return "default(h)" if reg is None else f"{reg:g}"
+def reg_key(reg: RegSpec) -> str:
+    if reg is None:
+        return "default(h)"
+    if isinstance(reg, str):
+        return reg
+    return f"{reg:g}"
+
+
+def resolve_reg(reg: RegSpec, h: float) -> float | None:
+    """Sinkhorn regularisation to hand to the solver: None keeps the prox default (h)."""
+    if reg is None or isinstance(reg, float | int):
+        return reg
+    if reg == "h^2":
+        return h * h
+    if reg == "h":
+        return None
+    raise ValueError(f"unknown reg spec {reg!r}")
+
+
+def parse_regs(text: str) -> list[RegSpec]:
+    out: list[RegSpec] = []
+    for raw in text.split(","):
+        token = raw.strip()
+        if token in {"h", "default", "default(h)"}:
+            out.append(None)
+        elif token == "h^2":
+            out.append(token)
+        else:
+            out.append(float(token))
+    return out
 
 
 def run_case(
@@ -689,8 +744,9 @@ def run_case(
     *,
     h_grid: Sequence[float],
     n_inner_grid: Sequence[int],
-    reg_grid: Sequence[float | None],
+    reg_grid: Sequence[RegSpec],
     grad_modes: Sequence[str],
+    scheme: str = "legacy_split",
     verbose: bool = True,
 ) -> dict[str, Any]:
     f_ref = PotentialEntropyF(spec, "numerical")
@@ -739,7 +795,16 @@ def run_case(
                     }
                 )
                 for reg in reg_grid:
-                    rig = kiki_step(f, spec.rho_tau, x, h, n_inner, rigorous=True, reg=reg)
+                    rig = kiki_step(
+                        f,
+                        spec.rho_tau,
+                        x,
+                        h,
+                        n_inner,
+                        rigorous=True,
+                        reg=resolve_reg(reg, h),
+                        scheme=scheme,
+                    )
                     steps.append(
                         {
                             **base,
@@ -767,6 +832,7 @@ def run_case(
         "name": spec.name,
         "label": spec.label,
         "description": spec.description,
+        "scheme": scheme,
         "theta": spec.theta,
         "potential": spec.potential,
         "rho_tau": spec.rho_tau,
@@ -776,16 +842,23 @@ def run_case(
 
 
 def run_trajectory(
-    spec: EnergySpec, x: np.ndarray, cost: np.ndarray, h: float, t_final: float
+    spec: EnergySpec,
+    x: np.ndarray,
+    cost: np.ndarray,
+    h: float,
+    t_final: float,
+    scheme: str = "legacy_split",
 ) -> dict[str, Any]:
-    """Composite scheme vs exact JKO sequence vs fast path, same h, up to t_final."""
+    """Step under test vs exact JKO sequence vs fast path, same h, up to t_final."""
     n_steps = int(round(t_final / h))
     f = PotentialEntropyF(spec, "numerical")
     gen = fp_generator(spec, x)
     rho_rig = rho_fast = rho_jko = rho_flow = spec.rho_tau
     rows = []
     for k in range(1, n_steps + 1):
-        rho_rig = kiki_step(f, rho_rig, x, h, PAPER_N_INNER, rigorous=True, reg=PAPER_REG)
+        rho_rig = kiki_step(
+            f, rho_rig, x, h, PAPER_N_INNER, rigorous=True, reg=PAPER_REG, scheme=scheme
+        )
         rho_fast = kiki_step(f, rho_fast, x, h, PAPER_N_INNER, rigorous=False)
         ref = jko_exact(f.energy, f.first_variation, rho_jko, cost, h, warm_starts=[rho_jko])
         rho_jko = ref.rho
@@ -817,6 +890,7 @@ def run_trajectory(
         "n_steps": n_steps,
         "n_inner": PAPER_N_INNER,
         "reg": PAPER_REG,
+        "scheme": scheme,
         "rows": rows,
         "final": {"rigorous": rho_rig, "fast": rho_fast, "jko": rho_jko, "flow": rho_flow},
     }
@@ -950,7 +1024,7 @@ def _flow_table(case: dict[str, Any]) -> list[str]:
     return lines
 
 
-def _config_table(case: dict[str, Any], h: float, reg_grid: Sequence[float | None]) -> list[str]:
+def _config_table(case: dict[str, Any], h: float, reg_grid: Sequence[RegSpec]) -> list[str]:
     header = "| n_inner | fast | " + " | ".join(f"reg = {reg_key(r)}" for r in reg_grid) + " |"
     lines = [header, "|---|---|" + "---|" * len(reg_grid)]
     n_inners = sorted({s["n_inner"] for s in case["steps"]})
@@ -1016,7 +1090,8 @@ def write_summary(results: dict[str, Any], path: Path) -> None:
         f"{meta['timestamp_utc']}, {results['runtime_seconds']:.0f} s.",
         "",
         f"Support: {params['grid']} points on [{X_MIN:g}, {X_MAX:g}], cost |x - y|^2. "
-        f"Prox Dykstra iterations {params['prox_n_iter']}. `rig` = `FullJKOSolver` "
+        f"Prox Dykstra iterations {params['prox_n_iter']}. Scheme under test: "
+        f"`{params.get('scheme', 'legacy_split')}`. `rig` = `FullJKOSolver` "
         f"(n_inner = {PAPER_N_INNER}, Sinkhorn reg = {PAPER_REG}, base-class numerical "
         "gradient as `T2FreeEnergy`), `fast` = `JKOStep` without prox, `JKO` = exact "
         "minimiser of F + W2^2(., rho_tau)/(2h) (cutting planes, exact LP W2), `Peyre` = "
@@ -1079,7 +1154,7 @@ def make_figure(results: dict[str, Any], png: Path, pdf: Path) -> None:
     fig, axes = plt.subplots(len(cases), 3, figsize=(13.5, 3.6 * len(cases)))
     axes = np.atleast_2d(axes)
     for row, case in enumerate(cases):
-        _plot_error_panel(axes[row, 0], case)
+        _plot_error_panel(axes[row, 0], case, results["params"])
         _plot_dissipation_panel(axes[row, 1], case)
         _plot_density_panel(axes[row, 2], case, results["params"])
         axes[row, 0].set_ylabel(f"{case['label']}\nW2(step, JKO) / W2(rho_tau, JKO)")
@@ -1104,28 +1179,53 @@ def _series(case: dict[str, Any], key: str, **where: Any) -> tuple[np.ndarray, n
     return np.array([r["h"] for r in rows]), np.array([r[key] for r in rows])
 
 
-def _plot_error_panel(ax: Any, case: dict[str, Any]) -> None:
-    styles = {1: ":", 10: "--", 50: "-"}
-    for n_inner, ls in styles.items():
-        hs, ys = _series(
-            case,
-            "rel_w2_vs_jko",
-            path="rigorous",
-            reg=PAPER_REG,
-            n_inner=n_inner,
-            grad_mode="numerical",
-        )
-        if hs.size:
-            ax.plot(
-                hs,
-                ys,
-                ls,
-                color=COLOR_RIGOROUS,
-                lw=1.6,
-                marker="o",
-                ms=4,
-                label=f"rigorous, n_inner={n_inner}",
+def _plot_error_panel(ax: Any, case: dict[str, Any], params: dict[str, Any]) -> None:
+    if params.get("scheme", "legacy_split") == "jko_entropic":
+        regs = [r for r in params["reg_grid"] if r is not None]
+        shades = np.linspace(0.35, 1.0, max(len(regs), 1))
+        for reg, shade in zip(regs, shades, strict=True):
+            hs, ys = _series(
+                case,
+                "rel_w2_vs_jko",
+                path="rigorous",
+                reg=reg,
+                n_inner=PAPER_N_INNER,
+                grad_mode="numerical",
             )
+            if hs.size:
+                ax.plot(
+                    hs,
+                    ys,
+                    "-",
+                    color=COLOR_RIGOROUS,
+                    alpha=float(shade),
+                    lw=1.6,
+                    marker="o",
+                    ms=4,
+                    label=f"jko_entropic, reg={reg_key(reg)}",
+                )
+    else:
+        styles = {1: ":", 10: "--", 50: "-"}
+        for n_inner, ls in styles.items():
+            hs, ys = _series(
+                case,
+                "rel_w2_vs_jko",
+                path="rigorous",
+                reg=PAPER_REG,
+                n_inner=n_inner,
+                grad_mode="numerical",
+            )
+            if hs.size:
+                ax.plot(
+                    hs,
+                    ys,
+                    ls,
+                    color=COLOR_RIGOROUS,
+                    lw=1.6,
+                    marker="o",
+                    ms=4,
+                    label=f"rigorous, n_inner={n_inner}",
+                )
     hs, ys = _series(
         case, "rel_w2_vs_jko", path="fast", n_inner=PAPER_N_INNER, grad_mode="numerical"
     )
@@ -1262,6 +1362,19 @@ def parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
     parser.add_argument("--no-figure", action="store_true")
     parser.add_argument("--quiet", action="store_true")
     parser.add_argument(
+        "--scheme",
+        choices=list(SCHEMES),
+        default="legacy_split",
+        help="JKOStep scheme under test (legacy_split = historical rigorous path)",
+    )
+    parser.add_argument(
+        "--regs",
+        type=str,
+        default=None,
+        help="comma-separated Sinkhorn regularisations: floats, h, h^2 "
+        "(default: the legacy grid, or FIX_REG_GRID with --scheme jko_entropic)",
+    )
+    parser.add_argument(
         "--from-json",
         type=Path,
         default=None,
@@ -1286,10 +1399,16 @@ def main(argv: Sequence[str] | None = None) -> dict[str, Any]:
         render(results, args.out_dir, figure=not args.no_figure)
         return results
     t_start = time.perf_counter()
+    entropic = args.scheme == "jko_entropic"
     h_grid = QUICK_H if args.quick else H_GRID
-    n_inner_grid = QUICK_N_INNER if args.quick else N_INNER_GRID
-    reg_grid = QUICK_REG if args.quick else REG_GRID
-    grad_modes = ("numerical",) if args.quick else GRAD_MODES
+    n_inner_grid = [PAPER_N_INNER] if entropic else (QUICK_N_INNER if args.quick else N_INNER_GRID)
+    if args.regs is not None:
+        reg_grid = parse_regs(args.regs)
+    elif entropic:
+        reg_grid = QUICK_REG if args.quick else FIX_REG_GRID
+    else:
+        reg_grid = QUICK_REG if args.quick else REG_GRID
+    grad_modes = ("numerical",) if (args.quick or entropic) else GRAD_MODES
     traj_h = QUICK_TRAJ_H if args.quick else TRAJ_H
     traj_t = QUICK_TRAJ_T if args.quick else TRAJ_T
     x = support()
@@ -1309,6 +1428,7 @@ def main(argv: Sequence[str] | None = None) -> dict[str, Any]:
             "trajectory_h": list(traj_h),
             "trajectory_t": traj_t,
             "quick": args.quick,
+            "scheme": args.scheme,
         },
         "cases": {},
         "trajectories": {},
@@ -1322,11 +1442,12 @@ def main(argv: Sequence[str] | None = None) -> dict[str, Any]:
             n_inner_grid=n_inner_grid,
             reg_grid=reg_grid,
             grad_modes=grad_modes,
+            scheme=args.scheme,
             verbose=not args.quiet,
         )
         if not args.skip_trajectory:
             results["trajectories"][spec.name] = [
-                run_trajectory(spec, x, cost, h, traj_t) for h in traj_h
+                run_trajectory(spec, x, cost, h, traj_t, scheme=args.scheme) for h in traj_h
             ]
             if not args.quiet:
                 for tr in results["trajectories"][spec.name]:

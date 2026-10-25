@@ -41,6 +41,7 @@ SMALL_H_TV_TOL = 2e-2
 ANCHOR_H = 0.02
 ANCHOR_GAMMA = 0.005
 FLOW_T = 0.05
+PEYRE_MATCH_TOL = 1e-6
 
 
 def _load() -> object:
@@ -195,6 +196,30 @@ def test_fp_generator_conserves_mass_and_fixes_gibbs() -> None:
     dx = x[1] - x[0]
     np.testing.assert_allclose(gen, gen.T, atol=1e-12)
     np.testing.assert_allclose(gen[0, 1], ent.theta / dx**2)
+
+
+def test_kiki_step_scheme_flag_and_reg_specs() -> None:
+    mod = _load()
+    x = mod.support(GRID)
+    spec = mod.energies(x)[0]
+    f = mod.PotentialEntropyF(spec)
+    legacy = mod.kiki_step(f, spec.rho_tau, x, H, N_INNER, rigorous=True, reg=REG)
+    fixed = mod.kiki_step(
+        f, spec.rho_tau, x, H, N_INNER, rigorous=True, reg=REG, scheme="jko_entropic"
+    )
+    assert not np.allclose(legacy, fixed)
+    # The entropic step equals the script's own Peyre reference (same problem).
+    cost = mod.cost_matrix(x)
+    peyre, _ = mod.jko_entropic(f.kl_prox_fn(), spec.rho_tau, cost, H, REG)
+    assert mod.tv(fixed, peyre) < PEYRE_MATCH_TOL
+    with pytest.raises(ValueError, match="scheme"):
+        mod.kiki_step(f, spec.rho_tau, x, H, N_INNER, rigorous=True, reg=REG, scheme="bogus")
+    assert mod.parse_regs("0.05, h, h^2") == [0.05, None, "h^2"]
+    assert mod.resolve_reg("h^2", H) == H * H
+    assert mod.resolve_reg(None, H) is None
+    assert mod.resolve_reg(0.02, H) == 0.02  # noqa: PLR2004
+    assert mod.reg_key("h^2") == "h^2"
+    assert mod.reg_key(None) == "default(h)"
 
 
 def test_outputs_are_new_files_under_results() -> None:

@@ -11,7 +11,7 @@ from kiki_flow_core.modules import AdvectionDiffusion, PhonologicalLoop, Scaffol
 from kiki_flow_core.species import CanonicalSpecies, MixedCanonicalSpecies, SpeciesBase
 from kiki_flow_core.state import FlowState, InvariantViolationError, assert_invariants
 from kiki_flow_core.telemetry import Metrics, StructuredLogger
-from kiki_flow_core.wasserstein_ops import prox_w2, sinkhorn_cost, w2_distance
+from kiki_flow_core.wasserstein_ops import jko_entropic_prox, prox_w2, sinkhorn_cost, w2_distance
 
 __version__ = "0.0.1"
 __all__ = [
@@ -33,6 +33,7 @@ __all__ = [
     "StructuredLogger",
     "ZeroF",
     "assert_invariants",
+    "jko_entropic_prox",
     "prox_w2",
     "sinkhorn_cost",
     "w2_distance",

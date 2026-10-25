@@ -9,7 +9,7 @@ from typing import Any, Literal
 import numpy as np
 from safetensors.numpy import save_file
 
-from kiki_flow_core.master_equation import JKOStep
+from kiki_flow_core.master_equation import JKOStep, Scheme
 from kiki_flow_core.species import CanonicalSpecies
 from kiki_flow_core.state import FlowState
 from kiki_flow_core.track2_paper.figures.continual_learning_gap import (
@@ -79,6 +79,8 @@ def run_paper(
     sinkhorn_backend: SinkhornBackend = "pot",
     save_trajectories: bool = False,
     make_all_figures: bool = False,
+    scheme: Scheme = "legacy_split",
+    reinject: bool = False,
 ) -> dict[str, Any]:
     """Run N seeds of the T2 multiscale loop, producing figures and stats.
 
@@ -96,6 +98,14 @@ def run_paper(
         Produce fig1-5 using the first seed's trajectory (requires
         save_trajectories implicitly). fig4/fig5 use synthetic input
         unless a real KL-sweep or CL benchmark is plumbed in.
+    scheme : "legacy_split" (default) or "jko_entropic"
+        Slow-step scheme (``JKOStep``). The default is the historical split
+        (Euclidean descent, then the KL prox when ``use_w2_prox``); the
+        entropic JKO step of F is opt-in.
+    reinject : bool (default False)
+        Feed the JKO output back into the particles after each slow step
+        (``MultiscaleLoop(reinject=True)``). Off by default: the historical
+        runs never reinjected.
     """
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -109,12 +119,21 @@ def run_paper(
     if use_w2_prox:
         if sinkhorn_backend == "mlx":
             jko: JKOStep = MLXFullJKOSolver(
-                f_functional=f_func, h=0.05, support=support, epsilon=0.01
+                f_functional=f_func, h=0.05, support=support, epsilon=0.01, scheme=scheme
             )
         else:
-            jko = FullJKOSolver(f_functional=f_func, h=0.05, support=support, epsilon=0.01)
+            jko = FullJKOSolver(
+                f_functional=f_func, h=0.05, support=support, epsilon=0.01, scheme=scheme
+            )
     else:
-        jko = JKOStep(f_functional=f_func, h=0.05, support=support, n_inner=10, apply_w2_prox=False)
+        jko = JKOStep(
+            f_functional=f_func,
+            h=0.05,
+            support=support,
+            n_inner=10,
+            apply_w2_prox=False,
+            scheme=scheme,
+        )
 
     per_seed: list[dict[str, Any]] = []
     trajectories: list[list[FlowState]] = []
@@ -127,7 +146,14 @@ def run_paper(
             sim = ParticleSimulator(
                 species=species, n_particles=n_particles, latent_dim=2, seed=seed
             )
-        loop = MultiscaleLoop(sim=sim, jko=jko, n_fast=n_fast, n_slow=n_slow, support=support)
+        loop = MultiscaleLoop(
+            sim=sim,
+            jko=jko,
+            n_fast=n_fast,
+            n_slow=n_slow,
+            support=support,
+            reinject=reinject,
+        )
         manifest = loop.run(seed=seed)
         make_phase_portrait(
             manifest["trajectory"],

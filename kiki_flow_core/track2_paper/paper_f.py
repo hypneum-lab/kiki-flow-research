@@ -7,6 +7,10 @@ import numpy as np
 from kiki_flow_core.master_equation import FreeEnergy
 from kiki_flow_core.species import CanonicalSpecies
 from kiki_flow_core.state import FlowState
+from kiki_flow_core.wasserstein_ops import KLProxLog
+
+RHO_FLOOR = 1e-12
+TURING_FD_EPS = 1e-4
 
 
 class T2FreeEnergy(FreeEnergy):
@@ -61,6 +65,57 @@ class T2FreeEnergy(FreeEnergy):
             total += self.turing_strength * turing
 
         return total
+
+    def _turing_value(self, rhos: list[np.ndarray]) -> float:
+        turing = 0.0
+        for i, ri in enumerate(rhos):
+            for k in range(i + 1, len(rhos)):
+                turing += float(np.sum(np.abs(np.gradient(ri) * np.gradient(rhos[k]))))
+        return self.turing_strength * turing
+
+    def nonseparable_grad(self, state: FlowState, species_name: str) -> np.ndarray:
+        """Gradient w.r.t. rho[species_name] of the terms of F without a closed-form prox.
+
+        Coupling: d/d rho_i of sum_{i,k} J_sym[i,k] <rho_i, rho_k> = 2 (J_sym rho)_i.
+        Turing term: finite difference (it is not smooth), zero if its strength is 0.
+        Evaluated at ``state`` (the other species frozen there); used by
+        ``kl_prox_log`` to linearise these terms into an effective potential.
+        """
+        names = self.species.species_names()
+        idx = names.index(species_name)
+        rhos = [state.rho[n] for n in names]
+        grad: np.ndarray = 2.0 * np.asarray(self._grad_conservative(rhos)[idx], dtype=float)
+        if self.turing_strength > 0.0:
+            base = self._turing_value(rhos)
+            rho = rhos[idx]
+            fd = np.zeros_like(rho)
+            for i in range(rho.size):
+                perturbed = rho.copy()
+                perturbed[i] += TURING_FD_EPS
+                fd[i] = (self._turing_value(rhos[:idx] + [perturbed] + rhos[idx + 1 :]) - base) / (
+                    TURING_FD_EPS
+                )
+            grad = grad + fd
+        return np.asarray(grad, dtype=float)
+
+    def kl_prox_log(self, state: FlowState, species_name: str) -> KLProxLog:
+        """Closed-form KL-prox of <V, q> + KL(q || prior), couplings linearised.
+
+        argmin_q KL(q || p) + tau [<V_eff, q> + KL(q || prior)] has
+        log q = (log p + tau log prior - tau V_eff) / (1 + tau) up to a constant,
+        with V_eff = V + ``nonseparable_grad`` at ``state`` (J_sym coupling and
+        Turing term frozen at rho_tau: semi-implicit, first order in h like the
+        JKO step itself). The entropic part is treated exactly (implicit), so
+        the diffusion carries no stability constraint on h.
+        """
+        log_prior = np.log(np.clip(self.prior[species_name], RHO_FLOOR, None))
+        v_eff = self.potentials[species_name] + self.nonseparable_grad(state, species_name)
+
+        def prox(log_p: np.ndarray, tau: float) -> np.ndarray:
+            out: np.ndarray = (log_p + tau * log_prior - tau * v_eff) / (1.0 + tau)
+            return out
+
+        return prox
 
     def _grad_conservative(self, rhos: list[np.ndarray]) -> list[np.ndarray]:
         """Per-species conservative coupling drive: (J_sym @ rho)_i.

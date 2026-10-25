@@ -481,3 +481,89 @@ Note (merge with §10): this sweep ran before the `max_iter` fix, i.e.
 with 100 Dykstra iterations instead of 1000. §10 bounds that effect at
 ≤ 8.6e-6 bits on the rigorous gap, far below the differences reported
 here, so the sweep was not rerun.
+
+## 12. The "rigorous path" is not a JKO step of F (2026-10-25)
+
+**Status: validated by the PI (2026-10-25).** Reformulates the
+wording of §8–11; removes no number.
+
+Finding (note `docs/notes/2026-10-25-jko-step-identification.md`,
+driver `experiments/jko_step_check_2026_10_25.py`, results
+`results/jko_step_check_2026_10_25/`, PR #40): the step of
+`kiki_flow_core/master_equation.py` as run by `FullJKOSolver` — the
+"rigorous path" of §7–11 and of the paper — is not the JKO step
+`argmin_rho F(rho) + W2^2(rho, rho_tau)/(2h)`. It is (A) an explicit
+Euler integration over time h, in `n_inner` sub-steps, of the
+*Euclidean* gradient flow of F on the simplex (pointwise relaxation, no
+transport), followed by (B) `prox_w2`, which is Peyré's (2015) entropic
+JKO step of `KL(. || d)` anchored on rho_tau, d being the output of (A)
+— a correct entropic JKO step, of the wrong functional. (B) coincides
+with the entropic JKO step of F only when F = KL(. || pi), theta = 1 and
+d = pi (observed numerically for the entropy alone at h = 0.4, W2 =
+1e-6), never along a trajectory. On a 48-point support the rigorous
+step is 60 % (quadratic potential + entropy), 64 % (double well +
+entropy) and 14 % (entropy alone) of the JKO displacement away from the
+exact JKO minimiser at h = 0.05, and the error grows as h shrinks (the
+step freezes relative to the flow); the fast path (no prox) is farther
+from the JKO minimiser than rho_tau itself for h <= 0.1 and violates the
+dissipation inequality. In addition, `MultiscaleLoop.run` never fed the
+JKO output back into the particles, so the recorded slow dynamics is one
+step applied to the histogram of a free Langevin diffusion, not an
+iteration of the step.
+
+Wording to amend. Wherever §8–11 (and `paper/main.tex`) say "the JKO
+step with the W2 prox", "rigorous JKO path" or "Wasserstein proximal
+step", read: "the legacy split scheme — a projected Euclidean descent of
+F followed by the entropic KL prox anchored on rho_tau — which is not a
+JKO step of F". §9–11 remain correct as statements about the Sinkhorn
+regularisation of phase (B); they say nothing about which problem (B)
+solves.
+
+Scope. Every result labelled "rigorous" in this file and in the paper
+was produced by that scheme and is to be requalified as such, not
+withdrawn: the paper-scale KL(rigorous || fast) of 0.272 ± 0.014 nats
+(§9–10), the rigorous specialisation gaps (1.44 ± 0.05 bits at
+(15, 0.2, 0), 1.46 after the ε fix, 1.35–1.39 best of the 72-point grid,
+1.28 at (10, 1, 0); §7–9), the ε-sweep of §11 (gap spans 0.04 bits
+across ε) and the Fig. 1 / Fig. 4 curves. They measure the legacy split
+scheme against the fast path, and the sensitivity of that scheme to its
+Sinkhorn regularisation; they do not measure a Wasserstein gradient
+flow of F. The "55 × slower" rigorous path of the paper spends its time
+in phase (A)'s `n_inner × N` finite-difference evaluations, not in the
+prox.
+
+Fix (this PR, opt-in, defaults unchanged): `JKOStep(scheme=
+"jko_entropic")` — the entropic JKO step of F itself, by the log-domain
+generalised Sinkhorn iteration on `FreeEnergy.kl_prox_log`
+(`wasserstein_ops.jko_entropic_prox`; closed form for
+`<V, rho> + KL(rho || prior)` in `T2FreeEnergy`, J_sym coupling and
+Turing term linearised at rho_tau), and `MultiscaleLoop(reinject=True)`.
+`scheme="legacy_split"` (default) reproduces the historical results
+bit for bit. Validation: `experiments/jko_step_check_2026_10_25.py
+--scheme jko_entropic` → `results/jko_step_fix_2026_10_25/` (697 s,
+electron-server). Relative W2 error to the exact JKO minimiser
+(quadratic / double well / entropy):
+
+| h | legacy split, reg 0.01 | jko_entropic, reg 0.01 | jko_entropic, reg h² |
+|---|---|---|---|
+| 0.4 | 0.26 / 0.40 / 0.04 | 0.02 / 0.17 / 0.04 | 0.16 / 1.25 / 0.09 |
+| 0.1 | 0.48 / 0.54 / 0.06 | 0.09 / 0.33 / 0.06 | 0.09 / 0.33 / 0.06 |
+| 0.05 | 0.60 / 0.64 / 0.14 | 0.19 / 0.50 / 0.08 | 0.16 / 0.30 / 0.05 |
+| 0.025 | 0.70 / 0.75 / 0.27 | 0.25 / 0.70 / 0.15 | 0.08 / 0.32 / 0.09 |
+| 0.0125 | 0.89 / 0.86 / 0.40 | 0.55 / 0.91 / 0.25 | 0.01 / 0.30 / 0.06 |
+| 0.00625 | 0.94 / 1.25 / 0.49 | 0.73 / 1.47 / 0.47 | 0.20 / 0.11 / 0.05 |
+
+At fixed reg the remaining error is the entropic bias, O(reg) against an
+O(h) displacement, so it grows as h shrinks; with reg = h² it decreases
+with h (quadratic: down to the grid pinning of the exact reference,
+h ≤ 0.0125). Dissipation inequality: no violation with reg = h²
+(fixed reg ≥ 0.01: 9 / 126 violations, all at h ≤ 0.0125 or reg = 0.05).
+No mass teleportation (quadratic, h = 0.05: 0.26 % right of the
+barrier, exact JKO 0.09 %, legacy 4.2 %; double well: 0.3000 kept).
+Cost on the paper setup (4 species, grid 64, ε = 0.01, one CPU thread):
+9.1 s per slow step (legacy split, max_iter 1000) against 1.7 s
+(jko_entropic, 1000 iterations) and 0.5 s (200 iterations). Decisions
+left to the PI: switch the default scheme (and reinjection) and the
+regularisation rule (reg = h² or a fixed small reg), rerun the rigorous
+specialisation sweep and the paper-scale run under the new scheme, and
+only then revisit NH-60.
