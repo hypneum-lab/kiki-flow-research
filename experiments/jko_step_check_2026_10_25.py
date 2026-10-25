@@ -1208,7 +1208,7 @@ def _plot_dissipation_panel(ax: Any, case: dict[str, Any]) -> None:
     ax.set_xscale("log")
     ax.set_yscale("symlog", linthresh=1e-4)
     ax.set_xlabel("h")
-    ax.set_ylabel("F(rho_1) + W2^2/(2h) - F(rho_0)  (<= 0 required)")
+    ax.set_ylabel("dissipation defect (<= 0 required)")
     ax.legend(fontsize=7, frameon=False)
 
 
