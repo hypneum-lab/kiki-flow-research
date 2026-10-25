@@ -30,7 +30,7 @@ quantitative results over five seeds.
 | Track | Purpose | Performance | Status |
 |---|---|---|---|
 | `track1_perf` | Nightly offline consolidation over the LoRA stack tensor (40 hybrid species). | ~30 min on Studio M3 Ultra (host powered down since 2026-10 ; not re-run since). | tag `track1-v0.1` |
-| `track2_paper` | N-particle Langevin × JKO entropic-regularized proxy for paper figures (4 Levelt-Baddeley species). | 2 min 31 s fast / 84 min rigorous on GrosMac M5. | tag `track2-v0.1` |
+| `track2_paper` | N-particle Langevin × JKO entropic-regularized proxy for paper figures (4 Levelt-Baddeley species). | 2 min 31 s fast (GrosMac M5, GPU) / 12 min 42 s rigorous with the corrected prox (M1 Max, CPU; the old 84 min timed the defective prox, see `ERRATUM.md`). | tag `track2-v0.1` |
 | `track3_deploy` | Pure-NumPy streaming surrogate, MiniLM query encoder, advisory-only routing. | p50 = 0.04 ms on GrosMac M5. | tag `track3-v0.1` |
 
 T1 runs are gated by `DriftTrigger`: it fires when the new-concept rate in
@@ -45,8 +45,8 @@ flag; `threshold_off=None` restores the old memoryless trigger. Details in
 `scripts/drift_trigger_sweep.py`.
 
 All three tracks share `kiki_flow_core/` (state, master equation,
-Wasserstein ops, species, modules, hooks, telemetry). 93 tests, 95 %
-coverage, strict ruff + mypy.
+Wasserstein ops, species, modules, hooks, telemetry). 230+ tests
+(`uv run pytest`, golden NPZ regressions), strict ruff + mypy.
 
 ## Install
 
@@ -59,6 +59,24 @@ uv run pre-commit install
 
 Tested on macOS 26.3 (arm64) with Python 3.14, MLX 0.31, JAX 0.10,
 POT 0.9. Other platforms may work but have not been validated.
+
+## Reproduce in one command
+
+```bash
+git clone https://github.com/hypneum-lab/kiki-flow-research.git && cd kiki-flow-research
+uv sync --locked --all-extras   # Linux x86_64 only: then `uv pip install mlx-cpu==0.31.1` (the lock ships the Metal backend only)
+PYTHONPATH=. uv run python -c "from pathlib import Path; from kiki_flow_core.track2_paper.paper_run import run_paper; \
+  run_paper(seeds=[0,1,2,3,4], out_dir=Path('paper_repro'), make_all_figures=True)"   # CPU-only pilot: seeds=[0], use_mlx=False
+```
+
+`out_dir='paper_repro'` keeps the committed `paper/` artefacts intact (writing to `paper/` overwrites `stats.json`, `figures/` and `trajectories/`).
+Expected output: `paper_repro/stats.json` with `"n_seeds": 5`, every `per_seed[*].n_slow_completed == 100` and
+`aggregate.<species>.entropy_bits_mean ≈ 5.99998` (flat potentials, near-maximal 6-bit entropy);
+`paper_repro/figures/fig1_phase_seed{0..4}`, `fig2_f_decay`, `fig3_turing` (+ `fig4`/`fig5` placeholders);
+`paper_repro/trajectories/seed{0..4}.safetensors` (MLX `seed0` sha256 `5a08487f…3493b`, same as the committed `paper/trajectories/seed0.safetensors`).
+Duration: 2 min 31 s (GrosMac M5, GPU) or 3 min 37 s (M1 Max, MLX on CPU) for 5 seeds; Linux x86-64 CPU with the
+NumPy simulator: ~6 min per seed (5 min 57 s measured for `seeds=[0]` on a Xeon X5680), bit-identical across runs.
+Full reproduction (ε-sweep, CL benchmarks, dense sweep, fast-vs-rigorous KL): see "Reproduce the paper" below and `.github/workflows/reproducibility.yml`; rigorous path (`use_w2_prox=True`): 12 min 42 s on M1 Max (`PERFORMANCE.md`).
 
 ## Reproduce the paper
 
@@ -188,12 +206,13 @@ kiki-flow-research/
 │   ├── track1_perf/                # Eulerian grid + offline consolidator
 │   ├── track2_paper/               # Particles + JKO + figures
 │   └── track3_deploy/              # Pure-numpy surrogate + streaming runner
-├── tests/                          # 93 tests, 95 % coverage
+├── tests/                          # 230+ tests, golden NPZ regressions
 ├── scripts/                        # Reproducibility scripts
 │   └── cl_llm_bench/               # Real-LLM CL: stub / preflight / real modes
 │       └── kxkm_trainer/           # Standalone 4-bit QLoRA trainer (runs on kxkm-ai)
 ├── paper/                          # main.tex, main.pdf, figures, JSON stats
-├── paper_rigorous/                 # 84-min rigorous run artifacts
+├── paper_rigorous/                 # historical 84-min rigorous run (defective prox, see ERRATUM.md)
+├── paper_rigorous_fixedprox/       # corrected rigorous run, 12 min 42 s on M1 Max
 ├── bench/                          # SLO latency records
 │   └── cl_llm/runs/                # Per-seed real-CL manifests + summary
 └── docs/superpowers/               # Specs, plans, integration, patches
