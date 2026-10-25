@@ -34,7 +34,7 @@ abstractions require a discussion first (open an issue).
 ## Development workflow
 
 ```bash
-git clone https://github.com/electron-rare/kiki-flow-research.git
+git clone https://github.com/hypneum-lab/kiki-flow-research.git
 cd kiki-flow-research
 uv sync --all-extras
 uv run pre-commit install
@@ -62,7 +62,7 @@ gh pr create
 - A clean integration of the surrogate into an actual micro-kiki
   inference pathway (the four integration dependencies are tracked in
   `docs/superpowers/integration-notes.md`).
-- Any reviewer feedback on the paper draft at tag `paper-v0.4-draft`.
+- Any reviewer feedback on the paper draft at tag `paper-v0.13-draft`.
 
 ## What we are not looking for
 

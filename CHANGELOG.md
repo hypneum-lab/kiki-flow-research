@@ -16,7 +16,7 @@ All notable releases of `kiki-flow-research`. Dates in YYYY-MM-DD.
 ### Changed
 - Documentation aligned with the repository state (issues #28, #33):
   latest tag `paper-v0.13-draft`; test count and coverage quoted as
-  measured by CI (326 collected, 87 % on 2026-10-25) instead of a fixed
+  measured by CI (333 collected, 87 % on 2026-10-25) instead of a fixed
   "93 tests, 95 %"; rigorous-path timings from the corrected reruns
   (the 84 min timed the defective prox); single-author byline in
   `CITATION.cff`, `CONTRIBUTORS.md`, `pyproject.toml`; Zenodo DOIs
