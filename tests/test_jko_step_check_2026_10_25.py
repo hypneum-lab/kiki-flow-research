@@ -40,6 +40,7 @@ SMALL_H = 1e-5
 SMALL_H_TV_TOL = 2e-2
 ANCHOR_H = 0.02
 ANCHOR_GAMMA = 0.005
+FLOW_T = 0.05
 
 
 def _load() -> object:
@@ -175,6 +176,25 @@ def test_exact_jko_reference_is_certified_and_dissipative() -> None:
     assert mod.tv(far.rho, gibbs) < LARGE_H_TV_TOL
     near = mod.jko_exact(f.energy, f.first_variation, spec.rho_tau, cost, SMALL_H)
     assert mod.tv(near.rho, spec.rho_tau) < SMALL_H_TV_TOL
+
+
+def test_fp_generator_conserves_mass_and_fixes_gibbs() -> None:
+    mod = _load()
+    x = mod.support(GRID)
+    for spec in mod.energies(x):
+        gen = mod.fp_generator(spec, x)
+        np.testing.assert_allclose(gen.sum(axis=0), 0.0, atol=1e-9)
+        gibbs = mod.simplex(np.exp(-spec.potential / spec.theta))
+        np.testing.assert_allclose(gen @ gibbs, 0.0, atol=1e-9)
+        flowed = mod.fp_flow(gen, spec.rho_tau, FLOW_T)
+        assert abs(flowed.sum() - 1.0) < SIMPLEX_TOL
+        assert flowed.min() > 0.0
+    # V = 0: symmetric diffusion with coefficient theta / dx^2.
+    ent = mod.energies(x)[2]
+    gen = mod.fp_generator(ent, x)
+    dx = x[1] - x[0]
+    np.testing.assert_allclose(gen, gen.T, atol=1e-12)
+    np.testing.assert_allclose(gen[0, 1], ent.theta / dx**2)
 
 
 def test_outputs_are_new_files_under_results() -> None:

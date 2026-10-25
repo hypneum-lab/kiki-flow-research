@@ -51,6 +51,7 @@ from typing import Any
 import numpy as np
 import ot
 import scipy
+from scipy.linalg import expm
 from scipy.optimize import minimize
 
 from kiki_flow_core.master_equation import FreeEnergy, JKOStep
@@ -73,6 +74,7 @@ except ImportError:  # pragma: no cover
 SPECIES = "rho"
 RHO_FLOOR = 1e-12
 TINY = 1e-300
+BERNOULLI_LINEAR_TOL = 1e-12  # below this |z|, z / (e^z - 1) is taken as 1
 GRID = 48
 X_MIN, X_MAX = -1.0, 1.0
 H_GRID = [0.4, 0.2, 0.1, 0.05, 0.025, 0.0125, 0.00625]
@@ -258,6 +260,42 @@ def kl_prox_to_target(target: np.ndarray) -> KLProx:
         return np.maximum(p, TINY) ** lam * safe_target ** (1.0 - lam)
 
     return prox
+
+
+def _bernoulli(z: np.ndarray) -> np.ndarray:
+    out = np.ones_like(z)
+    nz = np.abs(z) > BERNOULLI_LINEAR_TOL
+    out[nz] = z[nz] / np.expm1(z[nz])
+    return out
+
+
+def fp_generator(spec: EnergySpec, x: np.ndarray) -> np.ndarray:
+    """Scharfetter-Gummel generator of d rho/dt = d/dx (rho V' + theta rho') on the grid.
+
+    Finite volumes on cell masses with zero-flux ends; the Gibbs state exp(-V/theta)
+    is stationary and mass is conserved (columns sum to zero). It is the standard
+    discrete Fokker-Planck flow of F and is itself a gradient flow of the discrete
+    F for a discrete transport metric (Maas 2011), so exp(h L) rho_tau is the
+    grid-level "W2 flow of F over time h" that a JKO step approximates to O(h^2).
+    """
+    dx = float(x[1] - x[0])
+    delta = np.diff(spec.potential) / spec.theta  # (V_{i+1} - V_i) / theta
+    scale = spec.theta / dx**2
+    rate_right = scale * _bernoulli(delta)  # mass rate i -> i + 1 per unit m_i
+    rate_left = scale * _bernoulli(-delta)  # mass rate i + 1 -> i per unit m_{i+1}
+    n = x.size
+    gen = np.zeros((n, n))
+    idx = np.arange(n - 1)
+    gen[idx, idx] -= rate_right
+    gen[idx + 1, idx] += rate_right
+    gen[idx + 1, idx + 1] -= rate_left
+    gen[idx, idx + 1] += rate_left
+    return gen
+
+
+def fp_flow(gen: np.ndarray, rho: np.ndarray, t: float) -> np.ndarray:
+    """exp(t L) rho: the discrete Fokker-Planck flow over time t."""
+    return simplex(expm(t * gen) @ np.asarray(rho, dtype=float))
 
 
 # ----------------------------------------------------------------------------
@@ -541,11 +579,14 @@ def step_metrics(
     ref_rho: np.ndarray,
     peyre_rho: np.ndarray,
     fast_rho: np.ndarray,
+    flow_rho: np.ndarray,
 ) -> dict[str, float]:
     f0, f1 = energy(rho0), energy(rho1)
     w2sq_move = w2sq_exact(rho1, rho0, cost)
     w2_disp_jko = w2_exact(ref_rho, rho0, cost)
     w2_vs_jko = w2_exact(rho1, ref_rho, cost)
+    w2_disp_flow = w2_exact(flow_rho, rho0, cost)
+    w2_vs_flow = w2_exact(rho1, flow_rho, cost)
     return {
         "f_before": f0,
         "f_after": f1,
@@ -558,6 +599,9 @@ def step_metrics(
         "w2_vs_peyre": w2_exact(rho1, peyre_rho, cost),
         "tv_vs_fast": tv(rho1, fast_rho),
         "w2_vs_fast": w2_exact(rho1, fast_rho, cost),
+        "tv_vs_flow": tv(rho1, flow_rho),
+        "w2_vs_flow": w2_vs_flow,
+        "rel_w2_vs_flow": w2_vs_flow / w2_disp_flow if w2_disp_flow > 0 else float("nan"),
         "mass_right": float(rho1[x > 0].sum()),
     }
 
@@ -569,8 +613,10 @@ def reference_record(
     cost: np.ndarray,
     h: float,
     regs: Sequence[float | None],
+    gen: np.ndarray,
 ) -> dict[str, Any]:
     rho_tau = spec.rho_tau
+    rho_flow = fp_flow(gen, rho_tau, h)
     warm_fast = kiki_step(f, rho_tau, x, h, PAPER_N_INNER, rigorous=False)
     warm_peyre, _ = jko_entropic(f.kl_prox(), rho_tau, cost, h, WARM_GAMMA)
     t0 = time.perf_counter()
@@ -589,6 +635,7 @@ def reference_record(
             "sinkhorn": info,
             "tv_vs_jko": tv(q, exact.rho),
             "w2_vs_jko": w2_exact(q, exact.rho, cost),
+            "w2_vs_flow": w2_exact(q, rho_flow, cost),
             "f": f.energy(q),
             "dissipation_defect": f.energy(q)
             + w2sq_exact(q, rho_tau, cost) / (2.0 * h)
@@ -612,8 +659,16 @@ def reference_record(
         "dissipation_defect": f.energy(exact.rho) + w2sq_disp / (2.0 * h) - f.energy(rho_tau),
         "mass_right_rho_tau": float(rho_tau[x > 0].sum()),
         "mass_right_jko": float(exact.rho[x > 0].sum()),
+        "rho_flow": rho_flow,
+        "w2_disp_flow": w2_exact(rho_flow, rho_tau, cost),
+        "w2_jko_vs_flow": w2_exact(exact.rho, rho_flow, cost),
+        "tv_jko_vs_flow": tv(exact.rho, rho_flow),
+        "mass_right_flow": float(rho_flow[x > 0].sum()),
         "peyre": peyre,
     }
+    record["rel_jko_vs_flow"] = (
+        record["w2_jko_vs_flow"] / record["w2_disp_flow"] if record["w2_disp_flow"] > 0 else None
+    )
     cross = jko_exact_cvxpy(spec, rho_tau, cost, h)
     if cross is not None:
         record["cvxpy"] = {
@@ -639,14 +694,17 @@ def run_case(
     verbose: bool = True,
 ) -> dict[str, Any]:
     f_ref = PotentialEntropyF(spec, "numerical")
+    gen = fp_generator(spec, x)
     references = []
     for h in h_grid:
-        rec = reference_record(spec, f_ref, x, cost, h, reg_grid)
+        rec = reference_record(spec, f_ref, x, cost, h, reg_grid, gen)
         references.append(rec)
         if verbose:
             print(
                 f"[{spec.name}] h={h:g} exact JKO: gap={rec['gap']:.2e} cuts={rec['n_cuts']} "
-                f"{rec['solve_seconds']:.1f}s  W2(rho_tau, JKO)={rec['w2_disp_jko']:.4f}",
+                f"{rec['solve_seconds']:.1f}s  W2(rho_tau, JKO)={rec['w2_disp_jko']:.4f} "
+                f"W2(JKO, flow)={rec['w2_jko_vs_flow']:.4f} W2(rho_tau, flow)="
+                f"{rec['w2_disp_flow']:.4f}",
                 flush=True,
             )
     steps = []
@@ -676,6 +734,7 @@ def run_case(
                             rec["rho_jko"],
                             peyre_default["rho"],
                             fast,
+                            rec["rho_flow"],
                         ),
                     }
                 )
@@ -698,6 +757,7 @@ def run_case(
                                 rec["rho_jko"],
                                 rec["peyre"][reg_key(reg)]["rho"],
                                 fast,
+                                rec["rho_flow"],
                             ),
                         }
                     )
@@ -721,18 +781,24 @@ def run_trajectory(
     """Composite scheme vs exact JKO sequence vs fast path, same h, up to t_final."""
     n_steps = int(round(t_final / h))
     f = PotentialEntropyF(spec, "numerical")
-    rho_rig = rho_fast = rho_jko = spec.rho_tau
+    gen = fp_generator(spec, x)
+    rho_rig = rho_fast = rho_jko = rho_flow = spec.rho_tau
     rows = []
     for k in range(1, n_steps + 1):
         rho_rig = kiki_step(f, rho_rig, x, h, PAPER_N_INNER, rigorous=True, reg=PAPER_REG)
         rho_fast = kiki_step(f, rho_fast, x, h, PAPER_N_INNER, rigorous=False)
         ref = jko_exact(f.energy, f.first_variation, rho_jko, cost, h, warm_starts=[rho_jko])
         rho_jko = ref.rho
+        rho_flow = fp_flow(gen, spec.rho_tau, k * h)
         rows.append(
             {
                 "step": k,
                 "t": k * h,
                 "gap": ref.gap,
+                "w2_rig_vs_flow": w2_exact(rho_rig, rho_flow, cost),
+                "w2_jko_vs_flow": w2_exact(rho_jko, rho_flow, cost),
+                "w2_fast_vs_flow": w2_exact(rho_fast, rho_flow, cost),
+                "w2_flow_from_rho_tau": w2_exact(rho_flow, spec.rho_tau, cost),
                 "w2_rig_vs_jko": w2_exact(rho_rig, rho_jko, cost),
                 "tv_rig_vs_jko": tv(rho_rig, rho_jko),
                 "w2_fast_vs_jko": w2_exact(rho_fast, rho_jko, cost),
@@ -752,7 +818,7 @@ def run_trajectory(
         "n_inner": PAPER_N_INNER,
         "reg": PAPER_REG,
         "rows": rows,
-        "final": {"rigorous": rho_rig, "fast": rho_fast, "jko": rho_jko},
+        "final": {"rigorous": rho_rig, "fast": rho_fast, "jko": rho_jko, "flow": rho_flow},
     }
 
 
@@ -851,6 +917,39 @@ def _main_table(case: dict[str, Any]) -> list[str]:
     return lines
 
 
+def _flow_table(case: dict[str, Any]) -> list[str]:
+    lines = [
+        "| h | W2(rho_tau, flow) | W2(JKO, flow) | rel. | W2(rig, flow) | rel. "
+        "| W2(fast, flow) | rel. | W2(Peyre, flow) | rel. | mass right flow |",
+        "|---|---|---|---|---|---|---|---|---|---|---|",
+    ]
+    for rec in case["references"]:
+        h = rec["h"]
+        rig = select_steps(
+            case,
+            h=h,
+            path="rigorous",
+            reg=PAPER_REG,
+            n_inner=PAPER_N_INNER,
+            grad_mode="numerical",
+        )
+        fast = select_steps(case, h=h, path="fast", n_inner=PAPER_N_INNER, grad_mode="numerical")
+        if not rig or not fast:
+            continue
+        r, fa = rig[0], fast[0]
+        disp = rec["w2_disp_flow"]
+        pey = rec["peyre"].get(reg_key(PAPER_REG), {}).get("w2_vs_flow")
+        pey_rel = pey / disp if pey is not None and disp > 0 else None
+        lines.append(
+            f"| {h:g} | {_fmt(disp)} | {_fmt(rec['w2_jko_vs_flow'])} "
+            f"| {_fmt(rec.get('rel_jko_vs_flow'), 3)} | {_fmt(r['w2_vs_flow'])} "
+            f"| {_fmt(r['rel_w2_vs_flow'], 3)} | {_fmt(fa['w2_vs_flow'])} "
+            f"| {_fmt(fa['rel_w2_vs_flow'], 3)} | {_fmt(pey)} | {_fmt(pey_rel, 3)} "
+            f"| {rec['mass_right_flow']:.4f} |"
+        )
+    return lines
+
+
 def _config_table(case: dict[str, Any], h: float, reg_grid: Sequence[float | None]) -> list[str]:
     header = "| n_inner | fast | " + " | ".join(f"reg = {reg_key(r)}" for r in reg_grid) + " |"
     lines = [header, "|---|---|" + "---|" * len(reg_grid)]
@@ -886,8 +985,9 @@ def _grad_mode_lines(case: dict[str, Any], h: float) -> list[str]:
 def _trajectory_lines(trajs: list[dict[str, Any]]) -> list[str]:
     lines = [
         "| h | steps | t | W2(rig, JKO) | TV(rig, JKO) | W2(fast, JKO) | W2(rig, fast) "
-        "| W2(JKO, rho_tau) | F rig / fast / JKO | mass right rig / JKO | max gap |",
-        "|---|---|---|---|---|---|---|---|---|---|---|",
+        "| W2(JKO, rho_tau) | W2(rig, flow) | W2(JKO, flow) | W2(fast, flow) "
+        "| F rig / fast / JKO | mass right rig / JKO | max gap |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for tr in trajs:
         last = tr["rows"][-1]
@@ -895,6 +995,8 @@ def _trajectory_lines(trajs: list[dict[str, Any]]) -> list[str]:
             f"| {tr['h']:g} | {tr['n_steps']} | {last['t']:.3g} | {_fmt(last['w2_rig_vs_jko'])} "
             f"| {_fmt(last['tv_rig_vs_jko'])} | {_fmt(last['w2_fast_vs_jko'])} "
             f"| {_fmt(last['w2_rig_vs_fast'])} | {_fmt(last['w2_jko_from_rho_tau'])} "
+            f"| {_fmt(last['w2_rig_vs_flow'])} | {_fmt(last['w2_jko_vs_flow'])} "
+            f"| {_fmt(last['w2_fast_vs_flow'])} "
             f"| {_fmt(last['f_rig'])} / {_fmt(last['f_fast'])} / {_fmt(last['f_jko'])} "
             f"| {last['mass_right_rig']:.4f} / {last['mass_right_jko']:.4f} "
             f"| {max(r['gap'] for r in tr['rows']):.1e} |"
@@ -927,6 +1029,15 @@ def write_summary(results: dict[str, Any], path: Path) -> None:
         ref_by_h = {r["h"]: r for r in case["references"]}
         lines += [f"## `{case['name']}` — {case['label']}", "", case["description"], ""]
         lines += _main_table(case)
+        lines += [
+            "",
+            "Same step against the discrete Fokker-Planck flow exp(h L) rho_tau "
+            "(Scharfetter-Gummel generator L of the W2 flow of F on the grid; `rel.` = "
+            "distance / W2(rho_tau, flow)). The exact JKO step approximates the flow to "
+            "O(h^2) until the grid pins it (displacement below one cell):",
+            "",
+        ]
+        lines += _flow_table(case)
         h_cfg = PAPER_H if PAPER_H in ref_by_h else case["references"][0]["h"]
         lines += [
             "",
@@ -1045,10 +1156,26 @@ def _plot_error_panel(ax: Any, case: dict[str, Any]) -> None:
             ms=4,
             label=f"Peyre entropic JKO of F, gamma={PAPER_REG}",
         )
+    flow_refs = [
+        r
+        for r in sorted(case["references"], key=lambda r: r["h"])
+        if r.get("rel_jko_vs_flow") is not None
+    ]
+    if flow_refs:
+        ax.plot(
+            [r["h"] for r in flow_refs],
+            [r["rel_jko_vs_flow"] for r in flow_refs],
+            "--",
+            color=COLOR_JKO,
+            lw=1.6,
+            marker="d",
+            ms=4,
+            label="exact JKO vs FP flow / W2(rho_tau, flow)",
+        )
     ax.set_xscale("log")
     ax.set_yscale("log")
     ax.set_xlabel("h")
-    ax.axhline(1.0, color=COLOR_JKO, lw=0.8, alpha=0.6)
+    ax.axhline(1.0, color=INK, lw=0.8, alpha=0.6)
     ax.legend(fontsize=7, frameon=False)
 
 
@@ -1134,11 +1261,30 @@ def parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
     parser.add_argument("--skip-trajectory", action="store_true")
     parser.add_argument("--no-figure", action="store_true")
     parser.add_argument("--quiet", action="store_true")
+    parser.add_argument(
+        "--from-json",
+        type=Path,
+        default=None,
+        help="re-render summary and figure from an existing results.json, no computation",
+    )
     return parser.parse_args(argv)
+
+
+def render(results: dict[str, Any], out_dir: Path, *, figure: bool = True) -> dict[str, Path]:
+    paths = output_paths(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    write_summary(results, paths["summary"])
+    if figure:
+        make_figure(results, paths["figure_png"], paths["figure_pdf"])
+    return paths
 
 
 def main(argv: Sequence[str] | None = None) -> dict[str, Any]:
     args = parse_args(argv)
+    if args.from_json is not None:
+        results = json.loads(args.from_json.read_text(encoding="utf-8"))
+        render(results, args.out_dir, figure=not args.no_figure)
+        return results
     t_start = time.perf_counter()
     h_grid = QUICK_H if args.quick else H_GRID
     n_inner_grid = QUICK_N_INNER if args.quick else N_INNER_GRID
@@ -1195,9 +1341,7 @@ def main(argv: Sequence[str] | None = None) -> dict[str, Any]:
     paths = output_paths(args.out_dir)
     args.out_dir.mkdir(parents=True, exist_ok=True)
     paths["results"].write_text(json.dumps(_jsonable(results), indent=1), encoding="utf-8")
-    write_summary(results, paths["summary"])
-    if not args.no_figure:
-        make_figure(results, paths["figure_png"], paths["figure_pdf"])
+    render(results, args.out_dir, figure=not args.no_figure)
     if not args.quiet:
         print(f"wrote {paths['results']} ({results['runtime_seconds']:.0f} s)", flush=True)
     return results
