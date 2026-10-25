@@ -92,7 +92,9 @@ def run_point(
     sim = MLXParticleSimulator(
         species=species, n_particles=base.N_PARTICLES, latent_dim=2, seed=seed
     )
-    loop = MultiscaleLoop(sim=sim, jko=jko, n_fast=base.N_FAST, n_slow=n_slow, support=support)
+    loop = MultiscaleLoop(
+        reinject=False, sim=sim, jko=jko, n_fast=base.N_FAST, n_slow=n_slow, support=support
+    )
     final = loop.run(seed=seed)["trajectory"][-1]
     return {
         n: np.clip(np.asarray(rho, dtype=np.float64), RHO_FLOOR, None)

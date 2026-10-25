@@ -40,7 +40,9 @@ def run_fast(seed: int) -> dict[str, np.ndarray]:
     names = species.species_names()
     jko = JKOStep(f_functional=f_func, h=0.05, support=support, n_inner=10, apply_w2_prox=False)
     sim = MLXParticleSimulator(species=species, n_particles=N_PARTICLES, latent_dim=2, seed=seed)
-    loop = MultiscaleLoop(sim=sim, jko=jko, n_fast=N_FAST, n_slow=N_SLOW, support=support)
+    loop = MultiscaleLoop(
+        reinject=False, sim=sim, jko=jko, n_fast=N_FAST, n_slow=N_SLOW, support=support
+    )
     manifest = loop.run(seed=seed)
     final = manifest["trajectory"][-1]
     return {n: np.asarray(final.rho[n]) for n in names}
@@ -49,9 +51,13 @@ def run_fast(seed: int) -> dict[str, np.ndarray]:
 def run_rigorous(seed: int) -> dict[str, np.ndarray]:
     species, support, f_func = _build_common_setup()
     names = species.species_names()
-    jko = FullJKOSolver(f_functional=f_func, h=0.05, support=support, epsilon=0.05)
+    jko = FullJKOSolver(
+        scheme="legacy_split", f_functional=f_func, h=0.05, support=support, epsilon=0.05
+    )
     sim = MLXParticleSimulator(species=species, n_particles=N_PARTICLES, latent_dim=2, seed=seed)
-    loop = MultiscaleLoop(sim=sim, jko=jko, n_fast=N_FAST, n_slow=N_SLOW, support=support)
+    loop = MultiscaleLoop(
+        reinject=False, sim=sim, jko=jko, n_fast=N_FAST, n_slow=N_SLOW, support=support
+    )
     manifest = loop.run(seed=seed)
     final = manifest["trajectory"][-1]
     return {n: np.asarray(final.rho[n]) for n in names}

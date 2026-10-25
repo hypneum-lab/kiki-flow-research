@@ -97,7 +97,9 @@ def run_fvr() -> None:
     for seed in SEEDS:
         _, support, f_func = err.setup(grid)
         fast_jko = JKOStep(f_functional=f_func, h=0.05, support=support, n_inner=10)
-        rig_jko = FullJKOSolver(f_functional=f_func, h=0.05, support=support, epsilon=0.05)
+        rig_jko = FullJKOSolver(
+            scheme="legacy_split", f_functional=f_func, h=0.05, support=support, epsilon=0.05
+        )
         assert rig_jko.prox_n_iter == MAX_ITER
         fast = err._final(fast_jko, seed, grid, n_particles, n_fast, n_slow)[-1].rho
         rig = err._final(rig_jko, seed, grid, n_particles, n_fast, n_slow)[-1].rho

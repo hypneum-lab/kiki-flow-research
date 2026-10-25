@@ -51,7 +51,7 @@ def run_one(alpha: float, beta: float, gamma: float) -> dict[str, float]:
         f_functional=f_func, h=0.05, support=support, n_inner=n_inner, apply_w2_prox=False
     )
     sim = MLXParticleSimulator(species=species, n_particles=500, latent_dim=2, seed=SEED)
-    loop = MultiscaleLoop(sim=sim, jko=jko, n_fast=200, n_slow=30, support=support)
+    loop = MultiscaleLoop(reinject=False, sim=sim, jko=jko, n_fast=200, n_slow=30, support=support)
     manifest = loop.run(seed=SEED)
     final = manifest["trajectory"][-1]
     entropies = {}

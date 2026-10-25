@@ -94,14 +94,13 @@ class MultiscaleLoop:
     ``MLXParticleSimulator``. For MLX, ``potential_fn`` is left as None
     (zero drift) since the numpy ``_zero_potential`` would not type-match.
 
-    ``reinject=False`` (default, unchanged behaviour): the JKO output is only
-    recorded in the trajectory; the particles keep evolving on their own and
-    the next slow step restarts from their histogram, so the recorded slow
-    dynamics is not an iteration of the JKO step. ``reinject=True``: after
-    each slow step (and the hook) the particles are redrawn from the JKO
-    output (``resample_particles``, seeded by ``run(seed)``), so the slow
-    steps chain and the trajectory is a JKO sequence driven by the fast
-    Langevin layer.
+    ``reinject=True`` (default since 2026-10-25): after each slow step (and
+    the hook) the particles are redrawn from the JKO output
+    (``resample_particles``, seeded by ``run(seed)``), so the slow steps
+    chain and the trajectory is a JKO sequence driven by the fast Langevin
+    layer. ``reinject=False`` reproduces the runs made before 2026-10-25:
+    the JKO output is only recorded, the particles keep evolving on their
+    own and each slow step restarts from their histogram.
     """
 
     def __init__(
@@ -113,7 +112,7 @@ class MultiscaleLoop:
         support: np.ndarray,
         dt_fast: float = 1e-3,
         post_jko_hook: Callable[[FlowState], FlowState] | None = None,
-        reinject: bool = False,
+        reinject: bool = True,
     ) -> None:
         self.sim = sim
         self.jko = jko

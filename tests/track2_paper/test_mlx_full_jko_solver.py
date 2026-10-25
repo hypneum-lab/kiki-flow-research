@@ -18,7 +18,9 @@ def _make_state(rho: np.ndarray) -> FlowState:
 
 def test_mlx_full_jko_solver_constructs_with_mlx_prox():
     support = np.linspace(0, 1, 4).reshape(-1, 1)
-    solver = MLXFullJKOSolver(f_functional=ZeroF(), h=0.05, support=support, epsilon=0.05)
+    solver = MLXFullJKOSolver(
+        scheme="legacy_split", f_functional=ZeroF(), h=0.05, support=support, epsilon=0.05
+    )
     assert solver.apply_w2_prox is True
     assert solver.epsilon == 0.05  # noqa: PLR2004
     # prox_fn is the MLX one, not the POT default
@@ -28,21 +30,32 @@ def test_mlx_full_jko_solver_constructs_with_mlx_prox():
 def test_mlx_full_jko_solver_step_increments_tau():
     support = np.linspace(0, 1, 4).reshape(-1, 1)
     state = _make_state(np.full(4, 0.25))
-    solver = MLXFullJKOSolver(f_functional=ZeroF(), h=0.05, support=support, epsilon=0.1, n_inner=5)
+    solver = MLXFullJKOSolver(
+        scheme="legacy_split", f_functional=ZeroF(), h=0.05, support=support, epsilon=0.1, n_inner=5
+    )
     new_state = solver.step(state)
     assert new_state.tau == state.tau + 1
 
 
 def test_full_jko_solver_epsilon_and_max_iter_persist():
     support = np.linspace(0, 1, 2).reshape(-1, 1)
-    solver = FullJKOSolver(f_functional=ZeroF(), h=0.1, support=support, epsilon=0.02, max_iter=500)
+    solver = FullJKOSolver(
+        scheme="legacy_split",
+        f_functional=ZeroF(),
+        h=0.1,
+        support=support,
+        epsilon=0.02,
+        max_iter=500,
+    )
     assert solver.epsilon == 0.02  # noqa: PLR2004
     assert solver.max_iter == 500  # noqa: PLR2004
 
 
 def test_mlx_full_jko_solver_passes_epsilon_as_reg():
     support = np.linspace(0, 1, 4).reshape(-1, 1)
-    solver = MLXFullJKOSolver(f_functional=ZeroF(), h=0.05, support=support, epsilon=0.02)
+    solver = MLXFullJKOSolver(
+        scheme="legacy_split", f_functional=ZeroF(), h=0.05, support=support, epsilon=0.02
+    )
     assert solver.reg == 0.02  # noqa: PLR2004
 
 
@@ -52,7 +65,14 @@ def test_mlx_full_jko_solver_forwards_max_iter():
     rho = np.exp(-0.5 * ((x - 0.5) / 0.4) ** 2)
     state = _make_state(rho / rho.sum())
     out = [
-        MLXFullJKOSolver(f_functional=ZeroF(), h=0.05, support=support, epsilon=0.01, max_iter=n)
+        MLXFullJKOSolver(
+            scheme="legacy_split",
+            f_functional=ZeroF(),
+            h=0.05,
+            support=support,
+            epsilon=0.01,
+            max_iter=n,
+        )
         .step(state)
         .rho["phono"]
         for n in (5, 100)

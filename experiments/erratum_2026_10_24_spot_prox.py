@@ -91,10 +91,12 @@ def run_t2(kind: str, seed: int = 0) -> tuple[dict[str, np.ndarray], float]:
     if kind == "fast":
         jko = JKOStep(f_functional=f_func, h=0.05, support=support, n_inner=10)
     else:
-        jko = FullJKOSolver(f_functional=f_func, h=0.05, support=support, epsilon=0.05)
+        jko = FullJKOSolver(
+            scheme="legacy_split", f_functional=f_func, h=0.05, support=support, epsilon=0.05
+        )
         jko.prox_fn = prox_old if kind == "rig_old" else prox_fixed
     sim = ParticleSimulator(species=species, n_particles=500, latent_dim=2, seed=seed)
-    loop = MultiscaleLoop(sim=sim, jko=jko, n_fast=200, n_slow=20, support=support)
+    loop = MultiscaleLoop(reinject=False, sim=sim, jko=jko, n_fast=200, n_slow=20, support=support)
     t0 = time.perf_counter()
     manifest = loop.run(seed=seed)
     wall = time.perf_counter() - t0
