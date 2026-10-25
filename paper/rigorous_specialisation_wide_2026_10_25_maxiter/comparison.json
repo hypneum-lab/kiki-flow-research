@@ -1,0 +1,29 @@
+{
+  "n_runs": 276,
+  "seeds": [
+    0,
+    1
+  ],
+  "n_points": 138,
+  "baseline": "paper/rigorous_specialisation_wide_2026_10_24_reg/sweep_wide_records.json",
+  "max_abs_delta_gap_bits_per_run": 8.59302117328653e-06,
+  "mean_delta_gap_bits_per_run": -2.104772806816482e-07,
+  "max_abs_delta_point_mean_gap_bits": 4.613463107983051e-06,
+  "max_abs_delta_species_entropy_bits": 2.038728308706439e-05,
+  "note": "new (max_iter = 1000 forwarded) minus old (n_iter = 100), same seeds",
+  "provenance": {
+    "git_commit": "b713a9d263caf65a93bc044462102ce828c7765f",
+    "host": "MacBookPro.lan",
+    "machine": "arm64",
+    "python": "3.14.4",
+    "mlx_default_device": "Device(cpu, 0)",
+    "date_utc": "2026-10-24T22:46:05Z",
+    "prox": "kiki_flow_core.wasserstein_ops.prox_w2 (Dykstra, post-ffee5d9)",
+    "prox_params": {
+      "epsilon": "h = 0.05 (JKO step, proximal pull)",
+      "reg": "FullJKOSolver.epsilon (Sinkhorn entropic regularisation)",
+      "n_iter": "FullJKOSolver.max_iter = 1000 (forwarded)"
+    },
+    "entropy_units": "bits"
+  }
+}
