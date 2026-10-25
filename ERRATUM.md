@@ -482,9 +482,9 @@ with 100 Dykstra iterations instead of 1000. §10 bounds that effect at
 ≤ 8.6e-6 bits on the rigorous gap, far below the differences reported
 here, so the sweep was not rerun.
 
-## 12. The "rigorous path" is not a JKO step of F (PROPOSED, 2026-10-25)
+## 12. The "rigorous path" is not a JKO step of F (2026-10-25)
 
-**Status: PROPOSED — to be validated by the PI.** Reformulates the
+**Status: validated by the PI (2026-10-25).** Reformulates the
 wording of §8–11; removes no number.
 
 Finding (note `docs/notes/2026-10-25-jko-step-identification.md`,
