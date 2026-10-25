@@ -567,3 +567,35 @@ left to the PI: switch the default scheme (and reinjection) and the
 regularisation rule (reg = h² or a fixed small reg), rerun the rigorous
 specialisation sweep and the paper-scale run under the new scheme, and
 only then revisit NH-60.
+
+## 13. Default switched to the entropic JKO step (2026-10-25)
+
+**Status: PI decision of 2026-10-25 (QCM 19:51).**
+
+From this revision on, the rigorous slow step is the entropic JKO step
+of F (§12): `FullJKOSolver`, `MLXFullJKOSolver` and
+`JKOStep(apply_w2_prox=True)` default to `scheme="jko_entropic"` with
+Sinkhorn reg = h² (an explicit `epsilon` still sets it), and
+`MultiscaleLoop` / `run_paper` reinject the JKO output into the
+particles (`reinject=True`). The fast path (no prox) is unchanged.
+
+Reproducing earlier numbers: pass `scheme="legacy_split"` (with
+`epsilon=0.01`, the former default, or the value of the run) and
+`reinject=False`. The drivers and scripts behind every number of §1–12
+and of the paper now pin these values explicitly (erratum reruns, ε and
+`max_iter` sweeps, rigorous specialisation sweeps, E1, fast-vs-rigorous
+KL, T2 pairs, hyperparameter sweeps), so they reproduce their committed
+outputs unchanged. Tests that check the legacy prox call (`epsilon` =
+h, `reg`, `max_iter` forwarding, MLX prox) pin `legacy_split`.
+
+Specialisation statistic. Also decided on 2026-10-25: specialisation is
+reported as the excess over the Gibbs equilibrium of the potentials,
+gap − gap_Gibbs with gap_Gibbs the gap of rho_i ∝ prior_i exp(−V_i),
+with a 95 % bootstrap CI over seeds
+(`results/excess_over_gibbs_2026_10_25/`). Under the entropic step the
+excess is negative at every α ≤ 20, γ ≤ 10 (−0.39 [−0.42, −0.36] bits
+at (10, ·, 0)); positive only for γ ≥ 20 and marginally at α = 30, and
+after the α = 0 control only at (5, ·, 50). The legacy rigorous and fast
+gaps are below equilibrium everywhere. `paper/main.tex` and `README.md`
+no longer claim emergent specialisation; the published PDFs and tags
+are unchanged.
