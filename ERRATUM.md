@@ -346,3 +346,106 @@ sweep were not rerun: with changes six orders of magnitude below the
 reported precision (0.01 bit) on seeds 0–1, the full rerun was not
 worth the compute. No number in `paper/main.tex` changes; the paper and
 its PDF are not edited.
+
+## 11. 2026-10-25 — Sinkhorn regularisation defaulted to h (verification)
+
+**Status: validated by the PI (2026-10-25).** Independent re-check
+(review R3) of the §9 defect: the exact call chain, the revisions it
+affects, and an ε-sensitivity sweep of the rigorous specialisation gap
+on a second host. No paper number is changed by this section.
+
+### Exact chain (at `618bc76`, the last `main` before the fix)
+
+1. `kiki_flow_core/track2_paper/full_jko_solver.py:19,30` —
+   `FullJKOSolver.__init__(…, epsilon: float = 0.01, …)` called
+   `super().__init__` without `epsilon` and only stored
+   `self.epsilon`; nothing read it afterwards (same for
+   `MLXFullJKOSolver`).
+2. `kiki_flow_core/master_equation.py:98-104` — `JKOStep.step` called
+   `self.prox_fn(rho, reference=rho_tau, epsilon=self.h, support=…,
+   n_iter=100)`: the prox's `epsilon` argument is the proximal pull
+   (the JKO step h), and no `reg` was passed.
+3. `kiki_flow_core/wasserstein_ops.py:79` — `prox_w2`:
+   `sink_reg = max(reg if reg is not None else epsilon, 1e-3)`, so the
+   Gibbs kernel ran with Sinkhorn regularisation = h = 0.05.
+4. Configured values: `kiki_flow_core/track2_paper/paper_run.py:112,115`
+   (h = 0.05, ε = 0.01) and the rigorous specialisation drivers
+   (`FullJKOSolver` default ε = 0.01); the paper stated ε = 0.01
+   (`paper/main.tex:339` at `618bc76`, line 343 on `main`).
+
+Fix: `016d71a` (PR #25, merged as `a09492a`, 2026-10-24 23:54 CEST):
+`JKOStep` takes `reg` and forwards it; the full solvers pass
+`reg=epsilon`; h stays the proximal pull. The test
+`tests/track2_paper/test_full_jko_solver.py::test_full_jko_passes_epsilon_as_sinkhorn_reg_and_h_as_prox_step`
+pins `reg == 0.01` and `epsilon == 0.05` at the prox call; the sweep
+driver's `make_jko(…, epsilon=…)` flag is pinned the same way by
+`tests/test_eps_sweep_2026_10_25.py`.
+
+### Revisions affected
+
+`FullJKOSolver` has stored but not forwarded `epsilon` since its first
+commit `e3699c7` (2026-04-17), and `JKOStep.step` never passed `reg`
+before `a09492a`. All tags predate the fix (`016d71a` is not an
+ancestor of `paper-v0.12-draft` = `e17d115`, 2026-10-24, nor of
+`track2-v0.1`): every rigorous-path run from them received h = 0.05
+where ε was configured (with the pre-`ffee5d9` prox of §1 the prox
+itself was defective, so those numbers are superseded anyway).
+`main` from `a09492a` on is fixed. Runs configured with ε = 0.05 = h
+are unaffected (§9 table).
+
+### ε sweep of the rigorous specialisation gap (2026-10-25)
+
+Driver `experiments/eps_sweep_2026_10_25.py` at `7b3f7ee`, problem of
+`experiments/rigorous_specialisation_2026_10_24.py` (grid 16, 500
+particles, 200 fast × 30 slow steps, h = 0.05), seeds 0–4,
+ε ∈ {0.01, 0.02, 0.05} as the Sinkhorn `reg` only. Host
+electron-server (Xeon X5680, no AVX; Ubuntu 24.04, CPython 3.14.4,
+MLX 0.31.1 on CPU, `nice -n 19`), 80 runs in 12 min. Environment:
+`uv sync --locked --extra dev` plus `mlx-cpu==0.31.1` (the Linux
+`libmlx.so`; `uv.lock` only pins `mlx-metal` for darwin) and
+jax/jaxlib/optax/flax removed from that scratch venv (jaxlib needs
+AVX; POT falls back to NumPy; the T2 path does not import jax).
+Outputs: `results/eps_sweep_2026_10_25/{sweep.json,summary.md}`.
+Gap = log2(16) − mean H over the four species (bits); S = H(α = 0, same
+β, γ, seed) − H; mean ± sd over seeds.
+
+| ε | point | rigorous gap | α = 0 control gap | S | fast gap | fast − rigorous | KL(rig‖fast), nats |
+|---|---|---|---|---|---|---|---|
+| 0.01 | (10, 1, 0) | 1.276 ± 0.031 | 0.219 ± 0.031 | 1.057 ± 0.043 | 2.032 ± 0.027 | 0.757 ± 0.032 | 22.1 ± 2.9 |
+| 0.02 | (10, 1, 0) | 1.266 ± 0.028 | 0.196 ± 0.026 | 1.071 ± 0.038 | 2.032 ± 0.027 | 0.766 ± 0.029 | 22.2 ± 2.9 |
+| 0.05 | (10, 1, 0) | 1.234 ± 0.028 | 0.170 ± 0.021 | 1.064 ± 0.034 | 2.032 ± 0.027 | 0.798 ± 0.027 | 22.4 ± 2.7 |
+| 0.01 | (8, 0.5, 5) | 1.388 ± 0.055 | 0.215 ± 0.032 | 1.173 ± 0.062 | 1.802 ± 0.029 | 0.414 ± 0.046 | 16.4 ± 1.6 |
+| 0.02 | (8, 0.5, 5) | 1.380 ± 0.059 | 0.192 ± 0.026 | 1.188 ± 0.064 | 1.802 ± 0.029 | 0.422 ± 0.048 | 16.5 ± 1.6 |
+| 0.05 | (8, 0.5, 5) | 1.349 ± 0.059 | 0.167 ± 0.021 | 1.182 ± 0.061 | 1.802 ± 0.029 | 0.453 ± 0.050 | 16.8 ± 1.6 |
+
+What it shows (no further interpretation):
+
+- Over ε ∈ [0.01, 0.05] the rigorous gap moves by 0.042 bits at
+  (10, 1, 0) and 0.039 bits at (8, 0.5, 5), monotonically (larger ε,
+  smaller gap), i.e. about one seed sd. The fast − rigorous difference
+  is 0.76–0.80 and 0.41–0.45 bits at every ε. Running with reg = 0.05
+  instead of 0.01 therefore accounts for about 5 % and 10 % of the
+  fast/rigorous discrepancy at these two points: the discrepancy does
+  not come from the Sinkhorn temperature.
+- The specialisation S against the α = 0 control is flat in ε (within
+  0.015 bits). The α = 0 control gap (prox alone) falls from 0.22 to
+  0.17 bits as ε grows — the sign the extra-diffusion picture predicts,
+  but small.
+- Cross-host check: at ε = 0.05 the values equal the macM1 pre-fix
+  sweep (§8.7: 1.234 ± 0.028 and 1.349 ± 0.059) and at ε = 0.01 the
+  macM1 rerun (§9: 1.276 ± 0.031 and 1.388 ± 0.055) to three decimals.
+  The fast gap 2.032 ± 0.027 matches `paper/hyperparam_sweep_dense.json`.
+- KL(rigorous ‖ fast), summed over the four species at the final slow
+  step of this reduced setup, is 22.1–22.4 and 16.4–16.8 nats and moves
+  by ≤ 0.3 nats with ε. It is not the paper-scale KL of §7/§9
+  (0.272 ± 0.014 nats), which this sweep does not recompute.
+
+Decision (PI, 2026-10-25): keep §9 as the record of the fix, append this
+section as its verification; no paper number changes (the paper already
+uses the ε = 0.01 reruns); optionally quote the ε-insensitivity
+(≤ 0.04 bits over 0.01–0.05) in the rigorous-path paragraph.
+
+Note (merge with §10): this sweep ran before the `max_iter` fix, i.e.
+with 100 Dykstra iterations instead of 1000. §10 bounds that effect at
+≤ 8.6e-6 bits on the rigorous gap, far below the differences reported
+here, so the sweep was not rerun.
