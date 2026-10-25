@@ -24,7 +24,7 @@ species, modules, hooks, telemetry). Track-specific code lives in subpackages:
 |---|---|
 | Math / numerical contracts | `kiki_flow_core/CLAUDE.md` |
 | Paper sources, LaTeX, fast-path figures | `paper/CLAUDE.md` |
-| 84-min rigorous verification run artifacts | `paper_rigorous/CLAUDE.md` |
+| Historical rigorous run artifacts (defective prox; reruns in `paper_rigorous_*`) | `paper_rigorous/CLAUDE.md`, `ERRATUM.md` |
 | Reproducibility scripts (deterministic, seeded) | `scripts/CLAUDE.md` |
 | Real-LLM CL benchmark (remote GPU, manual) | `docs/superpowers/runbooks/real-cl-bench.md` |
 | Test conventions, golden regressions | `tests/CLAUDE.md` |

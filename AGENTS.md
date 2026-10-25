@@ -39,7 +39,7 @@ uv run python -m track1_perf.offline_consolidator # nightly consolidator (T1)
 - `track2_paper/` — T2: paper figures, N-particle Langevin × JKO, 4 Levelt-Baddeley species. Entry `track2_paper.paper_run.run_paper`.
 - `track3_deploy/` — T3: pure-NumPy streaming surrogate, advisory routing. Entry `track3_deploy.streaming_runner`.
 - `paper/` — LaTeX sources + fast-path figure generators.
-- `paper_rigorous/` — 84-min rigorous verification run artifacts (`stats.json` is generated, do not hand-edit).
+- `paper_rigorous/` — historical rigorous run artifacts (defective prox, 84 min; kept for provenance, `ERRATUM.md`). Corrected reruns: `paper_rigorous_fixedprox/`, `paper_rigorous_fixedeps/`, `paper_rigorous_maxiter/` (`stats.json` is generated, do not hand-edit).
 - `bench/` — SLO / latency / backend-speedup ledger (`bench/*.jsonl` is append-only).
 - `tests/golden/*.npz` — golden numerical fixtures.
 - `scripts/` — reproducibility / deterministic seeded runs.

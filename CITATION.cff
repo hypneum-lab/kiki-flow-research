@@ -12,6 +12,7 @@ abstract: >
   decomposition spanning phonological, lexical, syntactic, and
   semantic levels.
 type: software
+version: paper-v0.13-draft
 authors:
   - family-names: Saillant
     given-names: Clément
@@ -33,24 +34,29 @@ identifiers:
     value: 10.5281/zenodo.19666755
     description: "Zenodo concept DOI (resolves to latest version)"
   - type: doi
+    value: 10.5281/zenodo.23636477
+    description: "Zenodo paper-v0.13-draft version DOI (2026-10-25; erratum update: solver epsilon and max_iter fixes)"
+  - type: doi
+    value: 10.5281/zenodo.23619954
+    description: "Zenodo paper-v0.12-draft version DOI (2026-10-24; erratum: corrected W2 prox reruns)"
+  - type: doi
     value: 10.5281/zenodo.19666756
-    description: "Zenodo paper-v0.8-draft version DOI"
+    description: "Zenodo paper-v0.8-draft version DOI (2026-04-20; contains claims withdrawn by ERRATUM.md)"
   - type: doi
     value: 10.17605/OSF.IO/Q6JYN
     description: "Parent research program pre-registration (dreamOfkiki Cycle 1)"
   - type: url
     value: "https://osf.io/v7a2j"
     description: "Parent research program OSF project"
-date-released: 2026-04-19
+date-released: 2026-10-25
 preferred-citation:
   type: unpublished
   title: "dreamOfkiki: A Substrate-Agnostic Formal Framework for Dream-Based Knowledge Consolidation in Artificial Cognitive Systems"
   authors:
-    - name: "dreamOfkiki project contributors"
     - family-names: Saillant
       given-names: Clément
       email: clement@saillant.cc
       affiliation: "L'Electron Rare, Grandris, France"
   year: 2026
   url: "https://github.com/hypneum-lab/dream-of-kiki"
-  notes: "Paper 1 draft v0.2. MIT code + CC-BY-4.0 docs. OSF pre-registration DOI 10.17605/OSF.IO/Q6JYN. arXiv preprint forthcoming."
+  notes: "Paper 1 draft v0.2, single author. MIT code + CC-BY-4.0 docs. OSF pre-registration DOI 10.17605/OSF.IO/Q6JYN. Not submitted to arXiv as of 2026-10-25. For this repository's own paper draft and erratum see README.md (Citation) and ERRATUM.md."
