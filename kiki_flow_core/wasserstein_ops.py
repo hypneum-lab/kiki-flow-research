@@ -1,6 +1,8 @@
-"""Wasserstein-2 operations via entropic Sinkhorn (POT-backed)."""
+"""Wasserstein-2 operations via entropic Sinkhorn (POT-backed) and the entropic JKO prox."""
 
 from __future__ import annotations
+
+from collections.abc import Callable
 
 import numpy as np
 import ot
@@ -98,3 +100,79 @@ def prox_w2(
     if not np.isfinite(s) or s <= 0:  # Sinkhorn/Dykstra blew up -> report, don't fake.
         raise FloatingPointError("prox_w2 Dykstra iteration did not converge (non-finite marginal)")
     return q / s
+
+
+KLProxLog = Callable[[np.ndarray, float], np.ndarray]
+
+
+def _logsumexp_rows(m: np.ndarray) -> np.ndarray:
+    """log(sum(exp(m), axis=1)) without scipy, stable for very negative entries."""
+    top = m.max(axis=1, keepdims=True)
+    out: np.ndarray = np.asarray(
+        (top + np.log(np.sum(np.exp(m - top), axis=1, keepdims=True)))[:, 0], dtype=float
+    )
+    return out
+
+
+def jko_entropic_prox(
+    kl_prox_log: KLProxLog,
+    reference: np.ndarray,
+    epsilon: float,
+    support: np.ndarray,
+    n_iter: int = 500,
+    *,
+    reg: float | None = None,
+    tol: float = 0.0,
+) -> np.ndarray:
+    """Entropic JKO step of a functional F, anchored on ``reference`` (Peyré 2015).
+
+    Solves on the probability simplex
+        argmin_q  OT_reg(q, reference) + 2 * epsilon * F(q),
+    the entropic form of ``argmin_q F(q) + W2^2(q, reference) / (2 epsilon)``:
+    ``epsilon`` is the JKO time step h, ``reg`` the Sinkhorn entropic
+    regularisation (defaults to ``epsilon``; no floor, the iteration runs in the
+    log domain). F enters only through its KL-proximal map in log form:
+    ``kl_prox_log(log_p, tau)`` returns ``log argmin_q KL(q || p) + tau * F(q)``
+    over R^n_+, up to an additive constant (see ``FreeEnergy.kl_prox_log``).
+
+    Generalised Sinkhorn / scaling iteration (Chizat, Peyré, Schmitzer, Vialard
+    2018) on pi = diag(a) K diag(b), K = exp(-cost / reg):
+        log a <- kl_prox_log(log(K b), 2 epsilon / reg) - log(K b)
+        log b <- log reference - log(K^T a)
+    The second marginal is the reference (the W2 anchor); the first marginal
+    carries the proximal step of F. With ``kl_prox_log(log_p, tau) =
+    (log_p + tau * log d) / (1 + tau)`` this is exactly ``prox_w2(d, reference,
+    ...)`` (the legacy split scheme, see ``tests/test_jko_entropic_step.py``);
+    with the KL-prox of F itself it is the entropic JKO step of F.
+    ``tol > 0`` stops early once the max change of ``log b`` is below it
+    (``tol = 0`` runs all ``n_iter`` iterations, deterministic).
+    """
+    if epsilon < 0.0:
+        raise ValueError("epsilon (JKO step) must be non-negative")
+    sink_reg = reg if reg is not None else epsilon
+    if sink_reg <= 0.0:
+        raise ValueError("Sinkhorn regularisation must be positive")
+    cost_matrix = ot.dist(support, support, metric="sqeuclidean")
+    tau = 2.0 * epsilon / sink_reg
+    log_kernel = -cost_matrix / sink_reg
+    log_ref = np.log(np.clip(np.asarray(reference, dtype=float), 1e-300, None))
+    log_b = np.zeros_like(log_ref)
+    log_a = np.zeros_like(log_ref)
+    for _ in range(n_iter):
+        log_kb = _logsumexp_rows(log_kernel + log_b[None, :])
+        log_a = kl_prox_log(log_kb, tau) - log_kb
+        log_a = log_a - log_a.max()  # a global factor is absorbed by the b update
+        log_ka = _logsumexp_rows(log_kernel.T + log_a[None, :])
+        new_log_b = log_ref - log_ka
+        delta = float(np.max(np.abs(new_log_b - log_b)))
+        log_b = new_log_b
+        if tol > 0.0 and delta < tol:
+            break
+    log_q = log_a + _logsumexp_rows(log_kernel + log_b[None, :])
+    if not np.all(np.isfinite(log_q)):
+        raise FloatingPointError(
+            "jko_entropic_prox scaling iteration diverged (non-finite marginal)"
+        )
+    q: np.ndarray = np.exp(log_q - log_q.max())
+    out: np.ndarray = q / q.sum()
+    return out
