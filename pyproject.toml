@@ -5,7 +5,7 @@ description = "Wasserstein-gradient-flow engine for micro-kiki self-organization
 readme = "README.md"
 requires-python = ">=3.14"
 license = "MIT"
-authors = [{ name = "L'Electron Rare", email = "contact@saillant.cc" }]
+authors = [{ name = "Clément Saillant", email = "clement@saillant.cc" }]
 dependencies = [
     "mlx>=0.20",
     "jax>=0.4.30",

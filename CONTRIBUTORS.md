@@ -1,8 +1,8 @@
 # Contributors
 
-This repository is part of the **hypneum-lab** research organization
-(General Enhanced Neural Intelligence Artificial Learning), a small
-research lab developing executable formal frameworks for cognitive AI.
+This repository is part of **Hypneum Lab** (GitHub organisation
+`hypneum-lab`), a small research lab developing executable formal
+frameworks for cognitive AI, among them the GENIAL framework.
 
 The parent research program is **dreamOfkiki** — see the OSF
 pre-registration at [10.17605/OSF.IO/Q6JYN](https://doi.org/10.17605/OSF.IO/Q6JYN)
@@ -11,10 +11,11 @@ and the flagship repository at
 
 ## Authorship policy
 
-- **Byline** : publications resulting from this repository use the
-  byline `kiki-flow-research project contributors` with Clément Saillant as corresponding
-  author. Individual contributors are credited in §Acknowledgments
-  per project policy.
+- **Byline** : publications resulting from this repository carry the
+  single-author byline `Clément Saillant` (PI policy, applied
+  2026-10-25; the earlier `kiki-flow-research project contributors`
+  byline is withdrawn). Individual contributors are credited in
+  §Acknowledgments per project policy.
 - **No AI co-authorship** : large language models (Claude, GPT, Qwen,
   Mistral, etc.) are used as *tools* for drafting, review, and code
   generation. They are **not** listed as co-authors on any
@@ -53,4 +54,4 @@ for the current reviewer and co-author outreach status.
 
 ---
 
-Last updated : 2026-04-19.
+Last updated : 2026-10-25.

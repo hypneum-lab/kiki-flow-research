@@ -2,6 +2,49 @@
 
 All notable releases of `kiki-flow-research`. Dates in YYYY-MM-DD.
 
+## [Unreleased] — 2026-10-25 (ε sweep, phase 0 truth pass)
+
+### Added
+- ε sweep of the rigorous specialisation gap, ε ∈ {0.01, 0.02, 0.05}
+  as the Sinkhorn regularisation only, 5 seeds, two configurations
+  (PR #27, `results/eps_sweep_2026_10_25/`, electron-server). The gap
+  moves by ≤ 0.04 bits while the fast − rigorous difference is
+  0.41–0.80 bits: the Sinkhorn temperature does not explain the
+  discrepancy; the residual cause is not isolated. `ERRATUM.md` §11,
+  validated by the PI.
+
+### Changed
+- Documentation aligned with the repository state (issues #28, #33):
+  latest tag `paper-v0.13-draft`; test count and coverage quoted as
+  measured by CI (333 collected, 87 % on 2026-10-25) instead of a fixed
+  "93 tests, 95 %"; rigorous-path timings from the corrected reruns
+  (the 84 min timed the defective prox); single-author byline in
+  `CITATION.cff`, `CONTRIBUTORS.md`, `pyproject.toml`; Zenodo DOIs
+  10.5281/zenodo.23619954 (v0.12) and 10.5281/zenodo.23636477 (v0.13)
+  cited in `README.md`, `CITATION.cff`, `ERRATUM.md`.
+  `docs/ANNOUNCE.md` marked superseded. `ERRATUM.md` status header
+  covers §9–§11; §6 and §8.5 record the published releases. No code or
+  result file changes.
+
+## [paper-v0.13-draft] — 2026-10-25
+
+Tag `c484b7d`; Zenodo 10.5281/zenodo.23636477. `paper-v0.12-draft`
+(`e17d115`, 2026-10-24; Zenodo 10.5281/zenodo.23619954) tagged the
+erratum reruns listed under the 2026-10-24 entries below.
+
+### Fixed
+- `FullJKOSolver` / `MLXFullJKOSolver` forward `epsilon` to the W2 prox
+  as the Sinkhorn regularisation (`JKOStep(reg=…)`, PR #25). The prox
+  had run at reg = h = 0.05 whatever ε was configured; the paper states
+  ε = 0.01. Rigorous runs rerun at ε = 0.01 (`paper_rigorous_fixedeps/`,
+  `paper/erratum_2026_10_24_reg/`,
+  `paper/rigorous_specialisation_wide_2026_10_24_reg/`): paper-scale
+  KL(rigorous‖fast) 0.272 ± 0.014 nats, rigorous specialisation gap
+  1.46 ± 0.05 bits. `ERRATUM.md` §9.
+- `max_iter` forwarded to the prox (`JKOStep(prox_n_iter=…)`, PR #26);
+  100 Dykstra iterations had run instead of 1000. No reported number
+  changes (max |Δ gap| 8.6e-6 bits). `ERRATUM.md` §10.
+
 ## [Unreleased] — 2026-10-24 (drift trigger defaults)
 
 ### Changed

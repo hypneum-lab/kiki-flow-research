@@ -1,5 +1,12 @@
 # Announcement drafts
 
+> **Superseded (2026-10-25).** These drafts predate the 2026-10-24
+> erratum (`ERRATUM.md`). The numbers they quote — the 84 min rigorous
+> run, the 5× MLX speed-up, "93 tests, 95 % coverage" — are withdrawn
+> or stale, and the repository has moved to the `hypneum-lab`
+> organisation. Do not post them as written; rewrite from
+> `README.md` §Quantitative results.
+
 Draft posts for X / Bluesky / LinkedIn / Hacker News. Copy, edit to
 your voice, fire when ready.
 

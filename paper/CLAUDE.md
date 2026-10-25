@@ -6,16 +6,22 @@ back every numerical claim, and a packaged `arxiv_bundle/` +
 `kiki-flow-arxiv-v0.5.zip`.
 
 This is the **fast-path** run (target ~2 min 31 s on GrosMac M5). The
-companion **rigorous** run (84 min) lives in `paper_rigorous/`.
+companion **rigorous** runs live in `paper_rigorous/` (historical,
+defective prox, 84 min; provenance only) and in
+`paper_rigorous_fixedprox/`, `paper_rigorous_fixedeps/`,
+`paper_rigorous_maxiter/` (corrected solver, about 12.5 min on M1 Max
+CPU; `ERRATUM.md` §7, §9, §10).
 
 ## Layout
 
 - `main.tex` / `main.pdf` — paper source + latest build.
 - `references.bib` — BibTeX; add entries here, not inline in `.tex`.
-- `figures/fig{1..6}_*.{pdf,png}` — 5 seeds of phase portraits, F-decay,
-  Turing, KL-vs-epsilon, CL-gap, hyperparam heatmap. Emitted by the
-  generators in `kiki_flow_core/track2_paper/figures/` via the scripts
-  in `scripts/`. Never hand-edit.
+- `figures/fig{1..6}_*.{pdf,png}` — per-species moments (fig1; the
+  former phase portrait plotted a constant, `ERRATUM.md` §5), F-decay,
+  Turing, KL-vs-epsilon (fig4, re-measured, `ERRATUM.md` §9), CL-gap,
+  hyperparam heatmap. Emitted by the generators in
+  `kiki_flow_core/track2_paper/figures/` via the scripts in `scripts/`
+  and the erratum drivers in `experiments/`. Never hand-edit.
 - `stats.json`, `cl_benchmark.json`, `cl_benchmark_ewc.json`,
   `epsilon_sweep.json`, `hyperparam_sweep.json`,
   `hyperparam_sweep_dense.json` — single source of truth for every
@@ -24,10 +30,11 @@ companion **rigorous** run (84 min) lives in `paper_rigorous/`.
 - `arxiv_bundle/` + `kiki-flow-arxiv-v0.5.zip` — packaged submission.
   Regenerate both together; never hand-edit one.
   Status: **superseded**. The bundle is a v0.5 snapshot and lags
-  `main.tex` / `references.bib` (latest tag `paper-v0.11-draft`, plus
-  untagged 2026-06 revisions and the 2026-10-24 erratum: it keeps the
-  withdrawn KL agreement, old Fig. 1 and old epsilon sweep). Its
-  `main.pdf` was not rebuilt. Regenerate both before any submission.
+  `main.tex` / `references.bib` (latest tag `paper-v0.13-draft`,
+  2026-10-25, which carries the 2026-06 revisions and the 2026-10-24/25
+  erratum; the bundle keeps the withdrawn KL agreement, old Fig. 1 and
+  old epsilon sweep). Its `main.pdf` was not rebuilt. Regenerate both
+  before any submission.
 
 ## Editing discipline
 

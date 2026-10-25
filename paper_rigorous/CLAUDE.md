@@ -1,8 +1,11 @@
-# paper_rigorous — 84-minute full-W2-prox verification run
+# paper_rigorous — historical rigorous run (defective prox, superseded)
 
-Artifact-only directory. Proves the qualitative claims from the fast
-path (`paper/`) survive the rigorous setup: MLX Sinkhorn backend,
-`apply_w2_prox=True`, 100 slow steps, 10k particles, 5 seeds.
+Artifact-only directory. It was meant to check that the qualitative
+claims from the fast path (`paper/`) survive the rigorous setup:
+`apply_w2_prox=True`, 100 slow steps, 10k particles, 5 seeds. Its prox
+was defective (`ERRATUM.md` §1) and, with the corrected operator, the
+two paths do not agree (§7, §9). These artefacts are kept for
+provenance only; the corrected reruns are listed below.
 
 ## What lives here
 
@@ -24,13 +27,18 @@ artifact drop.
 
 Driven from the same `kiki_flow_core/track2_paper/paper_run.py` entry
 point as the fast path, with `backend={"simulator": "mlx", "w2_prox":
-true}` and `n_slow=100`. Output directory is `paper_rigorous/`.
+true}` and `n_slow=100`. Write new runs to a new directory: this one
+holds the historical artefacts and is not overwritten.
 
-Erratum (2026-10-24): the committed artefacts here were produced with
-the pre-`ffee5d9` POT `prox_w2`, whose output ignored the reference.
-The ~84 min timing is for that old operator and the "roughly 5x faster
-with the native MLX Sinkhorn" note is withdrawn. A rerun with the
-fixed prox is pending (see `ERRATUM.md`).
+Erratum (2026-10-24/25): the committed artefacts here were produced
+with the pre-`ffee5d9` POT `prox_w2`, whose output ignored the
+reference. The ~84 min timing is for that old operator and the
+"roughly 5x faster with the native MLX Sinkhorn" note is withdrawn.
+Reruns with the corrected operator (M1 Max, MLX on CPU, 5 seeds):
+`paper_rigorous_fixedprox/` (corrected prox, effective Sinkhorn reg
+0.05, 12 min 42 s), `paper_rigorous_fixedeps/` (ε = 0.01 forwarded,
+12 min 35 s), `paper_rigorous_maxiter/` (plus `max_iter` = 1000,
+12 min 45 s). See `ERRATUM.md` §7, §9, §10.
 
 Never run this from an editor terminal that might be suspended —
 resuming a suspended MLX process leaves the Metal context in a bad

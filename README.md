@@ -30,7 +30,7 @@ quantitative results over five seeds.
 | Track | Purpose | Performance | Status |
 |---|---|---|---|
 | `track1_perf` | Nightly offline consolidation over the LoRA stack tensor (40 hybrid species). | ~30 min on Studio M3 Ultra (host powered down since 2026-10 ; not re-run since). | tag `track1-v0.1` |
-| `track2_paper` | N-particle Langevin × JKO entropic-regularized proxy for paper figures (4 Levelt-Baddeley species). | 2 min 31 s fast (GrosMac M5, GPU) / 12 min 42 s rigorous with the corrected prox (M1 Max, CPU; the old 84 min timed the defective prox, see `ERRATUM.md`). | tag `track2-v0.1` |
+| `track2_paper` | N-particle Langevin × JKO entropic-regularized proxy for paper figures (4 Levelt-Baddeley species). | 2 min 31 s fast (GrosMac M5, GPU); 12 min 35 s to 12 min 45 s rigorous with the corrected solver over the three 2026-10-24 reruns (M1 Max, CPU). The old 84 min timed the defective prox, see `ERRATUM.md`. | tag `track2-v0.1` |
 | `track3_deploy` | Pure-NumPy streaming surrogate, MiniLM query encoder, advisory-only routing. | p50 = 0.04 ms on GrosMac M5. | tag `track3-v0.1` |
 
 T1 runs are gated by `DriftTrigger`: it fires when the new-concept rate in
@@ -45,8 +45,13 @@ flag; `threshold_off=None` restores the old memoryless trigger. Details in
 `scripts/drift_trigger_sweep.py`.
 
 All three tracks share `kiki_flow_core/` (state, master equation,
-Wasserstein ops, species, modules, hooks, telemetry). 230+ tests
-(`uv run pytest`, golden NPZ regressions), strict ruff + mypy.
+Wasserstein ops, species, modules, hooks, telemetry). Strict ruff +
+mypy; golden NPZ regressions in `tests/golden/`. Test count and
+coverage are whatever CI measures (`uv run pytest`), not a fixed
+number: on the `main` run of 2026-10-25 (`175551c`, GitHub Actions run
+40198407183) pytest reported 333 tests collected (332 passed,
+1 deselected) and 87 % line coverage of `kiki_flow_core`. The CI badge
+above tracks the current state.
 
 ## Install
 
@@ -80,25 +85,34 @@ Full reproduction (ε-sweep, CL benchmarks, dense sweep, fast-vs-rigorous KL): s
 
 ## Reproduce the paper
 
-The paper's five figures are produced by three scripts. Each is
-deterministic under the given seeds.
+The fast-path figures and statistics are produced by the scripts
+below; each is deterministic under the given seeds. The rigorous-path
+reruns and the regenerated Fig. 1 (per-species moments, both paths)
+and Fig. 4 (ε as Sinkhorn regularisation only) are driven by the
+erratum scripts listed in `ERRATUM.md` §7, §9 and §10
+(`experiments/erratum_reruns_2026_10_24.py`,
+`experiments/erratum_reg_reruns_2026_10_24.py`,
+`experiments/erratum_maxiter_reruns_2026_10_25.py`); they write to new
+directories and leave the historical outputs untouched.
 
 ```bash
-# Figure 1-3: phase portraits + F-decay + Turing profiles (5 seeds, fast path, ~2 min 31 s)
+# Figures 2-3: F-decay + Turing profiles, fast-path stats (5 seeds, ~2 min 31 s on M5)
 PYTHONPATH=. uv run python -c "
 from pathlib import Path
 from kiki_flow_core.track2_paper.paper_run import run_paper
 run_paper(seeds=[0,1,2,3,4], out_dir=Path('paper'), make_all_figures=True)
 "
 
-# Figure 4: measured Sinkhorn epsilon bias
+# Historical epsilon sweep (conflates epsilon with the prox step; superseded, ERRATUM.md §9)
 PYTHONPATH=. uv run python scripts/epsilon_sweep.py
 
 # Figure 5: measured continual-learning proxy (5 seeds)
 PYTHONPATH=. uv run python scripts/cl_benchmark.py
 
-# Hyperparameter sweep (72 configs, dense) to reproduce the specialization finding
+# Hyperparameter sweeps, fast path: 27-config coarse grid (paper/hyperparam_sweep.json)
+# and 72-config dense grid (paper/hyperparam_sweep_dense.json, the specialization finding)
 PYTHONPATH=. uv run python scripts/hyperparam_sweep.py
+PYTHONPATH=. uv run python scripts/hyperparam_sweep_dense.py
 
 # Compile the LaTeX paper (requires tectonic or a TeX distribution)
 cd paper && tectonic main.tex
@@ -138,24 +152,35 @@ Run the full test suite:
 uv run pytest --cov=kiki_flow_core
 ```
 
-## Quantitative results (paper draft on `main`, last tag `paper-v0.11-draft`)
+## Quantitative results (paper draft on `main`, last tag `paper-v0.13-draft`)
 
-> **Erratum (2026-10-24).** Two W2 proximal-operator defects affected
-> the rigorous timing, the fast-vs-rigorous agreement, the ε-sweep and
-> the MLX speedup (withdrawn). The rows below give the values re-measured
-> with the corrected operator. Fast-path-only results describe the
-> projected-gradient scheme. See [`ERRATUM.md`](ERRATUM.md).
+> **Erratum (2026-10-24/25).** Four defects affected the rigorous
+> (entropic-W2) path: the POT and MLX `prox_w2` ignored their reference
+> (`ERRATUM.md` §1), `FullJKOSolver.epsilon` was never forwarded, so
+> Sinkhorn ran at reg = h = 0.05 where the paper states ε = 0.01 (§9),
+> and `max_iter` was not forwarded (§10; no reported number changes).
+> Withdrawn: the 5× / 5.13× MLX speedup, the fast-vs-rigorous
+> "agreement", the old ε-sweep and the old Fig. 1. Only runs that call
+> this prox are affected; fast-path results (Figs. 2–3, sweeps, CL
+> benchmarks) never did and describe the projected-gradient scheme. An
+> ε sweep (§11) shows the Sinkhorn temperature does not explain the
+> fast/rigorous discrepancy; its residual cause is not isolated. Public
+> record: GitHub releases `paper-v0.12-draft` and `paper-v0.13-draft`,
+> Zenodo [10.5281/zenodo.23619954](https://doi.org/10.5281/zenodo.23619954)
+> (v0.12) and [10.5281/zenodo.23636477](https://doi.org/10.5281/zenodo.23636477)
+> (v0.13). The rows below give the values re-measured with the
+> corrected solver. See [`ERRATUM.md`](ERRATUM.md).
 
 | Claim | Measured value | Source |
 |---|---|---|
-| Flow tractable at scale | 5 seeds × 100 slow × 10k particles: fast 2 min 31 s (M5, GPU) or 3 min 37 s (M1 Max, CPU); rigorous with the corrected prox 12 min 42 s (M1 Max, CPU). The old 84 min timed the defective prox | `paper/stats.json`, `paper_rigorous_fixedprox/stats.json` |
-| Fast vs rigorous agreement (corrected prox) | **They do not agree**: KL(rigorous‖fast) = 0.218 ± 0.026 nats (reduced setup, 5 seeds), 0.262 ± 0.014 nats at paper scale; previously reported 0.000638 with the defective prox | `paper/erratum_2026_10_24/` |
-| Emergent specialization under asymmetric potentials | Mean entropy 2.60 bits vs max 4.00 bits (gap 1.40 bits, 35 % below max) at `(α, β, γ) = (5, 1, 0)` | `paper/hyperparam_sweep.json` |
+| Flow tractable at scale | 5 seeds × 100 slow × 10k particles: fast 2 min 31 s (M5, GPU) or 3 min 37 s (M1 Max, CPU); rigorous with the corrected solver 12 min 35 s to 12 min 45 s over the three 2026-10-24 reruns (M1 Max, CPU; latest: ε = 0.01, `max_iter` = 1000, 765 s). The old 84 min timed the defective prox | `paper/stats.json`, `paper_rigorous_fixedprox/stats.json`, `paper_rigorous_fixedeps/stats.json`, `paper_rigorous_maxiter/stats.json` |
+| Fast vs rigorous agreement (corrected solver) | **They do not agree**: KL(rigorous‖fast) = 0.218 ± 0.026 nats (reduced setup, ε = h = 0.05, 5 seeds); 0.272 ± 0.014 nats at paper scale with ε = 0.01 (0.262 before the §9 fix); previously reported 0.000638 with the defective prox | `paper/erratum_2026_10_24/fast_vs_rigorous_kl_fixed.json`, `paper/erratum_2026_10_24_reg/fig1_species_moments_summary_reg.json` |
+| Specialization under asymmetric potentials (none under flat potentials) | Fast path: gap 2.04 bits at the best of the 72-point dense grid, `(α, β, γ) = (10, 1, 0)`; 2.94 ± 0.03 bits at (30, 4, 0) in the widened sweep. Rigorous path (ε = 0.01, 138 points × 10 seeds): the gap saturates at 1.46 ± 0.05 bits at (15, 0.2, 0) and is 1.28 ± 0.07 at (10, 1, 0). The β trend has opposite signs on the two paths | `paper/hyperparam_sweep_dense.json`, `paper/rigorous_specialisation_wide_2026_10_24_reg/summary.json` |
 | Streaming surrogate latency | p50 = 0.04 ms, p99 = 0.06 ms (v0.1, `state_dim=16`); p50 = 0.37 ms (v0.2-d128, `state_dim=128`) | `bench/T3_latency.jsonl` |
 | Continual-learning retention (honest trade-off) | Task 1 with cons. 0.90 ± 0.07 / without 0.29 ± 0.07; Task 3 with 0.004 / without 0.81 | `paper/cl_benchmark.json` |
 | Real-LLM continual learning, 500-sample regime (Qwen3-4B 4-bit LoRA, 5 seeds) | SST-2: forgetting 0.085 ± 0.030; CoLA: apparent positive transfer; BoolQ: 0.565 ± 0.023 (data-limited) | `bench/cl_llm/runs/e2_5seeds_summary.json` |
 | Real-LLM continual learning, 5000-sample regime (5 seeds) | SST-2: forgetting **0.361 ± 0.010** (4.2× higher); CoLA: forgetting 0.129 ± 0.021; positive-transfer artefact disappears | `bench/cl_llm/runs/e3_5k_5seeds_summary.json` |
-| ε-dependence of one entropic prox step (corrected) | KL(ρ_ε ‖ ρ_0.001) = 4.7e-4 nats at ε = 0.01, 0.23 at 0.05, 0.67 at 0.1. The former "0 → 8.3 bits" was an artefact of the defective prox | `paper/erratum_2026_10_24/epsilon_sweep_fixed.json` |
+| ε-dependence of one entropic prox step (ε as Sinkhorn regularisation only, prox step h = 0.05) | KL(ρ_ε ‖ ρ_0.001) = 3.5e-4 nats at ε = 0.01, 0.011 at 0.05, 0.016 at 0.1. The former "0 → 8.3 bits" was an artefact of the defective prox; the 2026-10-24 intermediate values (0.23 / 0.67 nats) conflated ε with the prox step (`ERRATUM.md` §9) | `paper/erratum_2026_10_24_reg/epsilon_sweep_reg.json` |
 | Entropic JKO is the real Peyré bias, not a grid artefact (pre-registered OU test) | Grid-invariant 321→4001 pts (0 % change); no-entropy null Var* ≈ 2.8e-15; stationary floor Var* = (ε/τ)·g(τ) with g(τ)→0.5 as τ→0 (textbook ε/(2τ)) | `experiments/results/e1b_peyre_bias.json` |
 | Propagation-of-chaos preconditions (E2) | Convex on simplex tangent (worst eig 2.831), L ≈ 18.5, Bakry–Émery LSI ≥ 2.831 — but only because KL entropy dominates the indefinite coupling J_sym (min eig −0.288); **not uniform** | `experiments/results/e2_poc_preconditions.json` |
 | MLX vs NumPy W2 prox (corrected operator, per call) | MLX **slower** at the paper grid sizes (NumPy/MLX = 0.10 at n = 16, 0.15 at n = 64) and faster only from n ≈ 1024 (1.32 at 1024, 4.26 at 2048; M1 Max). The former "5.13× faster than POT" claim is **withdrawn** — see `ERRATUM.md` | `PERFORMANCE.md`, `tests/track2_paper/test_mlx_prox_w2.py` |
@@ -206,13 +231,15 @@ kiki-flow-research/
 │   ├── track1_perf/                # Eulerian grid + offline consolidator
 │   ├── track2_paper/               # Particles + JKO + figures
 │   └── track3_deploy/              # Pure-numpy surrogate + streaming runner
-├── tests/                          # 230+ tests, golden NPZ regressions
+├── tests/                          # pytest suite, golden NPZ regressions; count and coverage as measured by CI (see above)
 ├── scripts/                        # Reproducibility scripts
 │   └── cl_llm_bench/               # Real-LLM CL: stub / preflight / real modes
 │       └── kxkm_trainer/           # Standalone 4-bit QLoRA trainer (runs on kxkm-ai)
 ├── paper/                          # main.tex, main.pdf, figures, JSON stats
-├── paper_rigorous/                 # historical 84-min rigorous run (defective prox, see ERRATUM.md)
-├── paper_rigorous_fixedprox/       # corrected rigorous run, 12 min 42 s on M1 Max
+├── paper_rigorous/                 # Historical 84-min rigorous run (defective prox, see ERRATUM.md; kept for provenance)
+├── paper_rigorous_fixedprox/       # Corrected rigorous reruns, 12 min 35 s to 12 min 45 s on M1 Max (ERRATUM.md §7, §9, §10)
+├── paper_rigorous_fixedeps/
+├── paper_rigorous_maxiter/
 ├── bench/                          # SLO latency records
 │   └── cl_llm/runs/                # Per-seed real-CL manifests + summary
 └── docs/superpowers/               # Specs, plans, integration, patches
@@ -230,14 +257,24 @@ the normative scaffolding for this engine.
 
 ## Citation
 
-Draft pre-print. The latest tagged paper version is `paper-v0.11-draft`
-(2026-04-22); `paper/main.tex` on `main` adds the untagged 2026-06
-external-review revisions (E1b, E2). The packaged
-`paper/kiki-flow-arxiv-v0.5.zip` / `paper/arxiv_bundle/` is an older
-v0.5 snapshot, **superseded** since the 2026-10-24 erratum: it still
-carries the withdrawn fast-vs-rigorous agreement, the old Fig. 1 and the
-old ε-sweep (see `ERRATUM.md`). Use `paper/main.pdf`; the bundle must be
-regenerated from `paper/main.tex` before any submission.
+Draft pre-print, single author (Clément Saillant). The latest tagged
+paper version is `paper-v0.13-draft` (2026-10-25, erratum update:
+solver ε and `max_iter` fixes; Zenodo
+[10.5281/zenodo.23636477](https://doi.org/10.5281/zenodo.23636477)),
+preceded by `paper-v0.12-draft` (2026-10-24, corrected-prox reruns;
+Zenodo [10.5281/zenodo.23619954](https://doi.org/10.5281/zenodo.23619954)).
+The concept DOI
+[10.5281/zenodo.19666755](https://doi.org/10.5281/zenodo.19666755)
+resolves to the latest version. Every tag up to `paper-v0.11-draft`,
+and the Zenodo record 10.5281/zenodo.19666756 (`paper-v0.8-draft`),
+carry claims withdrawn by `ERRATUM.md`. The package version in
+`pyproject.toml` (`0.0.1`) is independent of the paper tags. The
+packaged `paper/kiki-flow-arxiv-v0.5.zip` / `paper/arxiv_bundle/` is
+an older v0.5 snapshot, **superseded** since the 2026-10-24 erratum: it
+still carries the withdrawn fast-vs-rigorous agreement, the old Fig. 1
+and the old ε-sweep. Use `paper/main.pdf`; the bundle must be
+regenerated from `paper/main.tex` before any submission. Not submitted
+to arXiv.
 
 ```bibtex
 @unpublished{kiki-flow-2026,
@@ -245,8 +282,9 @@ regenerated from `paper/main.tex` before any submission.
   title  = {Hybrid Cognitive-Fluid Dynamics for Language Production:
             A Wasserstein Gradient Flow Perspective},
   year   = 2026,
+  doi    = {10.5281/zenodo.23636477},
   url    = {https://github.com/hypneum-lab/kiki-flow-research},
-  note   = {Draft; code, data, and figures released under MIT at tag paper-v0.11-draft}
+  note   = {Draft; code, data, and figures released under MIT at tag paper-v0.13-draft; see ERRATUM.md}
 }
 ```
 

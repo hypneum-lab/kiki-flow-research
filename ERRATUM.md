@@ -1,10 +1,22 @@
 # Erratum — W2 proximal operator defects (2026-10-24)
 
-Status: sections 1–6 were written before the reruns (PR #18); section 7
-has the rerun results and section 8 the PI decisions (2026-10-24).
-No historical result JSON or zip has been edited: the reruns are
-written to new files. `paper/main.pdf` was rebuilt from the corrected
-source (§8, item 6); earlier PDFs remain in the tags and releases.
+Status: sections 1–6 were written before the reruns (PR #18); §7 has
+the rerun results and §8 the PI decisions (2026-10-24); §9 and §10
+record two further solver defects fixed on 2026-10-24/25 (`epsilon`
+and `max_iter` not forwarded) with their reruns; §11 is the
+PI-validated verification of §9 (ε sweep, 2026-10-25). No historical
+result JSON or zip has been edited: the reruns are written to new
+files. `paper/main.pdf` was rebuilt from the corrected source (§8,
+item 6, and again for `paper-v0.13-draft`); earlier PDFs remain in the
+tags and releases. Public record: GitHub releases `paper-v0.12-draft`
+(2026-10-24) and `paper-v0.13-draft` (2026-10-25); Zenodo
+10.5281/zenodo.23619954 (v0.12) and 10.5281/zenodo.23636477 (v0.13),
+concept DOI 10.5281/zenodo.19666755 (§6).
+
+Scope: only runs that call the W2 prox — the rigorous path — are
+affected, and §2 lists them one by one. Fast-path results never call
+the prox. The ε defect of §9 is a documentation and reproducibility
+defect; §11 shows it is not the cause of the fast/rigorous discrepancy.
 
 ## 1. The two defects
 
@@ -160,6 +172,15 @@ corrected code; none is claimed.
   `paper-v0.7-draft` ship a `main.pdf`. Zenodo DOI
   `10.5281/zenodo.19666756` archives `paper-v0.8-draft`, which contains
   both claims.
+- Corrected record (added 2026-10-25). GitHub releases
+  `paper-v0.12-draft` (2026-10-24, `e17d115`) and `paper-v0.13-draft`
+  (2026-10-25, `c484b7d`) carry release notes and a rebuilt `main.pdf`.
+  Zenodo archives them as `10.5281/zenodo.23619954` (v0.12, published
+  2026-10-24) and `10.5281/zenodo.23636477` (v0.13, published
+  2026-10-25); the concept DOI `10.5281/zenodo.19666755` resolves to the
+  latest version. `paper-v0.12-draft` still has the §9 and §10 solver
+  defects (effective Sinkhorn reg 0.05, 100 Dykstra iterations);
+  `paper-v0.13-draft` is the first tag with both fixes.
 
 ## 7. Reruns with the corrected prox (done 2026-10-24)
 
@@ -212,8 +233,10 @@ Still pending:
 3. Fig. 4: replaced by the re-measured curve, in nats, with the
    ε-conflation caveat.
 4. Fig. 1: replaced by per-species moments.
-5. Public notice: a note on the GitHub releases and a new Zenodo
-   version. Drafted, **not published**; awaiting PI confirmation.
+5. Public notice: done. Release notes on GitHub for
+   `paper-v0.12-draft` (2026-10-24) and `paper-v0.13-draft`
+   (2026-10-25); Zenodo versions `10.5281/zenodo.23619954` and
+   `10.5281/zenodo.23636477` (§6).
 6. PDF / bundle: `paper/main.pdf` rebuilt from `paper/main.tex` at
    `087d1f6` on 2026-10-24 (electron-server, Tectonic 0.17.0, TeX
    bundle `tlextras-2022.0r0`, 16 pages, no undefined reference or
@@ -439,6 +462,15 @@ What it shows (no further interpretation):
   step of this reduced setup, is 22.1–22.4 and 16.4–16.8 nats and moves
   by ≤ 0.3 nats with ε. It is not the paper-scale KL of §7/§9
   (0.272 ± 0.014 nats), which this sweep does not recompute.
+
+Residual cause: not isolated by this sweep. Two other differences
+between the paths are untouched by ε: the prox anchors each update to
+the particle histogram ρ_τ (its `reference`), and `MultiscaleLoop.run`
+does not feed the JKO output back into the particles (§5, item 4;
+`kiki_flow_core/track2_paper/multiscale_loop.py`). Both are candidates
+for the 0.4–0.8 bit discrepancy and need their own ablations; neither
+has been run. The §9 defect therefore stands as a documentation and
+reproducibility defect, not as the cause of the discrepancy.
 
 Decision (PI, 2026-10-25): keep §9 as the record of the fix, append this
 section as its verification; no paper number changes (the paper already

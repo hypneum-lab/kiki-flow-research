@@ -13,7 +13,9 @@ to this file are not allowed (run the script and regenerate).
 | Fast path | 5 seeds × 100 slow × 10 k particles, grid 64, `use_w2_prox=False` | **2 min 31 s** | GrosMac M5 | `paper/stats.json` |
 | Rigorous path (historical) | same, `use_w2_prox=True`, old POT prox | 84 min (defective prox; see `ERRATUM.md`) | GrosMac M5 | `paper_rigorous/stats.json` |
 | Fast path (rerun) | same as fast, MLX simulator on CPU device | 3 min 37 s | M1 Max (macM1) | `paper_rigorous_fixedprox/fast/stats.json` |
-| Rigorous path (rerun) | same, corrected Dykstra `prox_w2`, ε = 0.01, MLX on CPU | **12 min 42 s** | M1 Max (macM1) | `paper_rigorous_fixedprox/stats.json` |
+| Rigorous path (rerun) | same, corrected Dykstra `prox_w2`, MLX on CPU; configured ε = 0.01 but effective Sinkhorn reg 0.05 (`ERRATUM.md` §9) | 12 min 42 s | M1 Max (macM1) | `paper_rigorous_fixedprox/stats.json` |
+| Rigorous path (rerun, ε forwarded) | same, ε = 0.01 as Sinkhorn reg (`ERRATUM.md` §9) | 12 min 35 s | M1 Max (macM1) | `paper_rigorous_fixedeps/stats.json` |
+| Rigorous path (rerun, ε and `max_iter` forwarded) | same, ε = 0.01, `max_iter` = 1000 (`ERRATUM.md` §10) | **12 min 45 s** | M1 Max (macM1) | `paper_rigorous_maxiter/stats.json` |
 | Rigorous reduced | grid 16, 5 slow, 100 particles, POT | 29.72 s (pre-fix prox; see `ERRATUM.md`) | GrosMac M5 | `bench/sinkhorn_backend_bench.jsonl` |
 | Rigorous reduced | same, MLX backend | 5.79 s — **withdrawn**: timed a defective MLX prox; the former "5.13× faster than POT" claim does not hold (see `ERRATUM.md`) | GrosMac M5 | `bench/sinkhorn_backend_bench.jsonl` |
 
@@ -222,11 +224,13 @@ from kiki_flow_core.track2_paper.paper_run import run_paper
 run_paper(seeds=[0,1,2,3,4], out_dir=Path('paper'), make_all_figures=True)
 "
 
-# Rigorous path (~ 84 min)
+# Rigorous path (~ 12.5 min on M1 Max CPU with the corrected solver; the
+# historical 84 min timed the defective prox). Write to a new directory:
+# paper_rigorous/ holds the historical artefacts and is not overwritten.
 PYTHONPATH=. uv run python -c "
 from pathlib import Path
 from kiki_flow_core.track2_paper.paper_run import run_paper
-run_paper(seeds=[0,1,2,3,4], out_dir=Path('paper_rigorous'), use_w2_prox=True)
+run_paper(seeds=[0,1,2,3,4], out_dir=Path('paper_rigorous_rerun'), use_w2_prox=True)
 "
 
 # Dedicated sweeps (a few minutes each)
