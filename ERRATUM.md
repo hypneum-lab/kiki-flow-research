@@ -347,9 +347,9 @@ reported precision (0.01 bit) on seeds 0–1, the full rerun was not
 worth the compute. No number in `paper/main.tex` changes; the paper and
 its PDF are not edited.
 
-## 11. 2026-10-25 — Sinkhorn regularisation defaulted to h (PROPOSED)
+## 11. 2026-10-25 — Sinkhorn regularisation defaulted to h (verification)
 
-**Status: PROPOSED — to be validated by the PI.** Independent re-check
+**Status: validated by the PI (2026-10-25).** Independent re-check
 (review R3) of the §9 defect: the exact call chain, the revisions it
 affects, and an ε-sensitivity sweep of the rigorous specialisation gap
 on a second host. No paper number is changed by this section.
@@ -440,7 +440,7 @@ What it shows (no further interpretation):
   by ≤ 0.3 nats with ε. It is not the paper-scale KL of §7/§9
   (0.272 ± 0.014 nats), which this sweep does not recompute.
 
-Proposed decision (PI): keep §9 as the record of the fix, append this
+Decision (PI, 2026-10-25): keep §9 as the record of the fix, append this
 section as its verification; no paper number changes (the paper already
 uses the ε = 0.01 reruns); optionally quote the ε-insensitivity
 (≤ 0.04 bits over 0.01–0.05) in the rigorous-path paragraph.
