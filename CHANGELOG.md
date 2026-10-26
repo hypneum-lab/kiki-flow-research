@@ -2,7 +2,34 @@
 
 All notable releases of `kiki-flow-research`. Dates in YYYY-MM-DD.
 
-## [Unreleased] — 2026-10-25 (ε sweep, phase 0 truth pass)
+## [Unreleased] — 2026-10-25 (entropic JKO default, excess over Gibbs)
+
+### Changed (breaking for the rigorous path)
+- The "rigorous" slow step is now the entropic JKO step of F
+  (`FullJKOSolver` / `MLXFullJKOSolver` / `JKOStep(apply_w2_prox=True)`
+  default `scheme="jko_entropic"`, Sinkhorn reg = h² unless `epsilon` is
+  given) and `MultiscaleLoop` / `run_paper` reinject the JKO output into
+  the particles by default (`reinject=True`). PI decision of
+  2026-10-25; `ERRATUM.md` §13. The fast path (Euclidean descent without
+  prox, also used by T1/T3) is unchanged.
+- `scheme="legacy_split"` (with `reinject=False`) stays available and
+  documented; every experiment and script that reproduces a committed
+  number before 2026-10-25 pins it explicitly.
+- Specialisation is reported as the excess over the Gibbs equilibrium
+  of the potentials (gap − gap_Gibbs, bootstrap CI over seeds);
+  `paper/main.tex` (abstract, §5, conclusion) and `README.md` reworded:
+  no claim of emergent specialisation in the regime studied (excess
+  −0.39 [−0.42, −0.36] bits at (10, ·, 0)). PDF not rebuilt.
+
+### Added
+- `JKOStep(scheme="jko_entropic")`, `FreeEnergy.kl_prox_log`,
+  `wasserstein_ops.jko_entropic_prox`, `MultiscaleLoop(reinject=...)`
+  (PR #45); JKO step identification note and check (PR #40);
+  specialisation sweep under the entropic step (PR #46);
+  `experiments/excess_over_gibbs_2026_10_25.py`;
+  `experiments/paper_scale_jko_entropic_2026_10_25.py`.
+
+## [Unreleased, earlier] — 2026-10-25 (ε sweep, phase 0 truth pass)
 
 ### Added
 - ε sweep of the rigorous specialisation gap, ε ∈ {0.01, 0.02, 0.05}

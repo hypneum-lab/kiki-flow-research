@@ -107,6 +107,7 @@ def test_kiki_step_forwards_h_reg_and_dykstra_count() -> None:
     np.testing.assert_allclose(calls[0]["reference"], spec.rho_tau)
     # Same output as building FullJKOSolver by hand.
     solver = mod.FullJKOSolver(
+        scheme="legacy_split",
         f_functional=f,
         h=H,
         support=x.reshape(-1, 1),

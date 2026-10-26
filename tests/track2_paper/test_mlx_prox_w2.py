@@ -124,7 +124,14 @@ def test_mlx_full_jko_step_matches_numpy_full_jko_step():
         tau=0,
         metadata={"track_id": "T2"},
     )
-    kw = {"f_functional": ZeroF(), "h": 0.05, "support": support, "epsilon": 0.05, "n_inner": 3}
+    kw = {
+        "f_functional": ZeroF(),
+        "h": 0.05,
+        "support": support,
+        "epsilon": 0.05,
+        "n_inner": 3,
+        "scheme": "legacy_split",
+    }
     out_np = FullJKOSolver(**kw).step(state).rho["phono"]
     out_mlx = MLXFullJKOSolver(**kw).step(state).rho["phono"]
     np.testing.assert_allclose(out_mlx, out_np, rtol=0, atol=PARITY_ATOL)

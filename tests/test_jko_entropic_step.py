@@ -166,20 +166,25 @@ def test_t2_nonseparable_grad_includes_turing_term() -> None:
     assert np.abs(g_on - g_off).max() > 0.0
 
 
-def test_step_rejects_unknown_scheme_and_keeps_legacy_default() -> None:
+def test_step_rejects_unknown_scheme_and_resolves_defaults() -> None:
+    """Defaults since 2026-10-25: entropic JKO with a prox (reg = h^2), descent without."""
     support = _support(4)
     with pytest.raises(ValueError, match="scheme"):
         JKOStep(f_functional=ZeroF(), h=0.1, support=support, scheme="bogus")  # type: ignore[arg-type]
-    jko = JKOStep(f_functional=ZeroF(), h=0.1, support=support)
-    assert jko.scheme == "legacy_split"
     assert SCHEMES == ("legacy_split", "jko_entropic")
-    solver = FullJKOSolver(f_functional=ZeroF(), h=0.1, support=support, epsilon=0.01)
-    assert solver.scheme == "legacy_split"
-    solver = FullJKOSolver(
-        f_functional=ZeroF(), h=0.1, support=support, epsilon=0.01, scheme="jko_entropic"
-    )
+    fast = JKOStep(f_functional=ZeroF(), h=0.1, support=support)
+    assert fast.scheme == "legacy_split"
+    rigorous = JKOStep(f_functional=ZeroF(), h=0.1, support=support, apply_w2_prox=True)
+    assert rigorous.scheme == "jko_entropic"
+    solver = FullJKOSolver(f_functional=ZeroF(), h=0.1, support=support)
     assert solver.scheme == "jko_entropic"
-    assert solver.reg == 0.01  # noqa: PLR2004
+    assert solver.reg == pytest.approx(0.1**2)
+    assert solver.epsilon == pytest.approx(0.1**2)
+    legacy = FullJKOSolver(f_functional=ZeroF(), h=0.1, support=support, scheme="legacy_split")
+    assert legacy.scheme == "legacy_split"
+    assert legacy.reg == 0.01  # noqa: PLR2004  (historical default)
+    explicit = FullJKOSolver(f_functional=ZeroF(), h=0.1, support=support, epsilon=0.02)
+    assert explicit.reg == 0.02  # noqa: PLR2004
 
 
 def test_entropic_step_with_zero_f_is_the_entropic_self_prox() -> None:
@@ -202,7 +207,9 @@ def test_entropic_step_with_zero_f_is_the_entropic_self_prox() -> None:
     assert_invariants(out)
     np.testing.assert_allclose(out.rho["phono"], rho, atol=IDENTITY_TOL)
     # Legacy scheme on the same object parameters is untouched (prox_fn spy).
-    legacy = JKOStep(f_functional=ZeroF(), h=H, support=support, apply_w2_prox=True)
+    legacy = JKOStep(
+        f_functional=ZeroF(), h=H, support=support, apply_w2_prox=True, scheme="legacy_split"
+    )
     assert legacy.scheme == "legacy_split"
     calls: list[dict] = []
     inner = legacy.prox_fn

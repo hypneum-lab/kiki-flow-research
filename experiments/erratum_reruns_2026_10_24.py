@@ -126,7 +126,9 @@ def run_eps() -> None:
 def _final(jko: JKOStep, seed: int, grid: int, n_particles: int, n_fast: int, n_slow: int):
     species, support, _ = setup(grid)
     sim = MLXParticleSimulator(species=species, n_particles=n_particles, latent_dim=2, seed=seed)
-    loop = MultiscaleLoop(sim=sim, jko=jko, n_fast=n_fast, n_slow=n_slow, support=support)
+    loop = MultiscaleLoop(
+        reinject=False, sim=sim, jko=jko, n_fast=n_fast, n_slow=n_slow, support=support
+    )
     return loop.run(seed=seed)["trajectory"]
 
 
@@ -138,7 +140,9 @@ def run_fvr() -> None:
     for seed in SEEDS:
         _, support, f_func = setup(grid)
         fast_jko = JKOStep(f_functional=f_func, h=0.05, support=support, n_inner=10)
-        rig_jko = FullJKOSolver(f_functional=f_func, h=0.05, support=support, epsilon=0.05)
+        rig_jko = FullJKOSolver(
+            scheme="legacy_split", f_functional=f_func, h=0.05, support=support, epsilon=0.05
+        )
         fast = _final(fast_jko, seed, grid, n_particles, n_fast, n_slow)[-1].rho
         rig = _final(rig_jko, seed, grid, n_particles, n_fast, n_slow)[-1].rho
         kl_sp = {n: kl(np.asarray(rig[n]), np.asarray(fast[n])) for n in fast}
@@ -171,7 +175,9 @@ def run_full(kind: str, seeds: list[int], n_slow: int, out_dir: Path) -> None:
         _, support, f_func = setup(grid)
         jko: JKOStep
         if kind == "rigorous":
-            jko = FullJKOSolver(f_functional=f_func, h=0.05, support=support, epsilon=0.01)
+            jko = FullJKOSolver(
+                scheme="legacy_split", f_functional=f_func, h=0.05, support=support, epsilon=0.01
+            )
         else:
             jko = JKOStep(f_functional=f_func, h=0.05, support=support, n_inner=10)
         t0 = time.perf_counter()

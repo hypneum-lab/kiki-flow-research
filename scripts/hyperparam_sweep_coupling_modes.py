@@ -171,6 +171,7 @@ def run_one(
             return _e.apply_drift_splitting(state, h_drift=0.01)
 
     loop = MultiscaleLoop(
+        reinject=False,
         sim=sim,
         jko=jko,
         n_fast=200,

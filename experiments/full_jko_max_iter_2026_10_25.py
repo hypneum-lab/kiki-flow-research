@@ -108,11 +108,15 @@ def _recorder(solver: FullJKOSolver, keep: list[dict[str, Any]], every: int) -> 
 def record_paper(n_slow: int, every: int) -> list[dict[str, Any]]:
     err = _load("experiments_erratum_reruns", "erratum_reruns_2026_10_24.py")
     species, support, f_func = err.setup(64)
-    jko = FullJKOSolver(f_functional=f_func, h=0.05, support=support, epsilon=0.01)
+    jko = FullJKOSolver(
+        scheme="legacy_split", f_functional=f_func, h=0.05, support=support, epsilon=0.01
+    )
     calls: list[dict[str, Any]] = []
     _recorder(jko, calls, every)
     sim = MLXParticleSimulator(species=species, n_particles=10_000, latent_dim=2, seed=0)
-    MultiscaleLoop(sim=sim, jko=jko, n_fast=1000, n_slow=n_slow, support=support).run(seed=0)
+    MultiscaleLoop(
+        reinject=False, sim=sim, jko=jko, n_fast=1000, n_slow=n_slow, support=support
+    ).run(seed=0)
     return calls
 
 
@@ -125,7 +129,9 @@ def record_spec(every: int) -> dict[str, list[dict[str, Any]]]:
         calls: list[dict[str, Any]] = []
         _recorder(jko, calls, every)
         sim = MLXParticleSimulator(species=species, n_particles=500, latent_dim=2, seed=0)
-        loop = MultiscaleLoop(sim=sim, jko=jko, n_fast=200, n_slow=30, support=support)
+        loop = MultiscaleLoop(
+            reinject=False, sim=sim, jko=jko, n_fast=200, n_slow=30, support=support
+        )
         loop.run(seed=0)
         out[f"spec({alpha:g},{beta:g},{gamma:g})"] = calls
     return out

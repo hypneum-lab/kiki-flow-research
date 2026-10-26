@@ -56,10 +56,16 @@ def test_resample_particles_matches_target_histogram_and_keeps_tags() -> None:
     np.testing.assert_array_equal(again["positions"], out["positions"])
 
 
-def test_loop_reinject_flag_changes_dynamics_and_default_is_off() -> None:
+def test_loop_reinject_flag_changes_dynamics_and_default_is_on() -> None:
     species, support, f = _problem()
     jko = FullJKOSolver(
-        f_functional=f, h=0.05, support=support, epsilon=0.05, max_iter=50, n_inner=5
+        f_functional=f,
+        h=0.05,
+        support=support,
+        epsilon=0.05,
+        max_iter=50,
+        n_inner=5,
+        scheme="legacy_split",
     )
     runs = {}
     for reinject in (False, True):
@@ -77,7 +83,7 @@ def test_loop_reinject_flag_changes_dynamics_and_default_is_off() -> None:
         n_slow=N_SLOW,
         support=support,
     )
-    assert default_loop.reinject is False
+    assert default_loop.reinject is True  # default since 2026-10-25
     # First slow step identical (reinjection acts after it), later ones differ.
     first_off = runs[False]["trajectory"][0].rho
     first_on = runs[True]["trajectory"][0].rho

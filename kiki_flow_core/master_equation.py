@@ -78,19 +78,26 @@ class ZeroF(FreeEnergy):
 class JKOStep:
     """One slow step of the Wasserstein flow of F, in one of two schemes.
 
-    ``scheme="legacy_split"`` (default, unchanged behaviour): ``n_inner``
+    ``scheme=None`` (default) resolves to ``"jko_entropic"`` when
+    ``apply_w2_prox`` is set (the "rigorous" path; default since 2026-10-25,
+    ERRATUM.md section 13) and to ``"legacy_split"`` otherwise (the fast path:
+    Euclidean descent of F without prox, unchanged).
+
+    ``scheme="legacy_split"``: ``n_inner``
     projected Euclidean gradient sub-steps of F on the simplex (explicit Euler
     of the Euclidean gradient flow of F over time h), then, if
     ``apply_w2_prox``, ``prox_w2`` — Peyré's entropic JKO step of
     ``KL(. || d)`` anchored on rho_tau, d being the sub-step output. This is
     **not** the JKO step of F (``docs/notes/2026-10-25-jko-step-identification.md``);
-    it is kept for the reproducibility of past results.
+    it is kept, explicitly, for the reproducibility of past results.
 
     ``scheme="jko_entropic"``: the entropic JKO step of F itself,
     ``argmin_rho F(rho) + W_reg(rho, rho_tau) / (2h)``, by the generalised
     Sinkhorn iteration on ``F.kl_prox_log`` (``wasserstein_ops.jko_entropic_prox``,
     log domain). ``n_inner`` and ``apply_w2_prox`` are ignored; ``reg`` is the
-    Sinkhorn regularisation (default h), ``prox_n_iter`` the iteration count,
+    Sinkhorn regularisation (default h^2, the step-scaled rule validated on
+    2026-10-25; the legacy prox keeps its own default h), ``prox_n_iter`` the
+    iteration count,
     ``prox_tol`` an optional early-stopping tolerance on the scaling vector.
     Species are updated from the same input state (Jacobi), as in the legacy
     scheme.
@@ -106,11 +113,13 @@ class JKOStep:
         prox_fn: ProxFn | None = None,
         reg: float | None = None,
         prox_n_iter: int = 100,
-        scheme: Scheme = "legacy_split",
+        scheme: Scheme | None = None,
         prox_tol: float = 0.0,
     ) -> None:
         if h <= 0:
             raise ValueError("h must be positive")
+        if scheme is None:
+            scheme = "jko_entropic" if apply_w2_prox else "legacy_split"
         if scheme not in SCHEMES:
             raise ValueError(f"scheme must be one of {SCHEMES}, got {scheme!r}")
         self.f_functional = f_functional
@@ -175,7 +184,7 @@ class JKOStep:
                 epsilon=self.h,
                 support=self.support,
                 n_iter=self.prox_n_iter,
-                reg=self.reg,
+                reg=self.reg if self.reg is not None else self.h * self.h,
                 tol=self.prox_tol,
             )
         return state.model_copy(update={"rho": new_rho, "tau": state.tau + 1})

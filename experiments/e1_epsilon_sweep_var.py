@@ -33,12 +33,12 @@ from kiki_flow_core.track2_paper.full_jko_solver import FullJKOSolver
 EPSILONS = [1e-2, 5e-3, 2e-3, 1e-3, 5e-4]
 PRODUCTION_EPS = 1e-2
 EPS_MATCH_TOL = 1e-15  # float tolerance when matching a row to PRODUCTION_EPS
-GRID = 321        # fine enough that exp(-cost/reg) does not underflow for reg>=5e-4
+GRID = 321  # fine enough that exp(-cost/reg) does not underflow for reg>=5e-4
 X_MAX = 4.0
-H = 0.05          # JKO time-step == tau per step (matches track2 production h=0.05)
-K_STEPS = 20      # number of JKO steps
+H = 0.05  # JKO time-step == tau per step (matches track2 production h=0.05)
+K_STEPS = 20  # number of JKO steps
 SEED = 0
-SIGMA0 = 1.0      # initial Gaussian std on the grid
+SIGMA0 = 1.0  # initial Gaussian std on the grid
 
 
 class PotentialF(FreeEnergy):
@@ -73,13 +73,13 @@ def variance(rho: np.ndarray, x: np.ndarray) -> float:
 
 def swept_prox_w2(
     distribution: np.ndarray,  # the (Euclidean-advected) guess from JKOStep -- ignored here
-    reference: np.ndarray,     # rho_tau == the previous JKO iterate (true proximal anchor)
-    epsilon: float,            # supplied by JKOStep as self.h -- ignored (we use `h` below)
+    reference: np.ndarray,  # rho_tau == the previous JKO iterate (true proximal anchor)
+    epsilon: float,  # supplied by JKOStep as self.h -- ignored (we use `h` below)
     support: np.ndarray,
     n_iter: int = 2000,
     *,
-    reg: float,      # the swept Sinkhorn entropic regularization (gamma)
-    h: float,        # the true JKO time-step tau (proximal pull strength)
+    reg: float,  # the swept Sinkhorn entropic regularization (gamma)
+    h: float,  # the true JKO time-step tau (proximal pull strength)
     step_size: float = 0.1,  # unused (Dykstra is step-free); kept for API parity
 ) -> np.ndarray:
     """One genuine entropic JKO step for F[rho] = <V, rho>, V(x) = x^2/2.
@@ -135,7 +135,7 @@ def run_one(eps: float, support: np.ndarray, x: np.ndarray) -> dict[str, float]:
     )
     prox_fn = partial(swept_prox_w2, reg=eps, h=H)
     f = PotentialF(support)
-    solver = FullJKOSolver(f_functional=f, h=H, support=support, epsilon=eps)
+    solver = FullJKOSolver(scheme="legacy_split", f_functional=f, h=H, support=support, epsilon=eps)
     solver.prox_fn = prox_fn  # inject decoupled prox
 
     var0 = variance(rho0, x)
@@ -171,7 +171,7 @@ def main() -> None:
         print(
             f"eps={eps:.1e}  Var(rho_K)={res['var_K']:.6e}  "
             f"Var_exact={var_exact:.6e}  diff={diff:+.6e}  "
-            f"eps/(2tau)={eps/(2*H):.4e}"
+            f"eps/(2tau)={eps / (2 * H):.4e}"
         )
 
     prod = next(r for r in rows if abs(r["epsilon"] - PRODUCTION_EPS) < EPS_MATCH_TOL)

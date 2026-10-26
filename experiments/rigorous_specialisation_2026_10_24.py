@@ -118,7 +118,14 @@ def make_jko(
     n_inner = max(1, int(10 * beta)) if beta > 0 else 1
     if rigorous:
         eps_kw: dict[str, float] = {} if epsilon is None else {"epsilon": epsilon}
-        return FullJKOSolver(f_functional=f_func, h=H, support=support, n_inner=n_inner, **eps_kw)
+        return FullJKOSolver(
+            scheme="legacy_split",
+            f_functional=f_func,
+            h=H,
+            support=support,
+            n_inner=n_inner,
+            **eps_kw,
+        )
     return JKOStep(f_functional=f_func, h=H, support=support, n_inner=n_inner, apply_w2_prox=False)
 
 
@@ -128,7 +135,9 @@ def run_one(
     species, support, f_func = problem(alpha, gamma)
     jko = make_jko(f_func, support, beta, rigorous)
     sim = MLXParticleSimulator(species=species, n_particles=N_PARTICLES, latent_dim=2, seed=seed)
-    loop = MultiscaleLoop(sim=sim, jko=jko, n_fast=N_FAST, n_slow=n_slow, support=support)
+    loop = MultiscaleLoop(
+        reinject=False, sim=sim, jko=jko, n_fast=N_FAST, n_slow=n_slow, support=support
+    )
     final = loop.run(seed=seed)["trajectory"][-1]
     out = {}
     for n, rho in final.rho.items():

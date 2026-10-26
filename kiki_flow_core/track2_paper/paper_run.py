@@ -79,8 +79,8 @@ def run_paper(
     sinkhorn_backend: SinkhornBackend = "pot",
     save_trajectories: bool = False,
     make_all_figures: bool = False,
-    scheme: Scheme = "legacy_split",
-    reinject: bool = False,
+    scheme: Scheme | None = None,
+    reinject: bool = True,
 ) -> dict[str, Any]:
     """Run N seeds of the T2 multiscale loop, producing figures and stats.
 
@@ -98,14 +98,14 @@ def run_paper(
         Produce fig1-5 using the first seed's trajectory (requires
         save_trajectories implicitly). fig4/fig5 use synthetic input
         unless a real KL-sweep or CL benchmark is plumbed in.
-    scheme : "legacy_split" (default) or "jko_entropic"
-        Slow-step scheme (``JKOStep``). The default is the historical split
-        (Euclidean descent, then the KL prox when ``use_w2_prox``); the
-        entropic JKO step of F is opt-in.
-    reinject : bool (default False)
-        Feed the JKO output back into the particles after each slow step
-        (``MultiscaleLoop(reinject=True)``). Off by default: the historical
-        runs never reinjected.
+    scheme : None (default), "jko_entropic" or "legacy_split"
+        Slow-step scheme. None follows the solver defaults: the entropic JKO
+        step of F (reg = h^2) with ``use_w2_prox``, the Euclidean descent
+        without it. ``"legacy_split"`` reproduces the runs made before
+        2026-10-25 (with ``reinject=False``).
+    reinject : bool (default True)
+        Feed the JKO output back into the particles after each slow step.
+        The runs made before 2026-10-25 never reinjected.
     """
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -119,11 +119,19 @@ def run_paper(
     if use_w2_prox:
         if sinkhorn_backend == "mlx":
             jko: JKOStep = MLXFullJKOSolver(
-                f_functional=f_func, h=0.05, support=support, epsilon=0.01, scheme=scheme
+                f_functional=f_func,
+                h=0.05,
+                support=support,
+                epsilon=0.01 if scheme == "legacy_split" else None,
+                scheme=scheme or "jko_entropic",
             )
         else:
             jko = FullJKOSolver(
-                f_functional=f_func, h=0.05, support=support, epsilon=0.01, scheme=scheme
+                f_functional=f_func,
+                h=0.05,
+                support=support,
+                epsilon=0.01 if scheme == "legacy_split" else None,
+                scheme=scheme or "jko_entropic",
             )
     else:
         jko = JKOStep(
