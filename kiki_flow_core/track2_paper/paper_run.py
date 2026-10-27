@@ -9,7 +9,7 @@ from typing import Any, Literal
 import numpy as np
 from safetensors.numpy import save_file
 
-from kiki_flow_core.master_equation import JKOStep, Scheme
+from kiki_flow_core.master_equation import JKOStep, NonSeparable, Scheme
 from kiki_flow_core.species import CanonicalSpecies
 from kiki_flow_core.state import FlowState
 from kiki_flow_core.track2_paper.figures.continual_learning_gap import (
@@ -81,6 +81,7 @@ def run_paper(
     make_all_figures: bool = False,
     scheme: Scheme | None = None,
     reinject: bool = True,
+    nonseparable: NonSeparable = "implicit",
 ) -> dict[str, Any]:
     """Run N seeds of the T2 multiscale loop, producing figures and stats.
 
@@ -106,6 +107,9 @@ def run_paper(
     reinject : bool (default True)
         Feed the JKO output back into the particles after each slow step.
         The runs made before 2026-10-25 never reinjected.
+    nonseparable : "implicit" (default since 2026-10-27) or "explicit"
+        Treatment of the coupling and Turing terms in the entropic step
+        (ERRATUM.md sections 14-15); "explicit" reproduces earlier runs.
     """
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -124,6 +128,7 @@ def run_paper(
                 support=support,
                 epsilon=0.01 if scheme == "legacy_split" else None,
                 scheme=scheme or "jko_entropic",
+                nonseparable=nonseparable,
             )
         else:
             jko = FullJKOSolver(
@@ -132,6 +137,7 @@ def run_paper(
                 support=support,
                 epsilon=0.01 if scheme == "legacy_split" else None,
                 scheme=scheme or "jko_entropic",
+                nonseparable=nonseparable,
             )
     else:
         jko = JKOStep(

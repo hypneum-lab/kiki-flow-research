@@ -367,6 +367,7 @@ def kiki_step(
             apply_w2_prox=True,
             prox_n_iter=PROX_N_ITER,
             scheme=scheme,  # type: ignore[arg-type]
+            nonseparable="explicit",  # as run on 2026-10-25
         )
     else:
         jko = FullJKOSolver(
@@ -377,6 +378,7 @@ def kiki_step(
             max_iter=PROX_N_ITER,
             n_inner=n_inner,
             scheme=scheme,  # type: ignore[arg-type]
+            nonseparable="explicit",  # as run on 2026-10-25
         )
     return jko.step(make_state(rho_tau)).rho[SPECIES]
 

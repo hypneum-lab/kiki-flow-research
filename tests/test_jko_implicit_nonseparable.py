@@ -3,7 +3,8 @@
 ERRATUM.md section 14: with the non-separable terms linearised at rho_tau
 (``"explicit"``, the default) the entropic step is not dissipative when the
 Turing term is strong. The implicit mode iterates the linearisation point to
-the step's output and halves the step if F would increase.
+the step's output and halves the step if F would increase; it is the
+default since 2026-10-27 (ERRATUM.md section 15).
 """
 
 from __future__ import annotations
@@ -65,12 +66,15 @@ def _solver(f: T2FreeEnergy, mode: str) -> FullJKOSolver:
     )
 
 
-def test_mode_validation_and_default_is_explicit() -> None:
+def test_mode_validation_and_default_is_implicit() -> None:
+    """Default since 2026-10-27 (ERRATUM section 15); explicit stays available."""
     support = np.linspace(0, 1, 4).reshape(-1, 1)
     assert NONSEPARABLE_MODES == ("explicit", "implicit")
     jko = JKOStep(f_functional=ZeroF(), h=0.1, support=support, apply_w2_prox=True)
-    assert jko.nonseparable == "explicit"
-    assert FullJKOSolver(f_functional=ZeroF(), h=0.1, support=support).nonseparable == "explicit"
+    assert jko.nonseparable == "implicit"
+    assert FullJKOSolver(f_functional=ZeroF(), h=0.1, support=support).nonseparable == "implicit"
+    explicit = FullJKOSolver(f_functional=ZeroF(), h=0.1, support=support, nonseparable="explicit")
+    assert explicit.nonseparable == "explicit"
     with pytest.raises(ValueError, match="nonseparable"):
         JKOStep(f_functional=ZeroF(), h=0.1, support=support, nonseparable="bogus")  # type: ignore[arg-type]
 

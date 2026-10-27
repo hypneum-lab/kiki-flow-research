@@ -2,7 +2,24 @@
 
 All notable releases of `kiki-flow-research`. Dates in YYYY-MM-DD.
 
-## [Unreleased] — 2026-10-25 (entropic JKO default, excess over Gibbs)
+## [Unreleased] — 2026-10-27 (implicit Turing term by default)
+
+### Changed
+- The entropic slow step treats the J_sym coupling and the Turing term
+  implicitly by default (`nonseparable="implicit"` in `JKOStep`,
+  `FullJKOSolver`, `MLXFullJKOSolver`, `run_paper`; PI decision of
+  2026-10-27, `ERRATUM.md` §15). The explicit treatment, which is not
+  dissipative for γ ≥ 10 (§14), stays available and is pinned by every
+  driver behind a committed number.
+- The implicit fixed point now stops when two successive outputs agree
+  (1e-9 in TV).
+
+### Added
+- `JKOStep(nonseparable=..., fp_iter, fp_damping, fp_tol, max_halvings)`
+  and `prox_tol` forwarding in the full solvers (PR #50), with the
+  dissipation check `experiments/turing_implicit_check_2026_10_27.py`.
+
+## [Unreleased, earlier] — 2026-10-25 (entropic JKO default, excess over Gibbs)
 
 ### Changed (breaking for the rigorous path)
 - The "rigorous" slow step is now the entropic JKO step of F

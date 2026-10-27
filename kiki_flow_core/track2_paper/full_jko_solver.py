@@ -33,8 +33,9 @@ class FullJKOSolver(JKOStep):
     explicitly to reproduce results produced before 2026-10-25).
     ``epsilon=None`` (default) resolves to ``h ** 2`` under ``jko_entropic``
     and to the historical ``0.01`` under ``legacy_split``.
-    ``nonseparable`` ("explicit" by default, or "implicit") is forwarded to
-    ``JKOStep`` (entropic scheme only, see ERRATUM.md section 14), and so is
+    ``nonseparable`` ("implicit" by default since 2026-10-27, or "explicit"
+    to reproduce earlier results) is forwarded to ``JKOStep`` (entropic
+    scheme only, ERRATUM.md sections 14-15), and so is
     ``prox_tol`` (Sinkhorn early stop; 0 runs all ``max_iter`` iterations).
     """
 
@@ -47,7 +48,7 @@ class FullJKOSolver(JKOStep):
         max_iter: int = 1000,
         n_inner: int = 50,
         scheme: Scheme = "jko_entropic",
-        nonseparable: NonSeparable = "explicit",
+        nonseparable: NonSeparable = "implicit",
         prox_tol: float = 0.0,
     ) -> None:
         epsilon = resolve_epsilon(epsilon, h, scheme)
@@ -89,7 +90,7 @@ class MLXFullJKOSolver(JKOStep):
         max_iter: int = 1000,
         n_inner: int = 50,
         scheme: Scheme = "jko_entropic",
-        nonseparable: NonSeparable = "explicit",
+        nonseparable: NonSeparable = "implicit",
         prox_tol: float = 0.0,
     ) -> None:
         epsilon = resolve_epsilon(epsilon, h, scheme)

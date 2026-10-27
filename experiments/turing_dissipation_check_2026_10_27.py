@@ -55,7 +55,7 @@ PILOT = Path("results/full_energy_excess_2026_10_26/pilot.json")
 def check_step() -> None:
     for cell in STEP_CELLS:
         f = ref.excess.problem(*cell)
-        jko = FullJKOSolver(f_functional=f, h=0.05, support=ref._support())
+        jko = FullJKOSolver(f_functional=f, h=0.05, support=ref._support(), nonseparable="explicit")
         state = ref._state(ref.excess.gibbs_potentials(f))
         values = [f.value(state)]
         for _ in range(N_STEPS):

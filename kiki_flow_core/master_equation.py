@@ -108,18 +108,21 @@ class JKOStep:
     ``nonseparable`` (entropic scheme only) sets how the terms of F without a
     closed-form prox (J_sym coupling, Turing term) are handled:
 
-    * ``"explicit"`` (default, unchanged): linearised once at rho_tau. Not
-      dissipative when the Turing term is strong (gamma >= 10, ERRATUM.md
-      section 14).
-    * ``"implicit"``: the linearisation point is iterated to the step's own
-      output (damped Picard fixed point over all species jointly,
-      ``fp_iter`` iterations, damping ``fp_damping``, tolerance ``fp_tol``
-      on the max TV change), i.e. a backward-Euler treatment of those
-      terms; then a safeguard: if F(output) > F(input) the step is split
+    * ``"implicit"`` (default since 2026-10-27, ERRATUM.md section 15): the
+      linearisation point is iterated to the step's own output (damped
+      Picard fixed point over all species jointly, at most ``fp_iter``
+      iterations, damping ``fp_damping``; it stops when two successive
+      outputs differ by less than ``fp_tol`` in max TV, so energies whose
+      prox does not depend on the linearisation point cost two prox
+      evaluations), i.e. a backward-Euler treatment of those terms; then a
+      safeguard: if F(output) > F(input) the step is split
       into two half-steps (each implicit, Sinkhorn reg scaled by
       (h_sub / h)^2 so reg / h^2 is kept), recursively up to
       ``max_halvings`` levels. ``self.last_halvings`` records the depth
       used by the last step.
+    * ``"explicit"``: linearised once at rho_tau (the default until
+      2026-10-27). Not dissipative when the Turing term is strong (gamma >=
+      10, ERRATUM.md section 14); kept to reproduce earlier results.
     """
 
     def __init__(
@@ -134,7 +137,7 @@ class JKOStep:
         prox_n_iter: int = 100,
         scheme: Scheme | None = None,
         prox_tol: float = 0.0,
-        nonseparable: NonSeparable = "explicit",
+        nonseparable: NonSeparable = "implicit",
         fp_iter: int = 30,
         fp_damping: float = 0.5,
         fp_tol: float = 1e-9,
@@ -230,14 +233,18 @@ class JKOStep:
     def _implicit_step(self, state: FlowState, h: float, depth: int) -> FlowState:
         reference = {n: r for n, r in state.rho.items() if r.size == self.support.shape[0]}
         cur = state
+        prev_out: dict[str, np.ndarray] | None = None
         for _ in range(self.fp_iter):
             out = self._entropic_map(cur, reference, h)
+            if prev_out is not None:
+                change = max(0.5 * float(np.abs(out[n] - prev_out[n]).sum()) for n in reference)
+                if change < self.fp_tol:
+                    cur = state.model_copy(update={"rho": {**state.rho, **out}})
+                    break
+            prev_out = out
             w = self.fp_damping
             mixed = {n: (1.0 - w) * cur.rho[n] + w * out[n] for n in reference}
-            change = max(0.5 * float(np.abs(mixed[n] - cur.rho[n]).sum()) for n in reference)
             cur = state.model_copy(update={"rho": {**state.rho, **mixed}})
-            if change < self.fp_tol:
-                break
         f_in = self.f_functional.value(state)
         if self.f_functional.value(cur) <= f_in + DISSIPATION_TOL or depth >= self.max_halvings:
             self.last_halvings = max(self.last_halvings, depth)
