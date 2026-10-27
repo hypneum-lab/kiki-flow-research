@@ -1,0 +1,94 @@
+{
+ "by_gamma": {
+  "0.0": {
+   "configs": 12,
+   "implicit_increases": 0,
+   "explicit_increases": 0,
+   "steps": 120,
+   "max_halvings": 0,
+   "implicit_seconds_per_step": 14.974805522174574
+  },
+  "5.0": {
+   "configs": 12,
+   "implicit_increases": 0,
+   "explicit_increases": 0,
+   "steps": 120,
+   "max_halvings": 0,
+   "implicit_seconds_per_step": 18.1208961594617
+  },
+  "10.0": {
+   "configs": 12,
+   "implicit_increases": 0,
+   "explicit_increases": 0,
+   "steps": 120,
+   "max_halvings": 0,
+   "implicit_seconds_per_step": 18.62855050940998
+  },
+  "20.0": {
+   "configs": 12,
+   "implicit_increases": 0,
+   "explicit_increases": 5,
+   "steps": 120,
+   "max_halvings": 0,
+   "implicit_seconds_per_step": 18.688879001233726
+  },
+  "30.0": {
+   "configs": 12,
+   "implicit_increases": 0,
+   "explicit_increases": 11,
+   "steps": 120,
+   "max_halvings": 0,
+   "implicit_seconds_per_step": 18.99116006270051
+  },
+  "50.0": {
+   "configs": 12,
+   "implicit_increases": 0,
+   "explicit_increases": 22,
+   "steps": 120,
+   "max_halvings": 3,
+   "implicit_seconds_per_step": 21.69355701788639
+  },
+  "70.0": {
+   "configs": 12,
+   "implicit_increases": 0,
+   "explicit_increases": 48,
+   "steps": 120,
+   "max_halvings": 0,
+   "implicit_seconds_per_step": 19.228049487449848
+  },
+  "100.0": {
+   "configs": 12,
+   "implicit_increases": 0,
+   "explicit_increases": 76,
+   "steps": 120,
+   "max_halvings": 0,
+   "implicit_seconds_per_step": 19.008992267989864
+  }
+ },
+ "implicit_increases_total": 0,
+ "n_records": 96,
+ "dissipation_pass": true,
+ "tv_max": 0.051758658698548746,
+ "tv_pass": false,
+ "key_points": [
+  {
+   "alpha": 10.0,
+   "gamma": 0.0,
+   "gap_implicit": 2.707969480070209,
+   "gap_explicit_pr46": 2.7276812183840526,
+   "diff_mean": -0.01971173831384343,
+   "diff_sd": 0.015402818849395124,
+   "within_tol": true
+  },
+  {
+   "alpha": 8.0,
+   "gamma": 5.0,
+   "gap_implicit": 2.393356680557404,
+   "gap_explicit_pr46": 2.4340454010908035,
+   "diff_mean": -0.04068872053339874,
+   "diff_sd": 0.031569593249477314,
+   "within_tol": true
+  }
+ ],
+ "gap_pass": true
+}
