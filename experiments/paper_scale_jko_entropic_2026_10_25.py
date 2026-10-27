@@ -60,7 +60,8 @@ def run(seed: int, n_slow: int) -> None:
             prior={n: np.full(grid, 1.0 / grid) for n in names},
             turing_strength=0.1,
         )
-        jko = FullJKOSolver(f_functional=f_func, h=0.05, support=support)
+        # As run on 2026-10-25: explicit non-separable terms (ERRATUM section 15).
+        jko = FullJKOSolver(f_functional=f_func, h=0.05, support=support, nonseparable="explicit")
         sim = MLXParticleSimulator(
             species=species, n_particles=PARAMS["n_particles"], latent_dim=2, seed=seed
         )

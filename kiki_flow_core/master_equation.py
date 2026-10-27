@@ -14,6 +14,9 @@ from kiki_flow_core.wasserstein_ops import KLProxLog, jko_entropic_prox, prox_w2
 ProxFn = Callable[..., np.ndarray]
 Scheme = Literal["legacy_split", "jko_entropic"]
 SCHEMES: tuple[Scheme, ...] = ("legacy_split", "jko_entropic")
+NonSeparable = Literal["explicit", "implicit"]
+NONSEPARABLE_MODES: tuple[NonSeparable, ...] = ("explicit", "implicit")
+DISSIPATION_TOL = 1e-12
 
 
 class FreeEnergy(ABC):
@@ -101,6 +104,25 @@ class JKOStep:
     ``prox_tol`` an optional early-stopping tolerance on the scaling vector.
     Species are updated from the same input state (Jacobi), as in the legacy
     scheme.
+
+    ``nonseparable`` (entropic scheme only) sets how the terms of F without a
+    closed-form prox (J_sym coupling, Turing term) are handled:
+
+    * ``"implicit"`` (default since 2026-10-27, ERRATUM.md section 15): the
+      linearisation point is iterated to the step's own output (damped
+      Picard fixed point over all species jointly, at most ``fp_iter``
+      iterations, damping ``fp_damping``; it stops when two successive
+      outputs differ by less than ``fp_tol`` in max TV, so energies whose
+      prox does not depend on the linearisation point cost two prox
+      evaluations), i.e. a backward-Euler treatment of those terms; then a
+      safeguard: if F(output) > F(input) the step is split
+      into two half-steps (each implicit, Sinkhorn reg scaled by
+      (h_sub / h)^2 so reg / h^2 is kept), recursively up to
+      ``max_halvings`` levels. ``self.last_halvings`` records the depth
+      used by the last step.
+    * ``"explicit"``: linearised once at rho_tau (the default until
+      2026-10-27). Not dissipative when the Turing term is strong (gamma >=
+      10, ERRATUM.md section 14); kept to reproduce earlier results.
     """
 
     def __init__(
@@ -115,6 +137,11 @@ class JKOStep:
         prox_n_iter: int = 100,
         scheme: Scheme | None = None,
         prox_tol: float = 0.0,
+        nonseparable: NonSeparable = "implicit",
+        fp_iter: int = 30,
+        fp_damping: float = 0.5,
+        fp_tol: float = 1e-9,
+        max_halvings: int = 8,
     ) -> None:
         if h <= 0:
             raise ValueError("h must be positive")
@@ -122,6 +149,10 @@ class JKOStep:
             scheme = "jko_entropic" if apply_w2_prox else "legacy_split"
         if scheme not in SCHEMES:
             raise ValueError(f"scheme must be one of {SCHEMES}, got {scheme!r}")
+        if nonseparable not in NONSEPARABLE_MODES:
+            raise ValueError(
+                f"nonseparable must be one of {NONSEPARABLE_MODES}, got {nonseparable!r}"
+            )
         self.f_functional = f_functional
         self.h = h
         self.support = support
@@ -135,6 +166,12 @@ class JKOStep:
         self.prox_n_iter = prox_n_iter
         self.scheme: Scheme = scheme
         self.prox_tol = prox_tol
+        self.nonseparable: NonSeparable = nonseparable
+        self.fp_iter = fp_iter
+        self.fp_damping = fp_damping
+        self.fp_tol = fp_tol
+        self.max_halvings = max_halvings
+        self.last_halvings = 0
         # Strategy pattern: Track-specific subclasses can inject an MLX-backed
         # prox without forcing a circular import here. Default remains the
         # POT-backed prox_w2. Only the legacy scheme uses it.
@@ -172,7 +209,54 @@ class JKOStep:
             new_rho[name] = rho
         return state.model_copy(update={"rho": new_rho, "tau": state.tau + 1})
 
+    def _entropic_reg(self, h: float) -> float:
+        base = self.reg if self.reg is not None else self.h * self.h
+        return base * (h / self.h) ** 2
+
+    def _entropic_map(
+        self, lin_state: FlowState, reference: dict[str, np.ndarray], h: float
+    ) -> dict[str, np.ndarray]:
+        """Entropic JKO step of F anchored on ``reference``, terms linearised at ``lin_state``."""
+        return {
+            name: jko_entropic_prox(
+                self.f_functional.kl_prox_log(lin_state, name),
+                reference=ref,
+                epsilon=h,
+                support=self.support,
+                n_iter=self.prox_n_iter,
+                reg=self._entropic_reg(h),
+                tol=self.prox_tol,
+            )
+            for name, ref in reference.items()
+        }
+
+    def _implicit_step(self, state: FlowState, h: float, depth: int) -> FlowState:
+        reference = {n: r for n, r in state.rho.items() if r.size == self.support.shape[0]}
+        cur = state
+        prev_out: dict[str, np.ndarray] | None = None
+        for _ in range(self.fp_iter):
+            out = self._entropic_map(cur, reference, h)
+            if prev_out is not None:
+                change = max(0.5 * float(np.abs(out[n] - prev_out[n]).sum()) for n in reference)
+                if change < self.fp_tol:
+                    cur = state.model_copy(update={"rho": {**state.rho, **out}})
+                    break
+            prev_out = out
+            w = self.fp_damping
+            mixed = {n: (1.0 - w) * cur.rho[n] + w * out[n] for n in reference}
+            cur = state.model_copy(update={"rho": {**state.rho, **mixed}})
+        f_in = self.f_functional.value(state)
+        if self.f_functional.value(cur) <= f_in + DISSIPATION_TOL or depth >= self.max_halvings:
+            self.last_halvings = max(self.last_halvings, depth)
+            return cur
+        mid = self._implicit_step(state, 0.5 * h, depth + 1)
+        return self._implicit_step(mid, 0.5 * h, depth + 1)
+
     def _step_jko_entropic(self, state: FlowState) -> FlowState:
+        if self.nonseparable == "implicit":
+            self.last_halvings = 0
+            out = self._implicit_step(state, self.h, 0)
+            return state.model_copy(update={"rho": out.rho, "tau": state.tau + 1})
         new_rho: dict[str, np.ndarray] = {}
         for name, rho_tau in state.rho.items():
             if rho_tau.size != self.support.shape[0]:

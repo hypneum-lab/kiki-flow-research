@@ -116,6 +116,7 @@ def make_solver(alpha: float, gamma: float, reg: float) -> tuple[Any, np.ndarray
         epsilon=reg,
         max_iter=MAX_ITER,
         scheme="jko_entropic",
+        nonseparable="explicit",  # as run on 2026-10-25 (ERRATUM section 15)
     )
     return species, support, jko
 

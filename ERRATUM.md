@@ -655,3 +655,44 @@ and this section requalifies them. The full-energy reference planned for a
 second preregistration did not converge for γ ≥ 20, so no test was frozen
 or run. A step that treats the Turing term implicitly is the prerequisite
 for any new result at γ ≥ 10 (branch `fix/turing-implicit-prox`).
+
+## 15. Default switched to the implicit treatment of the Turing term (2026-10-27)
+
+**Status: validated by the PI (2026-10-27).**
+
+From this revision on, the entropic slow step treats the J_sym coupling
+and the Turing term implicitly. `JKOStep`, `FullJKOSolver`,
+`MLXFullJKOSolver` and `run_paper` default to `nonseparable="implicit"`:
+
+- the linearisation point of these terms is iterated to the step's own
+  output;
+- if F would still increase, the step is split into implicit half-steps;
+- the fixed-point loop stops when two successive outputs agree to 1e-9 in
+  TV, which this revision introduces.
+
+The explicit treatment of §13–14 (`nonseparable="explicit"`) stays
+available. Every driver behind a number committed before this revision
+pins it, so it reproduces its outputs:
+
+- the specialisation sweep of PR #46 (and through it PR #48);
+- the paper-scale run of 2026-10-25;
+- the JKO step check;
+- the dissipation check of 2026-10-27.
+
+The legacy split (§12) is unaffected.
+
+Verification (`results/turing_implicit_check_2026_10_27/`, PR #50,
+earlier stopping rule):
+
+- F never increases in 960 grid steps, for γ from 0 to 100, α ∈ {2, 5, 10}
+  and h ∈ {0.05, 0.025};
+- at the paper's key points, the γ ≤ 5 gaps move by −0.020 ± 0.015 bits at
+  (10, ·, 0) and −0.041 ± 0.032 bits at (8, ·, 5);
+- the step is 25–35 times slower.
+
+Numbers are quoted with their scheme from now on: legacy split (§12),
+entropic explicit (§13–14), entropic implicit (§15). The 2026-10-25
+entropic numbers (sweep 2.72 ± 0.05 bits at (10, ·, 0), excess
+−0.39 bits, paper-scale gap 0.0098 bits) are entropic explicit. They are
+recomputed under the implicit default in PRs that follow; nothing is
+overwritten.

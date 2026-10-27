@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from kiki_flow_core.master_equation import FreeEnergy, JKOStep, Scheme
+from kiki_flow_core.master_equation import FreeEnergy, JKOStep, NonSeparable, Scheme
 from kiki_flow_core.track2_paper.mlx_wasserstein import mlx_prox_w2
 
 LEGACY_EPSILON = 0.01  # FullJKOSolver default before 2026-10-25 (legacy_split)
@@ -33,6 +33,10 @@ class FullJKOSolver(JKOStep):
     explicitly to reproduce results produced before 2026-10-25).
     ``epsilon=None`` (default) resolves to ``h ** 2`` under ``jko_entropic``
     and to the historical ``0.01`` under ``legacy_split``.
+    ``nonseparable`` ("implicit" by default since 2026-10-27, or "explicit"
+    to reproduce earlier results) is forwarded to ``JKOStep`` (entropic
+    scheme only, ERRATUM.md sections 14-15), and so is
+    ``prox_tol`` (Sinkhorn early stop; 0 runs all ``max_iter`` iterations).
     """
 
     def __init__(
@@ -44,6 +48,8 @@ class FullJKOSolver(JKOStep):
         max_iter: int = 1000,
         n_inner: int = 50,
         scheme: Scheme = "jko_entropic",
+        nonseparable: NonSeparable = "implicit",
+        prox_tol: float = 0.0,
     ) -> None:
         epsilon = resolve_epsilon(epsilon, h, scheme)
         super().__init__(
@@ -55,6 +61,8 @@ class FullJKOSolver(JKOStep):
             reg=epsilon,
             prox_n_iter=max_iter,
             scheme=scheme,
+            nonseparable=nonseparable,
+            prox_tol=prox_tol,
         )
         self.epsilon = epsilon
         self.max_iter = max_iter
@@ -82,6 +90,8 @@ class MLXFullJKOSolver(JKOStep):
         max_iter: int = 1000,
         n_inner: int = 50,
         scheme: Scheme = "jko_entropic",
+        nonseparable: NonSeparable = "implicit",
+        prox_tol: float = 0.0,
     ) -> None:
         epsilon = resolve_epsilon(epsilon, h, scheme)
         super().__init__(
@@ -94,6 +104,8 @@ class MLXFullJKOSolver(JKOStep):
             reg=epsilon,
             prox_n_iter=max_iter,
             scheme=scheme,
+            nonseparable=nonseparable,
+            prox_tol=prox_tol,
         )
         self.epsilon = epsilon
         self.max_iter = max_iter
