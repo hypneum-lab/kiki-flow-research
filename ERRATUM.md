@@ -599,3 +599,59 @@ after the α = 0 control only at (5, ·, 50). The legacy rigorous and fast
 gaps are below equilibrium everywhere. `paper/main.tex` and `README.md`
 no longer claim emergent specialisation; the published PDFs and tags
 are unchanged.
+
+## 14. Non-dissipative slow step for γ ≥ 10; strong-Turing results withdrawn (2026-10-27)
+
+**Status: validated by the PI (2026-10-27).**
+
+Finding (`docs/notes/2026-10-27-full-energy-reference-pilot.md`,
+`experiments/turing_dissipation_check_2026_10_27.py`,
+`results/full_energy_excess_2026_10_26/`, PR #49). The default slow step
+of §13 is the entropic JKO step of F with the non-separable terms
+linearised at rho_tau, and it is not dissipative when the Turing term is
+strong. We iterated it on the grid (h = 0.05, reg = h²) from the Gibbs
+state at α = 5, for 30 steps per γ:
+
+- F never increases at γ = 0 or 5;
+- F increases in 16, 15 and 15 steps out of 30 at γ = 10, 20 and 30.
+
+The term at fault, Σ_{i<k} Σ_x |∇ρ_i ∇ρ_k|, is not smooth, and its
+explicit linearisation makes the iterates oscillate. The final states of
+the preregistered strong-Turing runs of 2026-10-26 lie far above the
+minimum of F, and even above the Gibbs state of the potentials. For
+example, at (5, 30) F is −10.66 [−17.30, −4.57], against an approximate
+minimum of −19.34 and −17.13 for the Gibbs state.
+
+Withdrawn. The verdict "supported, restricted to (α, γ) = (5, 30)" of the
+L1 preregistration `docs/prereg/2026-10-26-turing-strong-excess.md`
+(PR #48, excess +0.248 bits [+0.102, +0.390], Holm p 0.0064) is an
+artefact of the non-dissipative step. It is not evidence of
+specialisation beyond equilibrium.
+
+Declared not interpretable: every value at γ ≥ 10 produced with the
+entropic slow step, namely
+
+- the γ ∈ {10, 20, 50} rows of the specialisation sweep of PR #46
+  (`results/jko_entropic_sweep_2026_10_25/`);
+- the same rows of the excess-over-Gibbs analysis of PR #47
+  (`results/excess_over_gibbs_2026_10_25/`), including the positive
+  excesses at γ ≥ 20 that motivated the 2026-10-26 test;
+- all 15 cells of PR #48 (`results/turing_strong_excess_2026_10_26/`).
+
+Unchanged. The step is dissipative for γ ≤ 5, so the following stand:
+
+- the paper's operating points (10, 1, 0) and (8, 0.5, 5), and every
+  γ ≤ 5 value;
+- the paper-scale run (γ = 1, i.e. turing_strength 0.1);
+- the conclusion "no specialisation beyond the equilibrium imposed by the
+  potentials in the regime studied" (§13, `paper/main.tex`).
+
+The wording in `paper/main.tex` that mentions the strong-Turing excess
+("a small positive excess appears only with a strong Turing term") is to
+be read as "not interpretable, §14".
+
+No number is removed: the files of PR #46, #47 and #48 stay as committed,
+and this section requalifies them. The full-energy reference planned for a
+second preregistration did not converge for γ ≥ 20, so no test was frozen
+or run. A step that treats the Turing term implicitly is the prerequisite
+for any new result at γ ≥ 10 (branch `fix/turing-implicit-prox`).
