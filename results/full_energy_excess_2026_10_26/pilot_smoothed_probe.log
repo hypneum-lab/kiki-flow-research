@@ -1,0 +1,8 @@
+F vs F_delta(1e-12): 1.9988676765850206 1.9988676762970206
+max |grad - FD| = 2.0847206641860794e-05
+(5.0, 10.0) gibbs False [False, False, False, False, False] True 14542 37.8 F=-19.55100420 gap=2.06902 [2.0487, 2.0629, 2.0675, 2.0689, 2.069]
+(5.0, 10.0) uniform False [False, False, False, False, False] True 15060 38.8 F=-19.55100420 gap=2.06902 [2.0487, 2.0629, 2.0675, 2.0689, 2.069]
+(5.0, 10.0) dirichlet1001 False [False, False, False, False, False] True 14695 38.0 F=-19.55100420 gap=2.06902 [2.0487, 2.0629, 2.0675, 2.0689, 2.069]
+(5.0, 30.0) gibbs False [False, False, False, False, False] True 63497 164.7 F=-19.34307421 gap=2.03882 [2.0245, 2.0275, 2.0366, 2.0387, 2.0388]
+(5.0, 30.0) uniform False [False, False, False, False, False] True 63494 161.3 F=-19.34307421 gap=2.03882 [2.0245, 2.0275, 2.0366, 2.0387, 2.0388]
+(5.0, 30.0) dirichlet1001 False [False, False, False, False, False] True 63585 163.0 F=-19.34307421 gap=2.03882 [2.0245, 2.0275, 2.0366, 2.0387, 2.0388]

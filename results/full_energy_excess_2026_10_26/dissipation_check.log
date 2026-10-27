@@ -1,0 +1,5 @@
+(5.0, 0.0) F: start -19.658 end -19.705 min -19.705 max -19.658; steps with F increase: 0/30
+(5.0, 5.0) F: start -19.237 end -19.585 min -19.585 max -19.237; steps with F increase: 0/30
+(5.0, 10.0) F: start -18.816 end -16.883 min -18.816 max -15.392; steps with F increase: 16/30
+(5.0, 20.0) F: start -17.974 end -14.054 min -17.974 max -10.946; steps with F increase: 15/30
+(5.0, 30.0) F: start -17.132 end -10.938 min -17.132 max -7.629; steps with F increase: 15/30

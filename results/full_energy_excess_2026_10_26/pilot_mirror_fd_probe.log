@@ -1,0 +1,6 @@
+(5.0, 10.0) gibbs False True 38 58 1.5 F=-19.55078415 gap=2.06528 w2=8.7e-08 dF=3.6e-15
+(5.0, 10.0) uniform False True 58 65 2.2 F=-19.55081133 gap=2.06553 w2=1.4e-08 dF=7.1e-15
+(5.0, 10.0) dirichlet1001 False True 21 53 0.8 F=-19.55076925 gap=2.06515 w2=1.9e-08 dF=3.6e-15
+(5.0, 30.0) gibbs False True 16 51 0.6 F=-19.30011901 gap=2.00132 w2=3.6e-03 dF=2.2e-04
+(5.0, 30.0) uniform False True 16 51 0.6 F=-19.26005436 gap=1.93784 w2=4.9e-03 dF=4.7e-05
+(5.0, 30.0) dirichlet1001 False True 38 58 1.4 F=-19.27691069 gap=1.91523 w2=6.9e-03 dF=2.1e-04
