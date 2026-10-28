@@ -2,21 +2,32 @@
 
 from __future__ import annotations
 
+import time
+import warnings
 from abc import ABC, abstractmethod
 from collections.abc import Callable
-from typing import Literal, cast
+from typing import Any, Literal, cast
 
 import numpy as np
+import ot
 
 from kiki_flow_core.state import FlowState
-from kiki_flow_core.wasserstein_ops import KLProxLog, jko_entropic_prox, prox_w2
+from kiki_flow_core.wasserstein_ops import (
+    KLProxLog,
+    SinkhornNotConvergedError,
+    entropic_ot,
+    jko_entropic_prox,
+    jko_entropic_prox_certified,
+    prox_w2,
+)
 
 ProxFn = Callable[..., np.ndarray]
 Scheme = Literal["legacy_split", "jko_entropic"]
 SCHEMES: tuple[Scheme, ...] = ("legacy_split", "jko_entropic")
 NonSeparable = Literal["explicit", "implicit"]
 NONSEPARABLE_MODES: tuple[NonSeparable, ...] = ("explicit", "implicit")
-DISSIPATION_TOL = 1e-12
+OnFailure = Literal["raise", "warn"]
+_FLOOR = 1e-300
 
 
 class FreeEnergy(ABC):
@@ -78,6 +89,14 @@ class ZeroF(FreeEnergy):
         return np.zeros_like(state.rho[species_name])
 
 
+class ImplicitJKOError(RuntimeError):
+    """The certified implicit JKO step failed; ``info`` holds the diagnostics."""
+
+    def __init__(self, message: str, info: dict[str, Any]) -> None:
+        super().__init__(f"{message}: {info}")
+        self.info = info
+
+
 class JKOStep:
     """One slow step of the Wasserstein flow of F, in one of two schemes.
 
@@ -94,35 +113,38 @@ class JKOStep:
     **not** the JKO step of F (``docs/notes/2026-10-25-jko-step-identification.md``);
     it is kept, explicitly, for the reproducibility of past results.
 
-    ``scheme="jko_entropic"``: the entropic JKO step of F itself,
-    ``argmin_rho F(rho) + W_reg(rho, rho_tau) / (2h)``, by the generalised
-    Sinkhorn iteration on ``F.kl_prox_log`` (``wasserstein_ops.jko_entropic_prox``,
-    log domain). ``n_inner`` and ``apply_w2_prox`` are ignored; ``reg`` is the
-    Sinkhorn regularisation (default h^2, the step-scaled rule validated on
-    2026-10-25; the legacy prox keeps its own default h), ``prox_n_iter`` the
-    iteration count,
-    ``prox_tol`` an optional early-stopping tolerance on the scaling vector.
-    Species are updated from the same input state (Jacobi), as in the legacy
-    scheme.
+    ``scheme="jko_entropic"``: the entropic JKO step of F,
+    ``Q_h(q) = F(q) + sum_i OT_reg(q_i, rho_tau_i) / (2h)`` with
+    ``OT_reg(q, r) = min_{pi in Pi(q, r)} <C, pi> + reg * sum pi (log pi - 1)``
+    (not debiased: OT_reg(r, r) != 0), Sinkhorn reg = ``reg`` (default h^2).
+    ``n_inner`` and ``apply_w2_prox`` are ignored. ``nonseparable`` sets how the
+    terms of F without a closed-form prox (J_sym coupling, Turing term) enter:
 
-    ``nonseparable`` (entropic scheme only) sets how the terms of F without a
-    closed-form prox (J_sym coupling, Turing term) are handled:
-
-    * ``"implicit"`` (default since 2026-10-27, ERRATUM.md section 15): the
-      linearisation point is iterated to the step's own output (damped
-      Picard fixed point over all species jointly, at most ``fp_iter``
-      iterations, damping ``fp_damping``; it stops when two successive
-      outputs differ by less than ``fp_tol`` in max TV, so energies whose
-      prox does not depend on the linearisation point cost two prox
-      evaluations), i.e. a backward-Euler treatment of those terms; then a
-      safeguard: if F(output) > F(input) the step is split
-      into two half-steps (each implicit, Sinkhorn reg scaled by
-      (h_sub / h)^2 so reg / h^2 is kept), recursively up to
-      ``max_halvings`` levels. ``self.last_halvings`` records the depth
-      used by the last step.
-    * ``"explicit"``: linearised once at rho_tau (the default until
-      2026-10-27). Not dissipative when the Turing term is strong (gamma >=
-      10, ERRATUM.md section 14); kept to reproduce earlier results.
+    * ``"explicit"``: linearised once at rho_tau, one generalised-Sinkhorn
+      solve per species (``wasserstein_ops.jko_entropic_prox``, ``prox_n_iter``
+      iterations, ``prox_tol``). Not a minimiser of Q_h; not dissipative when
+      the Turing term is strong (ERRATUM.md section 14). Kept to reproduce
+      earlier results.
+    * ``"implicit"`` (default): a certified stationary point of Q_h, by
+      Bregman (KL) majorisation-minimisation with a line search on Q_h itself.
+      With T_L(q) the generalised-Sinkhorn solution of the subproblem in which
+      the non-separable part N of F is linearised at q and a proximal term
+      L * KL(. || q) is added, the iteration starts from the explicit output
+      q_0 = T_0(rho_tau) and accepts q_{k+1} = T_L(q_k) for the smallest L in
+      {0, L0, 4 L0, ...} such that Q_h(q_{k+1}) <= Q_h(q_k) - sigma * L *
+      KL(q_{k+1} || q_k). It stops when the stationarity residual at the
+      returned point, max_i TV(T_0(q)_i, q_i), is below ``kkt_tol``: T_0(q) = q
+      is the first-order (KKT) condition of Q_h when N has an exact gradient
+      (``F.implicit_ready``). Every inner Sinkhorn solve and every OT_reg
+      evaluation carries its own certificate (marginal residual). Exhausting
+      ``max_outer`` iterations, a line search beyond ``l_max`` or an inner
+      certificate failure raises ``ImplicitJKOError`` (``on_failure="raise"``,
+      default); ``on_failure="warn"`` returns the last iterate with a warning
+      and ``status != "converged"`` (diagnostics only). ``self.last_info``
+      records status, iterations, residuals, Q_h values and costs. Q_h is not
+      convex in general (Turing coupling): the certificate is stationarity and
+      monotone decrease of Q_h from the explicit output, not global optimality.
+      There is no sub-stepping: the step solves Q_h for the requested h.
     """
 
     def __init__(
@@ -138,13 +160,18 @@ class JKOStep:
         scheme: Scheme | None = None,
         prox_tol: float = 0.0,
         nonseparable: NonSeparable = "implicit",
-        fp_iter: int = 30,
-        fp_damping: float = 0.5,
-        fp_tol: float = 1e-9,
-        max_halvings: int = 8,
+        kkt_tol: float = 1e-6,
+        max_outer: int = 500,
+        l0: float = 1.0,
+        l_max: float = 1e8,
+        sigma: float = 1e-4,
+        inner_n_iter: int = 200_000,
+        inner_tol: float = 1e-13,
+        inner_marginal_tol: float = 1e-10,
+        on_failure: OnFailure = "raise",
     ) -> None:
-        if h <= 0:
-            raise ValueError("h must be positive")
+        if not (h > 0 and np.isfinite(h)):
+            raise ValueError("h must be finite and positive")
         if scheme is None:
             scheme = "jko_entropic" if apply_w2_prox else "legacy_split"
         if scheme not in SCHEMES:
@@ -153,25 +180,46 @@ class JKOStep:
             raise ValueError(
                 f"nonseparable must be one of {NONSEPARABLE_MODES}, got {nonseparable!r}"
             )
+        if on_failure not in ("raise", "warn"):
+            raise ValueError("on_failure must be 'raise' or 'warn'")
+        if not (kkt_tol > 0 and max_outer >= 1 and 0 < l0 <= l_max and sigma >= 0):
+            raise ValueError("invalid implicit-solver settings")
+        if not (inner_n_iter >= 1 and inner_tol > 0 and inner_marginal_tol > 0):
+            raise ValueError("invalid inner-solver settings")
         self.f_functional = f_functional
         self.h = h
         self.support = support
         self.n_inner = n_inner
         self.apply_w2_prox = apply_w2_prox
         # Sinkhorn entropic regularisation of the prox. None keeps the prox's
-        # own default (reg = its proximal strength, i.e. h). The JKO step h is
-        # always the proximal pull strength.
+        # own default (reg = its proximal strength, i.e. h) for the legacy split
+        # and h^2 for the entropic scheme. The JKO step h is the proximal pull.
         self.reg = reg
         # Dykstra iterations of the prox (100 unless a subclass forwards its own).
         self.prox_n_iter = prox_n_iter
         self.scheme: Scheme = scheme
         self.prox_tol = prox_tol
         self.nonseparable: NonSeparable = nonseparable
-        self.fp_iter = fp_iter
-        self.fp_damping = fp_damping
-        self.fp_tol = fp_tol
-        self.max_halvings = max_halvings
-        self.last_halvings = 0
+        self.kkt_tol = kkt_tol
+        self.max_outer = max_outer
+        self.l0 = l0
+        self.l_max = l_max
+        self.sigma = sigma
+        self.inner_n_iter = inner_n_iter
+        self.inner_tol = inner_tol
+        self.inner_marginal_tol = inner_marginal_tol
+        self.on_failure: OnFailure = on_failure
+        self.last_info: dict[str, Any] = {}
+        if (
+            self.scheme == "jko_entropic"
+            and self.nonseparable == "implicit"
+            and not getattr(f_functional, "implicit_ready", True)
+        ):
+            raise ValueError(
+                "the implicit JKO step needs an exact gradient of the non-separable terms; "
+                "declare a smoothing of the Turing term (T2FreeEnergy(turing_smoothing=...)) "
+                "or use nonseparable='explicit'"
+            )
         # Strategy pattern: Track-specific subclasses can inject an MLX-backed
         # prox without forcing a circular import here. Default remains the
         # POT-backed prox_w2. Only the legacy scheme uses it.
@@ -209,54 +257,17 @@ class JKOStep:
             new_rho[name] = rho
         return state.model_copy(update={"rho": new_rho, "tau": state.tau + 1})
 
-    def _entropic_reg(self, h: float) -> float:
-        base = self.reg if self.reg is not None else self.h * self.h
-        return base * (h / self.h) ** 2
-
-    def _entropic_map(
-        self, lin_state: FlowState, reference: dict[str, np.ndarray], h: float
-    ) -> dict[str, np.ndarray]:
-        """Entropic JKO step of F anchored on ``reference``, terms linearised at ``lin_state``."""
-        return {
-            name: jko_entropic_prox(
-                self.f_functional.kl_prox_log(lin_state, name),
-                reference=ref,
-                epsilon=h,
-                support=self.support,
-                n_iter=self.prox_n_iter,
-                reg=self._entropic_reg(h),
-                tol=self.prox_tol,
-            )
-            for name, ref in reference.items()
-        }
-
-    def _implicit_step(self, state: FlowState, h: float, depth: int) -> FlowState:
-        reference = {n: r for n, r in state.rho.items() if r.size == self.support.shape[0]}
-        cur = state
-        prev_out: dict[str, np.ndarray] | None = None
-        for _ in range(self.fp_iter):
-            out = self._entropic_map(cur, reference, h)
-            if prev_out is not None:
-                change = max(0.5 * float(np.abs(out[n] - prev_out[n]).sum()) for n in reference)
-                if change < self.fp_tol:
-                    cur = state.model_copy(update={"rho": {**state.rho, **out}})
-                    break
-            prev_out = out
-            w = self.fp_damping
-            mixed = {n: (1.0 - w) * cur.rho[n] + w * out[n] for n in reference}
-            cur = state.model_copy(update={"rho": {**state.rho, **mixed}})
-        f_in = self.f_functional.value(state)
-        if self.f_functional.value(cur) <= f_in + DISSIPATION_TOL or depth >= self.max_halvings:
-            self.last_halvings = max(self.last_halvings, depth)
-            return cur
-        mid = self._implicit_step(state, 0.5 * h, depth + 1)
-        return self._implicit_step(mid, 0.5 * h, depth + 1)
+    @property
+    def entropic_reg(self) -> float:
+        reg = self.reg if self.reg is not None else self.h * self.h
+        if not (reg > 0 and np.isfinite(reg)):
+            raise ValueError(f"Sinkhorn regularisation must be finite and positive, got {reg}")
+        return float(reg)
 
     def _step_jko_entropic(self, state: FlowState) -> FlowState:
         if self.nonseparable == "implicit":
-            self.last_halvings = 0
-            out = self._implicit_step(state, self.h, 0)
-            return state.model_copy(update={"rho": out.rho, "tau": state.tau + 1})
+            rho = self._implicit_solve(state)
+            return state.model_copy(update={"rho": rho, "tau": state.tau + 1})
         new_rho: dict[str, np.ndarray] = {}
         for name, rho_tau in state.rho.items():
             if rho_tau.size != self.support.shape[0]:
@@ -268,7 +279,207 @@ class JKOStep:
                 epsilon=self.h,
                 support=self.support,
                 n_iter=self.prox_n_iter,
-                reg=self.reg if self.reg is not None else self.h * self.h,
+                reg=self.entropic_reg,
                 tol=self.prox_tol,
             )
         return state.model_copy(update={"rho": new_rho, "tau": state.tau + 1})
+
+    # ----- certified implicit step -------------------------------------------------
+
+    def _map(
+        self,
+        state: FlowState,
+        lin: dict[str, np.ndarray],
+        reference: dict[str, np.ndarray],
+        anchor_weight: float,
+        stats: dict[str, Any],
+    ) -> tuple[dict[str, np.ndarray], float]:
+        """T_L(lin) and its Q_h value.
+
+        The non-separable terms are linearised at ``lin`` and L * KL(. || lin) is
+        added. Q_h of the output uses the transport value of each prox's own
+        plan (the entropic optimum for its marginals, certified by the prox).
+        """
+        lin_state = state.model_copy(update={"rho": {**state.rho, **lin}})
+        out: dict[str, np.ndarray] = {}
+        transport = 0.0
+        for name, ref in reference.items():
+            base = self.f_functional.kl_prox_log(lin_state, name)
+            prox = base
+            if anchor_weight > 0.0:
+                log_anchor = np.log(np.clip(lin[name], _FLOOR, None))
+                weight = anchor_weight
+
+                def prox(
+                    log_p: np.ndarray,
+                    tau: float,
+                    base: KLProxLog = base,
+                    log_anchor: np.ndarray = log_anchor,
+                    weight: float = weight,
+                ) -> np.ndarray:
+                    scale = 1.0 + tau * weight
+                    return base((log_p + tau * weight * log_anchor) / scale, tau / scale)
+
+            warm = stats.setdefault("_warm_b", {})
+            q, info = jko_entropic_prox_certified(
+                prox,
+                ref,
+                self.h,
+                self.support,
+                reg=self.entropic_reg,
+                n_iter=self.inner_n_iter,
+                tol=self.inner_tol,
+                marginal_tol=self.inner_marginal_tol,
+                init_log_b=warm.get(name),
+            )
+            warm[name] = info["log_b"]
+            stats["prox_calls"] += 1
+            stats["inner_max_iterations"] = max(
+                stats["inner_max_iterations"], int(info["iterations"])
+            )
+            stats["inner_max_residual"] = max(
+                stats["inner_max_residual"], float(info["marginal_residual"])
+            )
+            out[name] = q
+            transport += float(info["transport_value"])
+        value = self.f_functional.value(state.model_copy(update={"rho": {**state.rho, **out}}))
+        return out, value + transport / (2.0 * self.h)
+
+    def objective(
+        self,
+        state: FlowState,
+        q: dict[str, np.ndarray],
+        reference: dict[str, np.ndarray],
+        stats: dict[str, Any] | None = None,
+    ) -> float:
+        """Q_h(q) = F(q) + sum_i OT_reg(q_i, rho_tau_i) / (2h) at an arbitrary q.
+
+        Independent evaluation by balanced log-domain Sinkhorn (``entropic_ot``,
+        certified); the solver itself uses the values of its prox plans.
+        """
+        cost = ot.dist(self.support, self.support, metric="sqeuclidean")
+        total = self.f_functional.value(state.model_copy(update={"rho": {**state.rho, **q}}))
+        warm = stats.setdefault("_warm", {}) if stats is not None else {}
+        for name, ref in reference.items():
+            try:
+                value, _, info = entropic_ot(
+                    q[name],
+                    ref,
+                    cost,
+                    self.entropic_reg,
+                    n_iter=self.inner_n_iter,
+                    tol=self.inner_tol,
+                    marginal_tol=self.inner_marginal_tol,
+                    warm_start=warm.get(name),
+                )
+            except SinkhornNotConvergedError:
+                if warm.get(name) is None:
+                    raise
+                # A warm start that does not certify is retried from scratch.
+                value, _, info = entropic_ot(
+                    q[name],
+                    ref,
+                    cost,
+                    self.entropic_reg,
+                    n_iter=self.inner_n_iter,
+                    tol=self.inner_tol,
+                    marginal_tol=self.inner_marginal_tol,
+                )
+            warm[name] = info["potentials"]
+            total += value / (2.0 * self.h)
+            if stats is not None:
+                stats["ot_calls"] += 1
+                stats["ot_max_residual"] = max(
+                    stats["ot_max_residual"], float(info["marginal_residual"])
+                )
+        return float(total)
+
+    @staticmethod
+    def _check_densities(reference: dict[str, np.ndarray]) -> None:
+        for name, rho in reference.items():
+            arr = np.asarray(rho, dtype=float)
+            if not np.all(np.isfinite(arr)) or np.any(arr < 0.0) or arr.sum() <= 0.0:
+                raise ValueError(f"density {name!r} must be finite, non-negative, positive mass")
+
+    def _line_search(
+        self,
+        state: FlowState,
+        q: dict[str, np.ndarray],
+        q_val: float,
+        t0: tuple[dict[str, np.ndarray], float],
+        reference: dict[str, np.ndarray],
+        stats: dict[str, Any],
+    ) -> tuple[dict[str, np.ndarray], float, float] | None:
+        """Smallest L in {0, l0, 4 l0, ...} with sufficient decrease of Q_h; None if none."""
+        weight = 0.0
+        cand, c_val = t0
+        while True:
+            kl = sum(float(np.sum(cand[n] * np.log(cand[n] / q[n]))) for n in reference)
+            if c_val <= q_val - self.sigma * weight * kl and c_val <= q_val:
+                return cand, c_val, weight
+            weight = self.l0 if weight == 0.0 else 4.0 * weight
+            if weight > self.l_max:
+                return None
+            cand, c_val = self._map(state, q, reference, weight, stats)
+
+    def _new_stats(self) -> dict[str, Any]:
+        return {
+            "status": "running",
+            "outer_iterations": 0,
+            "prox_calls": 0,
+            "ot_calls": 0,
+            "inner_max_iterations": 0,
+            "inner_max_residual": 0.0,
+            "ot_max_residual": 0.0,
+            "max_anchor_weight": 0.0,
+            "kkt_residual": float("nan"),
+            "kkt_tol": self.kkt_tol,
+            "h": self.h,
+            "reg": self.entropic_reg,
+            "Q_final": float("nan"),
+        }
+
+    def _implicit_solve(self, state: FlowState) -> dict[str, np.ndarray]:
+        tic = time.perf_counter()
+        reference = {n: r for n, r in state.rho.items() if r.size == self.support.shape[0]}
+        stats = self._new_stats()
+        result: dict[str, np.ndarray] = dict(state.rho)
+        if not reference:  # nothing on this support: same as the explicit path
+            stats.update(status="converged", kkt_residual=0.0, seconds=0.0)
+            self.last_info = stats
+            return result
+        self._check_densities(reference)
+        try:
+            q, q_val = self._map(state, reference, reference, 0.0, stats)  # explicit output
+            stats["Q_explicit"] = q_val
+            while True:
+                result, stats["Q_final"] = {**state.rho, **q}, q_val
+                t0 = self._map(state, q, reference, 0.0, stats)
+                stats["kkt_residual"] = max(
+                    0.5 * float(np.abs(t0[0][n] - q[n]).sum()) for n in reference
+                )
+                if stats["kkt_residual"] < self.kkt_tol:
+                    stats["status"] = "converged"
+                    break
+                if stats["outer_iterations"] >= self.max_outer:
+                    stats["status"] = "max_outer"
+                    break
+                found = self._line_search(state, q, q_val, t0, reference, stats)
+                if found is None:
+                    stats["status"] = "line_search"
+                    break
+                q, q_val, weight = found
+                stats["max_anchor_weight"] = max(stats["max_anchor_weight"], weight)
+                stats["outer_iterations"] += 1
+        except SinkhornNotConvergedError as exc:
+            stats["status"] = "inner_not_converged"
+            stats["inner_error"] = str(exc)
+        stats["seconds"] = time.perf_counter() - tic
+        stats.pop("_warm", None)
+        stats.pop("_warm_b", None)
+        self.last_info = stats
+        if stats["status"] != "converged":
+            if self.on_failure == "raise":
+                raise ImplicitJKOError("implicit JKO step not certified", stats)
+            warnings.warn(f"implicit JKO step not certified: {stats}", stacklevel=3)
+        return result

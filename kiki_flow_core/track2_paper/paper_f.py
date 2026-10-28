@@ -13,8 +13,23 @@ RHO_FLOOR = 1e-12
 TURING_FD_EPS = 1e-4
 
 
+def gradient_operator(n: int) -> np.ndarray:
+    """Matrix D with D @ v == np.gradient(v) (unit spacing, one-sided ends)."""
+    return np.stack([np.gradient(e) for e in np.eye(n)], axis=1)
+
+
 class T2FreeEnergy(FreeEnergy):
-    """F_T2 = sum_i <rho_i, V_i> + sum_i KL(rho_i || prior_i) + reaction + turing."""
+    """F_T2 = sum_i <rho_i, V_i> + sum_i KL(rho_i || prior_i) + reaction + turing.
+
+    The Turing term is turing_strength * sum_{i<k} sum_x |g_i(x) g_k(x)| with
+    g = np.gradient(rho). It is not smooth. ``turing_smoothing = delta`` replaces
+    |u| by sqrt(u^2 + delta^2) - delta in the value and uses the exact gradient
+    of that smoothed term (declared smoothing, |F_delta - F| <= n_pairs * n *
+    turing_strength * delta). ``None`` (default) keeps the historical behaviour:
+    exact |.| in the value and a forward-difference gradient, which is not a
+    derivative of F across sign changes (used by the explicit scheme only).
+    The implicit JKO step requires a smoothed Turing term (``implicit_ready``).
+    """
 
     def __init__(
         self,
@@ -22,11 +37,15 @@ class T2FreeEnergy(FreeEnergy):
         potentials: dict[str, np.ndarray],
         prior: dict[str, np.ndarray],
         turing_strength: float = 0.1,
+        turing_smoothing: float | None = None,
     ) -> None:
+        if turing_smoothing is not None and not (turing_smoothing > 0.0):
+            raise ValueError("turing_smoothing must be positive or None")
         self.species = species
         self.potentials = potentials
         self.prior = prior
         self.turing_strength = turing_strength
+        self.turing_smoothing = turing_smoothing
         self._coupling = species.coupling_matrix()
         # Canonical J split: J = J_sym + J_asym.
         # J_sym carries the conservative (gradient-of-scalar-energy) piece;
@@ -57,27 +76,51 @@ class T2FreeEnergy(FreeEnergy):
                 total += float(j[i, k] * np.dot(ri, rk))
 
         if self.turing_strength > 0.0:
-            turing = 0.0
-            for i, ri in enumerate(rhos):
-                for k in range(i + 1, len(rhos)):
-                    rk = rhos[k]
-                    turing += float(np.sum(np.abs(np.gradient(ri) * np.gradient(rk))))
-            total += self.turing_strength * turing
+            total += self._turing_value(rhos)
 
         return total
+
+    @property
+    def implicit_ready(self) -> bool:
+        """True when every non-separable term has an exact gradient (see class doc)."""
+        return self.turing_strength == 0.0 or self.turing_smoothing is not None
+
+    def _abs(self, u: np.ndarray) -> np.ndarray:
+        if self.turing_smoothing is None:
+            absolute: np.ndarray = np.abs(u)
+            return absolute
+        d = self.turing_smoothing
+        out: np.ndarray = np.sqrt(u * u + d * d) - d
+        return out
 
     def _turing_value(self, rhos: list[np.ndarray]) -> float:
         turing = 0.0
         for i, ri in enumerate(rhos):
             for k in range(i + 1, len(rhos)):
-                turing += float(np.sum(np.abs(np.gradient(ri) * np.gradient(rhos[k]))))
+                turing += float(np.sum(self._abs(np.gradient(ri) * np.gradient(rhos[k]))))
         return self.turing_strength * turing
+
+    def _turing_grad_smoothed(self, rhos: list[np.ndarray], idx: int) -> np.ndarray:
+        """Exact gradient of the smoothed Turing term w.r.t. rho_idx."""
+        assert self.turing_smoothing is not None
+        d_op = gradient_operator(rhos[idx].size)
+        gs = [d_op @ r for r in rhos]
+        acc = np.zeros(rhos[idx].size)
+        for k, gk in enumerate(gs):
+            if k == idx:
+                continue
+            u = gs[idx] * gk
+            acc += u * gk / np.sqrt(u * u + self.turing_smoothing**2)
+        out: np.ndarray = self.turing_strength * (d_op.T @ acc)
+        return out
 
     def nonseparable_grad(self, state: FlowState, species_name: str) -> np.ndarray:
         """Gradient w.r.t. rho[species_name] of the terms of F without a closed-form prox.
 
         Coupling: d/d rho_i of sum_{i,k} J_sym[i,k] <rho_i, rho_k> = 2 (J_sym rho)_i.
-        Turing term: finite difference (it is not smooth), zero if its strength is 0.
+        Turing term: exact gradient of the smoothed term when ``turing_smoothing``
+        is set; otherwise the historical forward difference (not a derivative of
+        F across sign changes); zero if its strength is 0.
         Evaluated at ``state`` (the other species frozen there); used by
         ``kl_prox_log`` to linearise these terms into an effective potential.
         """
@@ -85,7 +128,9 @@ class T2FreeEnergy(FreeEnergy):
         idx = names.index(species_name)
         rhos = [state.rho[n] for n in names]
         grad: np.ndarray = 2.0 * np.asarray(self._grad_conservative(rhos)[idx], dtype=float)
-        if self.turing_strength > 0.0:
+        if self.turing_strength > 0.0 and self.turing_smoothing is not None:
+            grad = grad + self._turing_grad_smoothed(rhos, idx)
+        elif self.turing_strength > 0.0:
             base = self._turing_value(rhos)
             rho = rhos[idx]
             fd = np.zeros_like(rho)

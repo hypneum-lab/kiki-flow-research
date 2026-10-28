@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 from pathlib import Path
 from typing import Any, Literal
 
@@ -67,6 +68,62 @@ def _aggregate_rho_stats(trajectories: list[list[FlowState]]) -> dict[str, Any]:
     }
 
 
+def _make_jko(
+    f_func: T2FreeEnergy,
+    support: np.ndarray,
+    use_w2_prox: bool,
+    sinkhorn_backend: SinkhornBackend,
+    scheme: Scheme | None,
+    nonseparable: NonSeparable,
+    implicit_options: dict[str, Any] | None,
+) -> JKOStep:
+    """Slow-step solver of ``run_paper``; ``nonseparable`` reaches all three branches."""
+    if use_w2_prox:
+        if sinkhorn_backend == "mlx":
+            jko: JKOStep = MLXFullJKOSolver(
+                f_functional=f_func,
+                h=0.05,
+                support=support,
+                epsilon=0.01 if scheme == "legacy_split" else None,
+                scheme=scheme or "jko_entropic",
+                nonseparable=nonseparable,
+                implicit_options=implicit_options,
+            )
+        else:
+            jko = FullJKOSolver(
+                f_functional=f_func,
+                h=0.05,
+                support=support,
+                epsilon=0.01 if scheme == "legacy_split" else None,
+                scheme=scheme or "jko_entropic",
+                nonseparable=nonseparable,
+                implicit_options=implicit_options,
+            )
+    else:
+        jko = JKOStep(
+            f_functional=f_func,
+            h=0.05,
+            support=support,
+            n_inner=10,
+            apply_w2_prox=False,
+            scheme=scheme,
+            nonseparable=nonseparable,
+            **(implicit_options or {}),
+        )
+
+    return jko
+
+
+def _git_commit() -> str:
+    try:
+        out = subprocess.run(
+            ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=False, timeout=10
+        )
+    except OSError, subprocess.SubprocessError:
+        return "unknown"
+    return out.stdout.strip() or "unknown"
+
+
 def run_paper(
     seeds: list[int],
     n_particles: int = 10_000,
@@ -82,6 +139,8 @@ def run_paper(
     scheme: Scheme | None = None,
     reinject: bool = True,
     nonseparable: NonSeparable = "implicit",
+    turing_smoothing: float | None = 1e-5,
+    implicit_options: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Run N seeds of the T2 multiscale loop, producing figures and stats.
 
@@ -107,9 +166,20 @@ def run_paper(
     reinject : bool (default True)
         Feed the JKO output back into the particles after each slow step.
         The runs made before 2026-10-25 never reinjected.
-    nonseparable : "implicit" (default since 2026-10-27) or "explicit"
+    nonseparable : "implicit" (default) or "explicit"
         Treatment of the coupling and Turing terms in the entropic step
-        (ERRATUM.md sections 14-15); "explicit" reproduces earlier runs.
+        (ERRATUM.md sections 14-16); "explicit" reproduces earlier runs.
+        Forwarded in all three solver branches.
+    turing_smoothing : float or None (default 1e-5)
+        Declared smoothing of the Turing term (``T2FreeEnergy``), required by
+        the certified implicit step; ignored (None) for the explicit and legacy
+        schemes, which keep the historical energy.
+    implicit_options : dict or None
+        Settings of the certified implicit solver (see ``JKOStep``).
+
+    ``stats.json`` records the resolved solver configuration (scheme,
+    nonseparable, reg, tolerances, smoothing, reinjection, git commit) and,
+    for the implicit step, a summary of the per-step certificates.
     """
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -118,36 +188,23 @@ def run_paper(
     support = np.linspace(-2, 2, grid_size).reshape(-1, 1)
     potentials = {n: np.zeros(grid_size) for n in names}
     prior = {n: np.full(grid_size, 1.0 / grid_size) for n in names}
-    f_func = T2FreeEnergy(species=species, potentials=potentials, prior=prior, turing_strength=0.1)
+    resolved_scheme = scheme or ("jko_entropic" if use_w2_prox else "legacy_split")
+    smoothing = (
+        turing_smoothing
+        if resolved_scheme == "jko_entropic" and nonseparable == "implicit"
+        else None
+    )
+    f_func = T2FreeEnergy(
+        species=species,
+        potentials=potentials,
+        prior=prior,
+        turing_strength=0.1,
+        turing_smoothing=smoothing,
+    )
 
-    if use_w2_prox:
-        if sinkhorn_backend == "mlx":
-            jko: JKOStep = MLXFullJKOSolver(
-                f_functional=f_func,
-                h=0.05,
-                support=support,
-                epsilon=0.01 if scheme == "legacy_split" else None,
-                scheme=scheme or "jko_entropic",
-                nonseparable=nonseparable,
-            )
-        else:
-            jko = FullJKOSolver(
-                f_functional=f_func,
-                h=0.05,
-                support=support,
-                epsilon=0.01 if scheme == "legacy_split" else None,
-                scheme=scheme or "jko_entropic",
-                nonseparable=nonseparable,
-            )
-    else:
-        jko = JKOStep(
-            f_functional=f_func,
-            h=0.05,
-            support=support,
-            n_inner=10,
-            apply_w2_prox=False,
-            scheme=scheme,
-        )
+    jko = _make_jko(
+        f_func, support, use_w2_prox, sinkhorn_backend, scheme, nonseparable, implicit_options
+    )
 
     per_seed: list[dict[str, Any]] = []
     trajectories: list[list[FlowState]] = []
@@ -168,7 +225,21 @@ def run_paper(
             support=support,
             reinject=reinject,
         )
+        certificates: list[dict[str, Any]] = []
+        if jko.scheme == "jko_entropic" and jko.nonseparable == "implicit":
+            base_step = jko.step
+
+            def certified_step(
+                state: FlowState, base_step: Any = base_step, certificates: Any = certificates
+            ) -> FlowState:
+                out: FlowState = base_step(state)
+                certificates.append(dict(jko.last_info))
+                return out
+
+            jko.step = certified_step  # type: ignore[method-assign]
         manifest = loop.run(seed=seed)
+        if certificates:
+            jko.step = base_step  # type: ignore[method-assign]
         make_phase_portrait(
             manifest["trajectory"],
             out_dir / "figures",
@@ -179,7 +250,17 @@ def run_paper(
                 manifest["trajectory"], out_dir / "trajectories" / f"seed{seed}.safetensors"
             )
             trajectories.append(manifest["trajectory"])
-        per_seed.append({"seed": seed, "n_slow_completed": manifest["n_slow_completed"]})
+        entry: dict[str, Any] = {"seed": seed, "n_slow_completed": manifest["n_slow_completed"]}
+        if certificates:
+            entry["implicit_certificates"] = {
+                "steps": len(certificates),
+                "all_converged": all(c["status"] == "converged" for c in certificates),
+                "max_kkt_residual": max(c["kkt_residual"] for c in certificates),
+                "max_outer_iterations": max(c["outer_iterations"] for c in certificates),
+                "max_inner_residual": max(c["inner_max_residual"] for c in certificates),
+                "seconds": float(sum(c["seconds"] for c in certificates)),
+            }
+        per_seed.append(entry)
 
     stats: dict[str, Any] = {
         "n_seeds": len(seeds),
@@ -188,6 +269,20 @@ def run_paper(
             "simulator": "mlx" if use_mlx else "numpy",
             "w2_prox": use_w2_prox,
             "sinkhorn_backend": sinkhorn_backend if use_w2_prox else None,
+        },
+        "solver": {
+            "scheme": jko.scheme,
+            "nonseparable": jko.nonseparable,
+            "h": jko.h,
+            "reg": jko.entropic_reg if jko.scheme == "jko_entropic" else jko.reg,
+            "prox_n_iter": jko.prox_n_iter,
+            "prox_tol": jko.prox_tol,
+            "kkt_tol": jko.kkt_tol,
+            "max_outer": jko.max_outer,
+            "inner_marginal_tol": jko.inner_marginal_tol,
+            "turing_smoothing": smoothing,
+            "reinject": reinject,
+            "git_commit": _git_commit(),
         },
     }
 
