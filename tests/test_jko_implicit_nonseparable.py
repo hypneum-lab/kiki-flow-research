@@ -37,8 +37,8 @@ SMALL_H_Q0 = 0.708128  # converged value (10 000 iterations) of the small-h case
 ATOL = 1e-5
 GRAD_TOL = 1e-6
 STATIONARITY_TOL = 1e-5
-PERTURBATION = 1e-3
-PERTURBATION_SLACK = 1e-12
+PERTURBATION = 1e-4  # absolute mass moved between two bins (all q entries > 1e-2 here)
+PERTURBATION_SLACK = 1e-11
 
 
 def _state(rho: dict[str, np.ndarray]) -> FlowState:
@@ -49,6 +49,8 @@ def _state(rho: dict[str, np.ndarray]) -> FlowState:
 
 class EntropyTo(FreeEnergy):
     """F = KL(q || p) on one species, with its exact KL-prox."""
+
+    implicit_ready = True  # exact KL-prox (kl_prox_log override)
 
     def __init__(self, p: np.ndarray) -> None:
         self.p = p
@@ -64,6 +66,8 @@ class EntropyTo(FreeEnergy):
 
 class Kink(FreeEnergy):
     """F = |q_0 - 1/4|: non-smooth, no exact gradient at the kink (Codex false stop)."""
+
+    implicit_ready = True  # declares a (sub)gradient; non-smooth, so the step must fail
 
     def value(self, state: FlowState) -> float:
         return abs(float(state.rho["a"][0]) - 0.25)
@@ -82,6 +86,28 @@ def pot_entropic_ot(
     safe = np.where(plan > 0.0, np.log(np.maximum(plan, 1e-300)), 0.0)
     value = float(np.sum(plan * cost) + reg * np.sum(plan * (safe - 1.0)))
     return value, reg * np.asarray(log["log_u"], dtype=float)
+
+
+class Quad(FreeEnergy):
+    """F = 8 x + 8 x^2 on q = (x, 1 - x), exact gradient (Codex boundary counter-example)."""
+
+    implicit_ready = True
+
+    def value(self, state: FlowState) -> float:
+        x = float(state.rho["a"][0])
+        return 8.0 * x + 8.0 * x * x
+
+    def grad_rho(self, state: FlowState, species_name: str, eps: float = 1e-4) -> np.ndarray:
+        x = float(state.rho[species_name][0])
+        return np.array([8.0 + 16.0 * x, 0.0])
+
+
+class FDOnly(FreeEnergy):
+    """Smooth energy relying on the inherited finite-difference gradient."""
+
+    def value(self, state: FlowState) -> float:
+        x = float(state.rho["a"][0])
+        return 1000.0 * (x - 0.3) ** 2
 
 
 def _t2(grid: int, alpha: float, gamma: float, delta: float | None) -> T2FreeEnergy:
@@ -115,6 +141,72 @@ def test_non_smooth_false_stop_fails_explicitly() -> None:
         jko.step(state)
     assert err.value.info["status"] in {"line_search", "max_outer"}
     assert err.value.info["kkt_residual"] > jko.kkt_tol
+
+
+def test_low_mass_false_stationarity_is_rejected() -> None:
+    """Codex B1 on PR #51: an absolute TV residual accepted x = 1.3e-14 (x* = 1.13e-7).
+
+    Zero cost, h = reg = 1: Q(x) = 8 x + 8 x^2 + (x log x + (1-x) log(1-x)) / 2 + c,
+    so x* solves 8 + 16 x + log(x / (1-x)) / 2 = 0.
+    """
+    state = _state({"a": np.array([0.5, 0.5])})
+    jko = JKOStep(Quad(), 1.0, np.array([[0.0], [0.0]]), scheme="jko_entropic", reg=1.0)
+    try:
+        out = jko.step(state)
+    except ImplicitJKOError as err:  # an explicit failure is acceptable, a false pass is not
+        assert err.info["status"] != "converged"
+        return
+    x = float(out.rho["a"][0])
+    x_star = 1.0 / (1.0 + np.exp(16.0 + 32.0 * 1.13e-7))
+    assert jko.last_info["log_residual"] < jko.log_tol
+    assert abs(x - x_star) / x_star < 1e-3  # noqa: PLR2004
+    assert abs(8.0 + 16.0 * x + 0.5 * np.log(x / (1.0 - x))) < 1e-3  # noqa: PLR2004
+
+
+def test_energy_without_exact_gradient_is_refused_even_after_mutation() -> None:
+    """Codex M1 on PR #51: the inherited finite difference must not be certified."""
+    support = np.array([[0.0], [0.0]])
+    with pytest.raises(ValueError, match="implicit_ready"):
+        JKOStep(FDOnly(), 1.0, support, scheme="jko_entropic", reg=1.0)
+    jko = JKOStep(FDOnly(), 1.0, support, scheme="jko_entropic", reg=1.0, nonseparable="explicit")
+    jko.nonseparable = "implicit"
+    with pytest.raises(ValueError, match="implicit_ready"):
+        jko.step(_state({"a": np.array([0.3, 0.7])}))
+
+
+def test_t2_entropy_has_no_floor_below_1e_12() -> None:
+    """Codex M2 on PR #51: value() and the prox must minimise the same entropy."""
+    f = _t2(4, 0.0, 0.0, None)
+    names = f.species.species_names()
+    rho = {n: np.full(4, 0.25) for n in names}
+    tiny = np.array([1e-14, 0.0, 0.5, 0.5 - 1e-14])
+    rho[names[0]] = tiny
+    expected_kl = float(
+        1e-14 * np.log(1e-14 / 0.25)
+        + 0.5 * np.log(2.0)
+        + (0.5 - 1e-14) * np.log((0.5 - 1e-14) / 0.25)
+    )
+    base = f.value(_state({**rho, names[0]: np.full(4, 0.25)}))
+    assert f.value(_state(rho)) - base == pytest.approx(
+        expected_kl + _coupling_delta(f, rho, names), abs=1e-13
+    )
+
+
+def _coupling_delta(f: T2FreeEnergy, rho: dict[str, np.ndarray], names: list[str]) -> float:
+    rhos = [rho[n] for n in names]
+    ref = [np.full(4, 0.25) for _ in names]
+    j = f._J_sym
+
+    def coupling(rs: list[np.ndarray]) -> float:
+        return float(sum(j[i, k] * np.dot(rs[i], rs[k]) for i in range(4) for k in range(4)))
+
+    return coupling(rhos) - coupling(ref)
+
+
+def test_off_simplex_input_is_refused() -> None:
+    jko = JKOStep(ZeroF(), 0.1, np.array([[0.0], [1.0]]), scheme="jko_entropic")
+    with pytest.raises(ValueError, match="simplex"):
+        jko.step(_state({"a": np.array([1.0, 1.0])}))
 
 
 def test_small_h_inner_solve_is_certified_not_frozen() -> None:
@@ -226,7 +318,7 @@ def test_small_coupled_problem_is_stationary_by_an_independent_check() -> None:
     At the returned q the gradient of Q_h, grad F + f / (2h) with f the POT dual
     potential of OT_reg(q_i, rho_tau_i), must be constant on each species'
     support (first-order condition on the simplex), and Q_h must not decrease
-    along small tangent perturbations. The L-BFGS comparison against an
+    along absolute mass transfers between any two bins. The L-BFGS comparison against an
     independent minimiser is in experiments/implicit_jko_certified_validation_
     2026_10_27.py (too slow for the test suite).
     """
@@ -263,15 +355,20 @@ def test_small_coupled_problem_is_stationary_by_an_independent_check() -> None:
             + f.nonseparable_grad(st, n)
             + pot / (2 * h)
         )
-        assert float(np.max(q[n] * np.abs(g - float(np.dot(q[n], g))))) < STATIONARITY_TOL
+        # unweighted: every bin, whatever its mass
+        assert float(np.max(np.abs(g - float(np.dot(q[n], g))))) < STATIONARITY_TOL
     base = q_value(q)
-    for _ in range(4):
-        pert = {}
-        for n in names:
-            d = rng.standard_normal(grid)
-            d -= d.mean()
-            pert[n] = q[n] + PERTURBATION * d * q[n].min()
-        assert q_value(pert) >= base - PERTURBATION_SLACK
+    for n in names:  # absolute mass transfers between bins, both directions
+        for a_bin in range(grid):
+            for b_bin in range(grid):
+                if a_bin == b_bin:
+                    continue
+                pert = dict(q)
+                moved = q[n].copy()
+                moved[a_bin] += PERTURBATION
+                moved[b_bin] -= PERTURBATION
+                pert[n] = moved
+                assert q_value(pert) >= base - PERTURBATION_SLACK
 
 
 def test_run_paper_forwards_nonseparable_in_all_branches() -> None:

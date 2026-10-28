@@ -52,6 +52,7 @@ def test_separable_equals_t2_when_j_and_turing_zero() -> None:
         potentials=potentials,
         prior=prior,
         turing_strength=0.0,
+        turing_smoothing=None,
     )
     # Force coupling to zero explicitly: the full coupling, plus the canonical
     # symmetric/antisymmetric split, all need to be identically zero so that

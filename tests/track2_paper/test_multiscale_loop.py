@@ -13,7 +13,13 @@ def test_multiscale_loop_produces_manifest():
     n = 8
     potentials = {name: np.zeros(n) for name in species.species_names()}
     prior = {name: np.full(n, 1.0 / n) for name in species.species_names()}
-    f = T2FreeEnergy(species=species, potentials=potentials, prior=prior, turing_strength=0.0)
+    f = T2FreeEnergy(
+        species=species,
+        potentials=potentials,
+        prior=prior,
+        turing_strength=0.0,
+        turing_smoothing=None,
+    )
     support = np.linspace(-2, 2, n).reshape(-1, 1)
     jko = FullJKOSolver(
         f_functional=f, h=0.05, support=support, epsilon=0.05, max_iter=50, n_inner=5

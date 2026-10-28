@@ -20,10 +20,13 @@ Parts (all on electron-server, nice 19, at most 4 workers):
   Q_h(step) - Q_h(reference), KKT residual.
 * ``certify``: the grid of the 2026-10-27 dissipation check, gamma in {0, 5, 10,
   20, 30, 50, 70, 100} x alpha in {2, 5, 10} x h in {0.05, 0.025} x 2 seeds
-  (Dirichlet initial states, seeds 500 and 501), ``N_STEPS`` steps on grid 16:
+  (Dirichlet initial states, seeds 500 and 501), ``N_STEPS`` = 3 steps on grid 16:
   status of every step (converged / failure kind), KKT residual, outer
   iterations, inner residuals, seconds per step; F and Q_h along the steps are
   recorded descriptively (not a criterion).
+* ``operating``: at the operating point (grid 16 on [-2, 2], h = 0.05, reg =
+  h^2) for (10, 0) and (8, 5): Q_h at the certified step against absolute mass
+  transfers between neighbouring bins, Q_h evaluated by certified brackets.
 * ``smoothing``: Turing smoothing delta in {1e-4, 1e-5, 1e-6} at (5, 5), (5, 30)
   and (10, 100): change of the step output and of F with delta.
 
@@ -49,7 +52,7 @@ import numpy as np
 import ot
 from scipy.optimize import minimize
 
-from kiki_flow_core.master_equation import ImplicitJKOError, JKOStep
+from kiki_flow_core.master_equation import SOLVER_VERSION, ImplicitJKOError, JKOStep
 from kiki_flow_core.species import CanonicalSpecies
 from kiki_flow_core.state import FlowState
 from kiki_flow_core.track2_paper.paper_f import T2FreeEnergy
@@ -60,9 +63,10 @@ GAMMAS = [0.0, 5.0, 10.0, 20.0, 30.0, 50.0, 70.0, 100.0]
 ALPHAS = [2.0, 5.0, 10.0]
 HS = [0.05, 0.025]
 INIT_SEEDS = [500, 501]
-N_STEPS = 1  # one certified step per configuration (cost: up to ~400 s at gamma = 5)
+N_STEPS = 3  # multi-step trajectories (dissipation along steps); up to ~400 s per step
 REF_GRIDS = [4, 6, 8]
 REF_CELLS = [(2.0, 0.0), (5.0, 5.0), (5.0, 30.0)]
+OPERATING_CELLS = [(10.0, 0.0), (8.0, 5.0)]  # support [-2, 2], h = 0.05, reg = h^2, grid 16
 SMOOTHING_DELTAS = [1e-4, 1e-5, 1e-6]
 REF_H = 0.2  # reg = h^2 = 0.04
 REF_HALF_WIDTH = 0.5  # reference support [-0.5, 0.5]: max cost / reg = 25, so the dual
@@ -75,6 +79,7 @@ FLOOR = 1e-300
 def output_paths() -> dict[str, Path]:
     return {
         "reference": OUT_DIR / "reference.json",
+        "operating": OUT_DIR / "operating.json",
         "certify": OUT_DIR / "certify.jsonl",
         "smoothing": OUT_DIR / "smoothing.json",
         "summary": OUT_DIR / "summary.md",
@@ -155,7 +160,7 @@ def pot_entropic_ot(
     return value, reg * np.asarray(log["log_u"], dtype=float)
 
 
-def reference_minimiser(
+def reference_minimiser(  # local reference (L-BFGS-B), no global guarantee
     f: T2FreeEnergy,
     ref: dict[str, np.ndarray],
     sup: np.ndarray,
@@ -188,15 +193,17 @@ def reference_minimiser(
             grad[i * grid : (i + 1) * grid] = q[n] * (gq - float(np.dot(q[n], gq)))
         return float(val), grad
 
-    best: tuple[dict[str, np.ndarray], float] | None = None
+    best: tuple[dict[str, np.ndarray], float, bool] | None = None
     for start in starts:
         z0 = np.concatenate([np.log(np.clip(start[n], 1e-12, None)) for n in names])
         res = minimize(
             fun, z0, jac=True, method="L-BFGS-B", options={"maxiter": 500, "gtol": 1e-10}
         )
         q = unpack(res.x)
-        if best is None or res.fun < best[1]:
-            best = (q, float(res.fun))
+        ok = bool(res.success)
+        # a successful run beats a failed one; among equals, the lower value wins
+        if best is None or (ok, -float(res.fun)) > (best[2], -best[1]):
+            best = (q, float(res.fun), ok)
     assert best is not None
     return best
 
@@ -216,7 +223,9 @@ def reference_job(grid: int, alpha: float, gamma: float, kind: str, h: float) ->
     q_step = {n: out.rho[n] for n in rho}
     names = f.species.species_names()
     uniform = {n: np.full(grid, 1.0 / grid) for n in names}
-    q_ref, q_ref_val = reference_minimiser(f, rho, sup, h, jko.entropic_reg, [uniform, rho, q_step])
+    q_ref, q_ref_val, ref_success = reference_minimiser(
+        f, rho, sup, h, jko.entropic_reg, [uniform, rho, q_step]
+    )
     cost = ot.dist(sup, sup, metric="sqeuclidean")
     q_step_val = f.value(state_of(q_step)) + sum(
         pot_entropic_ot(q_step[n], rho[n], cost, jko.entropic_reg)[0] for n in names
@@ -232,7 +241,48 @@ def reference_job(grid: int, alpha: float, gamma: float, kind: str, h: float) ->
         "outer_iterations": info["outer_iterations"],
         "tv_step_vs_reference": tv(q_step, q_ref),
         "Q_step_minus_Q_reference": q_step_val - q_ref_val,
+        "reference_lbfgs_success": ref_success,
+        "log_residual": info.get("log_residual"),
+        "solver_version": SOLVER_VERSION,
         "seconds": time.perf_counter() - tic,
+    }
+
+
+def operating_job(alpha: float, gamma: float) -> dict[str, Any]:
+    """Operating point: independent check by certified Q_h brackets and mass transfers.
+
+    At cost / reg up to 6400 the dual potentials are not identifiable, so the
+    check uses Q_h values (``JKOStep.objective``: certified dual / rounded-primal
+    bracket of OT_reg) along absolute mass transfers between neighbouring bins.
+    """
+    f = problem(16, alpha, gamma)
+    sup = support(16)
+    rng = np.random.default_rng(500)
+    rho = {n: rng.dirichlet(np.ones(16)) for n in f.species.species_names()}
+    jko = JKOStep(f, 0.05, sup, scheme="jko_entropic", on_failure="warn")
+    out = jko.step(state_of(rho))
+    q = {n: out.rho[n] for n in rho}
+    base = jko.objective(state_of(rho), q, rho)
+    worst = 0.0
+    for n in rho:
+        for a in range(15):
+            for sign in (1.0, -1.0):
+                moved = q[n].copy()
+                t = 1e-6
+                moved[a] += sign * t
+                moved[a + 1] -= sign * t
+                val = jko.objective(state_of(rho), {**q, n: moved}, rho)
+                worst = min(worst, val - base)
+    return {
+        "alpha": alpha,
+        "gamma": gamma,
+        "status": jko.last_info["status"],
+        "kkt_residual": jko.last_info["kkt_residual"],
+        "log_residual": jko.last_info["log_residual"],
+        "q_min": jko.last_info["q_min"],
+        "Q_step": base,
+        "worst_transfer_decrease": worst,
+        "solver_version": SOLVER_VERSION,
     }
 
 
@@ -256,7 +306,14 @@ def certify_job(alpha: float, gamma: float, h: float, seed: int) -> dict[str, An
         if info["status"] != "converged":
             break
         state = new
-    return {"alpha": alpha, "gamma": gamma, "h": h, "seed": seed, "steps": steps}
+    return {
+        "alpha": alpha,
+        "gamma": gamma,
+        "h": h,
+        "seed": seed,
+        "solver_version": SOLVER_VERSION,
+        "steps": steps,
+    }
 
 
 def b1_job(alpha: float, gamma: float) -> dict[str, Any]:
@@ -324,7 +381,8 @@ def run_certify(workers: int) -> None:
     if path.exists():
         for line in path.read_text().splitlines():
             r = json.loads(line)
-            done.add((r["alpha"], r["gamma"], r["h"], r["seed"]))
+            if r.get("solver_version") == SOLVER_VERSION:  # never reuse another solver
+                done.add((r["alpha"], r["gamma"], r["h"], r["seed"]))
     jobs = [
         (a, g, h, s)
         for g in reversed(GAMMAS)
@@ -348,15 +406,20 @@ def run_certify(workers: int) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["b1", "reference", "certify", "smoothing"])
+    ap.add_argument("cmd", choices=["b1", "reference", "operating", "certify", "smoothing"])
     ap.add_argument("--workers", type=int, default=4)
     args = ap.parse_args(argv)
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     if args.cmd == "b1":
         res = run_pool(b1_job, [(8.0, 5.0), (5.0, 30.0), (10.0, 0.0)], args.workers)
-        with (OUT_DIR / "b1_probe.jsonl").open("w") as fh:
+        stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
+        target = OUT_DIR / f"b1_rerun_{stamp}.jsonl"  # never overwrite the committed records
+        with target.open("x") as fh:
             for r in res:
                 fh.write(json.dumps(r, default=float) + "\n")
+    elif args.cmd == "operating":
+        res = run_pool(operating_job, OPERATING_CELLS, args.workers)
+        output_paths()["operating"].write_text(json.dumps(res, indent=1, default=float))
     elif args.cmd == "reference":
         jobs = [
             (g, a, gm, k, REF_H)

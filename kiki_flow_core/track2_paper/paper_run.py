@@ -10,7 +10,7 @@ from typing import Any, Literal
 import numpy as np
 from safetensors.numpy import save_file
 
-from kiki_flow_core.master_equation import JKOStep, NonSeparable, Scheme
+from kiki_flow_core.master_equation import SOLVER_VERSION, JKOStep, NonSeparable, Scheme
 from kiki_flow_core.species import CanonicalSpecies
 from kiki_flow_core.state import FlowState
 from kiki_flow_core.track2_paper.figures.continual_learning_gap import (
@@ -122,6 +122,21 @@ def _git_commit() -> str:
     except OSError, subprocess.SubprocessError:
         return "unknown"
     return out.stdout.strip() or "unknown"
+
+
+def _git_dirty() -> bool | None:
+    """True when tracked files differ from the commit (results not reproducible as is)."""
+    try:
+        out = subprocess.run(
+            ["git", "status", "--porcelain", "--untracked-files=no"],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=10,
+        )
+    except OSError, subprocess.SubprocessError:
+        return None
+    return bool(out.stdout.strip()) if out.returncode == 0 else None
 
 
 def run_paper(
@@ -269,6 +284,13 @@ def run_paper(
             "simulator": "mlx" if use_mlx else "numpy",
             "w2_prox": use_w2_prox,
             "sinkhorn_backend": sinkhorn_backend if use_w2_prox else None,
+            # The entropic scheme runs the NumPy log-domain solver whatever the
+            # backend; the MLX prox is used by the legacy split only.
+            "prox_backend_effective": (
+                "numpy (entropic scheme)"
+                if jko.scheme == "jko_entropic"
+                else (sinkhorn_backend if use_w2_prox else None)
+            ),
         },
         "solver": {
             "scheme": jko.scheme,
@@ -278,11 +300,20 @@ def run_paper(
             "prox_n_iter": jko.prox_n_iter,
             "prox_tol": jko.prox_tol,
             "kkt_tol": jko.kkt_tol,
+            "log_tol": jko.log_tol,
             "max_outer": jko.max_outer,
+            "l0": jko.l0,
+            "l_max": jko.l_max,
+            "sigma": jko.sigma,
+            "inner_n_iter": jko.inner_n_iter,
+            "inner_tol": jko.inner_tol,
             "inner_marginal_tol": jko.inner_marginal_tol,
+            "on_failure": jko.on_failure,
+            "solver_version": SOLVER_VERSION,
             "turing_smoothing": smoothing,
             "reinject": reinject,
             "git_commit": _git_commit(),
+            "git_dirty": _git_dirty(),
         },
     }
 

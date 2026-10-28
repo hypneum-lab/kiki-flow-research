@@ -98,7 +98,11 @@ def problem(alpha: float, gamma: float) -> tuple[CanonicalSpecies, np.ndarray, T
     }
     prior = {n: np.full(GRID, 1.0 / GRID) for n in names}
     f_func = T2FreeEnergy(
-        species=species, potentials=potentials, prior=prior, turing_strength=gamma * 0.1
+        species=species,
+        potentials=potentials,
+        prior=prior,
+        turing_strength=gamma * 0.1,
+        turing_smoothing=None,
     )
     return species, support, f_func
 

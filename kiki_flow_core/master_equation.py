@@ -28,10 +28,26 @@ NonSeparable = Literal["explicit", "implicit"]
 NONSEPARABLE_MODES: tuple[NonSeparable, ...] = ("explicit", "implicit")
 OnFailure = Literal["raise", "warn"]
 _FLOOR = 1e-300
+UNDERFLOW = 1e-280  # densities below this cannot carry a meaningful log residual
+SIMPLEX_TOL = 1e-9
+SOLVER_VERSION = "certified-implicit-2"
 
 
 class FreeEnergy(ABC):
-    """Abstract free-energy functional on FlowState."""
+    """Abstract free-energy functional on FlowState.
+
+    ``implicit_ready`` (default False) is a positive declaration that
+    ``kl_prox_log`` uses exact gradients of the non-separable terms, so that
+    the certified implicit JKO step can certify stationarity of the energy
+    actually evaluated by ``value``. The inherited numerical ``grad_rho`` is a
+    finite difference and does not qualify; subclasses with exact gradients set
+    ``implicit_ready = True``.
+    """
+
+    @property
+    def implicit_ready(self) -> bool:
+        """Positive declaration of exact gradients (see class doc); False by default."""
+        return False
 
     @abstractmethod
     def value(self, state: FlowState) -> float:
@@ -82,6 +98,10 @@ class FreeEnergy(ABC):
 class ZeroF(FreeEnergy):
     """Identically-zero free energy. Used in tests and as no-op placeholder."""
 
+    @property
+    def implicit_ready(self) -> bool:
+        return True
+
     def value(self, state: FlowState) -> float:
         return 0.0
 
@@ -125,17 +145,25 @@ class JKOStep:
       iterations, ``prox_tol``). Not a minimiser of Q_h; not dissipative when
       the Turing term is strong (ERRATUM.md section 14). Kept to reproduce
       earlier results.
-    * ``"implicit"`` (default): a certified stationary point of Q_h, by
-      Bregman (KL) majorisation-minimisation with a line search on Q_h itself.
+    * ``"implicit"`` (default): a certified stationary point of Q_h (no global
+      guarantee), by Bregman (KL) majorisation-minimisation with a line search
+      on Q_h itself.
       With T_L(q) the generalised-Sinkhorn solution of the subproblem in which
       the non-separable part N of F is linearised at q and a proximal term
       L * KL(. || q) is added, the iteration starts from the explicit output
       q_0 = T_0(rho_tau) and accepts q_{k+1} = T_L(q_k) for the smallest L in
       {0, L0, 4 L0, ...} such that Q_h(q_{k+1}) <= Q_h(q_k) - sigma * L *
-      KL(q_{k+1} || q_k). It stops when the stationarity residual at the
-      returned point, max_i TV(T_0(q)_i, q_i), is below ``kkt_tol``: T_0(q) = q
-      is the first-order (KKT) condition of Q_h when N has an exact gradient
-      (``F.implicit_ready``). Every inner Sinkhorn solve and every OT_reg
+      KL(q_{k+1} || q_k). It stops when, at the returned point, both
+      stationarity residuals are below their thresholds: the absolute one
+      max_i TV(T_0(q)_i, q_i) < ``kkt_tol`` and the relative (log-domain) one
+      max_{i,x} |log T_0(q)_i(x) - log q_i(x)| < ``log_tol``, which controls
+      every bin whatever its mass (an absolute TV residual alone accepts false
+      stationary points in low-mass bins). T_0(q) = q is the first-order (KKT)
+      condition of Q_h when N has an exact gradient (``F.implicit_ready``, a
+      positive declaration checked at every step). A density below
+      ``UNDERFLOW`` makes the log residual meaningless and fails as
+      ``status="underflow"``. Inputs must lie on the simplex (total mass 1 within
+      ``SIMPLEX_TOL``). Every inner Sinkhorn solve and every OT_reg
       evaluation carries its own certificate (marginal residual). Exhausting
       ``max_outer`` iterations, a line search beyond ``l_max`` or an inner
       certificate failure raises ``ImplicitJKOError`` (``on_failure="raise"``,
@@ -161,6 +189,7 @@ class JKOStep:
         prox_tol: float = 0.0,
         nonseparable: NonSeparable = "implicit",
         kkt_tol: float = 1e-6,
+        log_tol: float = 1e-5,
         max_outer: int = 500,
         l0: float = 1.0,
         l_max: float = 1e8,
@@ -182,7 +211,7 @@ class JKOStep:
             )
         if on_failure not in ("raise", "warn"):
             raise ValueError("on_failure must be 'raise' or 'warn'")
-        if not (kkt_tol > 0 and max_outer >= 1 and 0 < l0 <= l_max and sigma >= 0):
+        if not (kkt_tol > 0 and log_tol > 0 and max_outer >= 1 and 0 < l0 <= l_max and sigma >= 0):
             raise ValueError("invalid implicit-solver settings")
         if not (inner_n_iter >= 1 and inner_tol > 0 and inner_marginal_tol > 0):
             raise ValueError("invalid inner-solver settings")
@@ -201,6 +230,7 @@ class JKOStep:
         self.prox_tol = prox_tol
         self.nonseparable: NonSeparable = nonseparable
         self.kkt_tol = kkt_tol
+        self.log_tol = log_tol
         self.max_outer = max_outer
         self.l0 = l0
         self.l_max = l_max
@@ -210,16 +240,7 @@ class JKOStep:
         self.inner_marginal_tol = inner_marginal_tol
         self.on_failure: OnFailure = on_failure
         self.last_info: dict[str, Any] = {}
-        if (
-            self.scheme == "jko_entropic"
-            and self.nonseparable == "implicit"
-            and not getattr(f_functional, "implicit_ready", True)
-        ):
-            raise ValueError(
-                "the implicit JKO step needs an exact gradient of the non-separable terms; "
-                "declare a smoothing of the Turing term (T2FreeEnergy(turing_smoothing=...)) "
-                "or use nonseparable='explicit'"
-            )
+        self._check_implicit_ready()
         # Strategy pattern: Track-specific subclasses can inject an MLX-backed
         # prox without forcing a circular import here. Default remains the
         # POT-backed prox_w2. Only the legacy scheme uses it.
@@ -264,8 +285,26 @@ class JKOStep:
             raise ValueError(f"Sinkhorn regularisation must be finite and positive, got {reg}")
         return float(reg)
 
+    def _check_implicit_ready(self) -> None:
+        """Refuse the certified path for energies without exact gradients.
+
+        Called at construction and again at every step, since ``scheme``,
+        ``nonseparable`` and ``f_functional`` can be changed afterwards.
+        """
+        if (
+            self.scheme == "jko_entropic"
+            and self.nonseparable == "implicit"
+            and not getattr(self.f_functional, "implicit_ready", False)
+        ):
+            raise ValueError(
+                "the implicit JKO step needs an energy that declares exact gradients "
+                "(implicit_ready = True); for T2FreeEnergy declare a smoothing of the "
+                "Turing term (turing_smoothing), otherwise use nonseparable='explicit'"
+            )
+
     def _step_jko_entropic(self, state: FlowState) -> FlowState:
         if self.nonseparable == "implicit":
+            self._check_implicit_ready()
             rho = self._implicit_solve(state)
             return state.model_copy(update={"rho": rho, "tau": state.tau + 1})
         new_rho: dict[str, np.ndarray] = {}
@@ -400,6 +439,10 @@ class JKOStep:
             arr = np.asarray(rho, dtype=float)
             if not np.all(np.isfinite(arr)) or np.any(arr < 0.0) or arr.sum() <= 0.0:
                 raise ValueError(f"density {name!r} must be finite, non-negative, positive mass")
+            if abs(float(arr.sum()) - 1.0) > SIMPLEX_TOL:
+                raise ValueError(
+                    f"density {name!r} must lie on the simplex (mass {float(arr.sum())!r})"
+                )
 
     def _line_search(
         self,
@@ -433,7 +476,11 @@ class JKOStep:
             "ot_max_residual": 0.0,
             "max_anchor_weight": 0.0,
             "kkt_residual": float("nan"),
+            "log_residual": float("nan"),
+            "q_min": float("nan"),
             "kkt_tol": self.kkt_tol,
+            "log_tol": self.log_tol,
+            "solver_version": SOLVER_VERSION,
             "h": self.h,
             "reg": self.entropic_reg,
             "Q_final": float("nan"),
@@ -445,7 +492,7 @@ class JKOStep:
         stats = self._new_stats()
         result: dict[str, np.ndarray] = dict(state.rho)
         if not reference:  # nothing on this support: same as the explicit path
-            stats.update(status="converged", kkt_residual=0.0, seconds=0.0)
+            stats.update(status="converged", kkt_residual=0.0, log_residual=0.0, seconds=0.0)
             self.last_info = stats
             return result
         self._check_densities(reference)
@@ -458,7 +505,15 @@ class JKOStep:
                 stats["kkt_residual"] = max(
                     0.5 * float(np.abs(t0[0][n] - q[n]).sum()) for n in reference
                 )
-                if stats["kkt_residual"] < self.kkt_tol:
+                low = min(min(float(q[n].min()), float(t0[0][n].min())) for n in reference)
+                stats["q_min"] = min(float(q[n].min()) for n in reference)
+                if low < UNDERFLOW:
+                    stats["status"] = "underflow"
+                    break
+                stats["log_residual"] = max(
+                    float(np.max(np.abs(np.log(t0[0][n]) - np.log(q[n])))) for n in reference
+                )
+                if stats["kkt_residual"] < self.kkt_tol and stats["log_residual"] < self.log_tol:
                     stats["status"] = "converged"
                     break
                 if stats["outer_iterations"] >= self.max_outer:

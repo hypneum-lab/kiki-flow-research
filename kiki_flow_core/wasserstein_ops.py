@@ -265,6 +265,57 @@ def jko_entropic_prox_certified(
     return out, info
 
 
+def _entropic_ot_bounds(
+    f_pot: np.ndarray,
+    g_pot: np.ndarray,
+    q: np.ndarray,
+    r: np.ndarray,
+    cost_matrix: np.ndarray,
+    reg: float,
+) -> tuple[float, float, float]:
+    """Certified bracket ``lower <= OT_reg(q, r) <= upper`` and the marginal residual.
+
+    ``lower`` is the dual value <f, q> + <g, r> - reg * sum exp((f + g - C) / reg)
+    (weak duality); ``upper`` is the primal value of the plan built from (f, g)
+    and rounded to the exact marginals (Altschuler, Weed and Rigollet 2017,
+    Algorithm 2), hence feasible.
+    """
+    log_pi = (f_pot[:, None] + g_pot[None, :] - cost_matrix) / reg
+    pi = np.exp(log_pi)
+    lower = float(np.dot(f_pot, q) + np.dot(g_pot, r) - reg * pi.sum())
+    residual = float(np.abs(pi.sum(axis=1) - q).sum() + np.abs(pi.sum(axis=0) - r).sum())
+    rows = pi.sum(axis=1)
+    x = np.minimum(np.divide(q, rows, out=np.ones_like(q), where=rows > 0), 1.0)
+    rounded = pi * x[:, None]
+    cols = rounded.sum(axis=0)
+    y = np.minimum(np.divide(r, cols, out=np.ones_like(r), where=cols > 0), 1.0)
+    rounded = rounded * y[None, :]
+    err_r = q - rounded.sum(axis=1)
+    err_c = r - rounded.sum(axis=0)
+    mass = float(np.abs(err_r).sum())
+    if mass > 0.0:
+        rounded = rounded + np.outer(err_r, err_c) / mass
+    positive = rounded > 0.0
+    log_rounded = np.where(positive, np.log(np.where(positive, rounded, 1.0)), 0.0)
+    upper = float(np.sum(rounded * cost_matrix) + reg * np.sum(rounded * (log_rounded - 1.0)))
+    return lower, upper, residual
+
+
+def _scaling_stages(
+    reg: float,
+    top: float,
+    scaling_factor: float,
+    warm_start: tuple[np.ndarray, np.ndarray] | None,
+) -> list[float]:
+    """Decreasing regularisations of epsilon-scaling, ending at ``reg``."""
+    if warm_start is not None:
+        return [reg]
+    stages = [reg]
+    while stages[-1] < max(top, reg):
+        stages.append(stages[-1] / scaling_factor)
+    return stages[::-1]
+
+
 def entropic_ot(
     q: np.ndarray,
     r: np.ndarray,
@@ -276,6 +327,8 @@ def entropic_ot(
     marginal_tol: float = 1e-10,
     scaling_factor: float = 0.5,
     warm_start: tuple[np.ndarray, np.ndarray] | None = None,
+    gap_tol: float = 1e-10,
+    check_every: int = 200,
 ) -> tuple[float, np.ndarray, dict[str, Any]]:
     """Entropic OT value OT_reg(q, r) = min_pi <C, pi> + reg * sum pi (log pi - 1).
 
@@ -286,7 +339,12 @@ def entropic_ot(
     potentials; the last stage runs to ``tol`` / ``marginal_tol``. ``n_iter``
     bounds the total number of iterations. ``warm_start = (f, g)`` (potentials
     returned in ``info["potentials"]`` by a previous call at the same ``reg``)
-    skips the scaling stages; the certificate is the same. Returns
+    skips the scaling stages; the certificate is the same. Certificate: a
+    bracket lower <= OT_reg(q, r) <= upper from the dual value and the rounded
+    feasible plan (``_entropic_ot_bounds``); the call is certified when
+    ``upper - lower <= gap_tol`` (checked every ``check_every`` iterations of the
+    last stage) or the marginal residual is below ``marginal_tol``. The value
+    returned is the midpoint, within gap / 2 of OT_reg. Returns
     ``(value, f, info)``, ``f``
     the dual potential of the first marginal (the gradient of the value with
     respect to ``q`` up to an additive constant). This is, up to an additive
@@ -305,12 +363,8 @@ def entropic_ot(
         raise ValueError("scaling_factor must be in (0, 1)")
     log_q = np.log(np.clip(qa, 1e-300, None))
     log_r = np.log(np.clip(ra, 1e-300, None))
-    stages = [reg]
+    stages = _scaling_stages(reg, float(cost_matrix.max()), scaling_factor, warm_start)
     if warm_start is None:
-        top = max(float(cost_matrix.max()), reg)
-        while stages[-1] < top:
-            stages.append(stages[-1] / scaling_factor)
-        stages = stages[::-1]
         f_pot = np.zeros_like(log_q)
         g_pot = np.zeros_like(log_r)
     else:
@@ -330,19 +384,23 @@ def entropic_ot(
             g_pot = new_g
             if delta < stage_tol:
                 break
-    log_pi = (f_pot[:, None] + g_pot[None, :] - cost_matrix) / reg
-    pi = np.exp(log_pi)
-    residual = float(np.abs(pi.sum(axis=1) - qa).sum() + np.abs(pi.sum(axis=0) - ra).sum())
+            if last and iterations % check_every == 0:
+                lo, up, _ = _entropic_ot_bounds(f_pot, g_pot, qa, ra, cost_matrix, reg)
+                if up - lo <= gap_tol:
+                    break
+    lower, upper, residual = _entropic_ot_bounds(f_pot, g_pot, qa, ra, cost_matrix, reg)
     info: dict[str, Any] = {
         "iterations": iterations,
         "stages": len(stages),
         "last_delta": delta,
         "marginal_residual": residual,
-        "converged": bool(residual <= marginal_tol),
+        "lower": lower,
+        "upper": upper,
+        "gap": upper - lower,
+        "converged": bool(upper - lower <= gap_tol or residual <= marginal_tol),
     }
     if not info["converged"]:
         raise SinkhornNotConvergedError(f"entropic OT not converged: {info}")
-    safe = np.where(pi > 0.0, log_pi, 0.0)
-    value = float(np.sum(pi * cost_matrix) + reg * np.sum(pi * (safe - 1.0)))
+    value = 0.5 * (lower + upper)
     info["potentials"] = (f_pot.copy(), g_pot.copy())
     return value, f_pot, info

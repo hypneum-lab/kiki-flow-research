@@ -31,7 +31,13 @@ def _build_common_setup():
     support = np.linspace(-2, 2, GRID).reshape(-1, 1)
     potentials = {n: np.zeros(GRID) for n in names}
     prior = {n: np.full(GRID, 1.0 / GRID) for n in names}
-    f_func = T2FreeEnergy(species=species, potentials=potentials, prior=prior, turing_strength=0.1)
+    f_func = T2FreeEnergy(
+        species=species,
+        potentials=potentials,
+        prior=prior,
+        turing_strength=0.1,
+        turing_smoothing=None,
+    )
     return species, support, f_func
 
 

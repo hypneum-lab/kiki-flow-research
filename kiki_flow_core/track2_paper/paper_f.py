@@ -18,17 +18,29 @@ def gradient_operator(n: int) -> np.ndarray:
     return np.stack([np.gradient(e) for e in np.eye(n)], axis=1)
 
 
+def _kl(rho: np.ndarray, prior: np.ndarray) -> float:
+    """sum rho log(rho / prior) with 0 log 0 = 0 (no floor on positive masses)."""
+    r = np.maximum(np.asarray(rho, dtype=float), 0.0)
+    positive = r > 0.0
+    prior_safe = np.clip(prior, RHO_FLOOR, None)
+    terms = np.where(positive, r * np.log(np.where(positive, r, 1.0) / prior_safe), 0.0)
+    return float(np.sum(terms))
+
+
 class T2FreeEnergy(FreeEnergy):
     """F_T2 = sum_i <rho_i, V_i> + sum_i KL(rho_i || prior_i) + reaction + turing.
 
     The Turing term is turing_strength * sum_{i<k} sum_x |g_i(x) g_k(x)| with
-    g = np.gradient(rho). It is not smooth. ``turing_smoothing = delta`` replaces
-    |u| by sqrt(u^2 + delta^2) - delta in the value and uses the exact gradient
-    of that smoothed term (declared smoothing, |F_delta - F| <= n_pairs * n *
-    turing_strength * delta). ``None`` (default) keeps the historical behaviour:
-    exact |.| in the value and a forward-difference gradient, which is not a
-    derivative of F across sign changes (used by the explicit scheme only).
-    The implicit JKO step requires a smoothed Turing term (``implicit_ready``).
+    g = np.gradient(rho). It is not smooth. ``turing_smoothing = delta`` (default
+    1e-5, PI decision of 2026-10-28, ERRATUM.md section 16) replaces |u| by
+    sqrt(u^2 + delta^2) - delta in the value and uses the exact gradient of that
+    smoothed term, so 0 <= F - F_delta <= n_pairs * n * turing_strength * delta
+    (n_pairs = 6 species pairs, n grid points). ``None`` keeps the historical
+    energy: exact |.| in the value and a forward-difference gradient, which is
+    not a derivative of F across sign changes; drivers behind committed numbers
+    pin it. The entropy uses the exact convention 0 log 0 = 0 (no floor), the
+    same function the KL-prox minimises. The implicit JKO step requires a
+    smoothed Turing term (``implicit_ready``).
     """
 
     def __init__(
@@ -37,7 +49,7 @@ class T2FreeEnergy(FreeEnergy):
         potentials: dict[str, np.ndarray],
         prior: dict[str, np.ndarray],
         turing_strength: float = 0.1,
-        turing_smoothing: float | None = None,
+        turing_smoothing: float | None = 1e-5,
     ) -> None:
         if turing_smoothing is not None and not (turing_smoothing > 0.0):
             raise ValueError("turing_smoothing must be positive or None")
@@ -63,9 +75,7 @@ class T2FreeEnergy(FreeEnergy):
 
         for n, rho in zip(names, rhos, strict=True):
             total += float(np.dot(rho, self.potentials[n]))
-            rho_safe = np.clip(rho, 1e-12, None)
-            prior_safe = np.clip(self.prior[n], 1e-12, None)
-            total += float(np.sum(rho_safe * np.log(rho_safe / prior_safe)))
+            total += _kl(rho, self.prior[n])
 
         # Route the coupling energy through J_sym: mathematically equivalent
         # to using the full J (antisymmetric contribution vanishes), but makes

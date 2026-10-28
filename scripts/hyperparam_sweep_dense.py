@@ -44,7 +44,11 @@ def run_one(alpha: float, beta: float, gamma: float) -> dict[str, float]:
     }
     prior = {n: np.full(GRID, 1.0 / GRID) for n in names}
     f_func = T2FreeEnergy(
-        species=species, potentials=potentials, prior=prior, turing_strength=gamma * 0.1
+        species=species,
+        potentials=potentials,
+        prior=prior,
+        turing_strength=gamma * 0.1,
+        turing_smoothing=None,
     )
     n_inner = max(1, int(10 * beta)) if beta > 0 else 1
     jko = JKOStep(

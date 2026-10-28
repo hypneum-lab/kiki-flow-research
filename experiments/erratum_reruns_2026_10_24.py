@@ -85,6 +85,7 @@ def setup(grid: int) -> tuple[CanonicalSpecies, np.ndarray, T2FreeEnergy]:
         potentials={n: np.zeros(grid) for n in names},
         prior={n: np.full(grid, 1.0 / grid) for n in names},
         turing_strength=0.1,
+        turing_smoothing=None,
     )
     return species, support, f_func
 
