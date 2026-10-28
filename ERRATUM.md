@@ -749,14 +749,35 @@ with a line search on Q_h itself.
 
 - **Objective value.** OT_reg is the transport value of each prox's own
   Gibbs plan, which is certified.
-- **Stopping rule.** The stationarity (KKT) residual at the returned point,
-  max_i TV(T_0(q)_i, q_i), must be below `kkt_tol` (default 1e-6).
+- **Stopping rule.** Two stationarity (KKT) residuals at the returned point
+  must be below their declared thresholds: the absolute one,
+  max_i TV(T_0(q)_i, q_i) < `kkt_tol` (default 1e-6), and the relative one,
+  max_{i,x} |log T_0(q)_i(x) − log q_i(x)| < `log_tol` (default 1e-5). The
+  TV residual alone is absolute in mass and accepted false stationary
+  points in low-mass bins (review of PR #51: F = 8x + 8x², zero cost,
+  h = reg = 1 was declared converged at x = 1.3e-14 instead of
+  x* = 1.13e-7, with dQ/dx = −8; regression test added). A density below
+  1e-280 fails as `status="underflow"`; inputs off the simplex are refused.
 - **Failures are explicit.** Exhausted outer iterations, a failed line
   search or an uncertified inner solve raise `ImplicitJKOError`, with
   status, iterations and residuals in `last_info`.
 - **No "F decreases" safeguard and no sub-stepping.**
-- **Turing term.** The implicit step requires a declared smoothing,
-  `T2FreeEnergy(turing_smoothing=δ)`, with an exact gradient.
+- **Exact gradients are declared, never assumed.** `FreeEnergy.implicit_ready`
+  is False by default (the inherited finite-difference gradient does not
+  qualify) and is checked at every step.
+- **Turing term: two different energies.** `T2FreeEnergy` now smooths the
+  Turing term by default, |u| → √(u² + δ²) − δ with δ = 1e-5 (PI decision of
+  2026-10-28), with an exact gradient, and 0 ≤ F − F_δ ≤ n_pairs · n · γ · δ
+  (n_pairs = 6, n grid points, γ the Turing strength; with the drivers'
+  Turing strength 0.1 γ on grid 16 the bound is 9.6e-5 · γ, i.e. 2.9e-3 at
+  γ = 30). The implicit step therefore solves the JKO
+  problem of F_δ, while the explicit step and every committed result keep
+  the exact |·| (their drivers now pin `turing_smoothing=None`).
+  Comparisons between the two schemes mix two energies; the measured
+  difference of F at γ = 30 is about 3e-3 (Codex probe). The entropy in
+  `T2FreeEnergy.value` uses the exact convention 0 log 0 = 0 without the
+  former 1e-12 floor, so value, gradient and prox minimise the same
+  function.
 - **Provenance and validation.** `run_paper` forwards `nonseparable` in
   all three branches and records the resolved configuration and the
   certificates. Regression tests cover the Codex cases, and an
@@ -766,9 +787,12 @@ with a line search on Q_h itself.
   comparison with an independent minimiser (L-BFGS-B on Q_h) on small
   grids, the dissipation-check grid and a study of the smoothing δ.
 
-**Cost found on the B1 cases** (grid 16, h = 0.05, reg = h², δ = 1e-5):
-all three are certified, with KKT residual below 1e-6 and Q_h decreasing
-from the explicit output.
+**What is certified.** A stationary point of the smoothed problem Q_h
+for F_δ, reached by monotone decrease of Q_h from the explicit output. Q_h
+is not convex in general (Turing coupling): there is no global guarantee.
+
+**Cost found on the B1 cases** (grid 16, h = 0.05, reg = h², δ = 1e-5),
+first run with the TV criterion only (superseded by the rerun below):
 
 | point (α, γ) | wall time per step |
 |---|---|
@@ -776,14 +800,32 @@ from the explicit output.
 | (5, 30) | 284 s |
 | (8, 5), the paper point | 407 s |
 
-The explicit step takes about 0.6 s. A difficult step therefore costs
-5–7 minutes, and a certified implicit recomputation of the γ ≤ 5 sweep is
-not affordable (on the order of 1000 CPU hours). Records:
-`results/implicit_jko_certified_2026_10_27/`.
+Rerun on 2026-10-28 (17:08Z) with the two-residual stopping rule (solver
+`certified-implicit-2`, `kkt_tol` = 1e-6, `log_tol` = 1e-5), same inputs:
 
-**Proposal.**
+| point (α, γ) | status | TV residual | log residual | q_min | outer it. | wall time |
+|---|---|---|---|---|---|---|
+| (10, 0) | converged | 9.9e-7 | 5.8e-6 | 4.0e-3 | 6 | 6 s |
+| (5, 30) | converged | 7.9e-7 | 9.0e-6 | 2.2e-2 | 65 | 301 s |
+| (8, 5), the paper point | converged | 9.3e-7 | 7.8e-6 | 1.4e-2 | 41 | 439 s |
 
-- Make the explicit step the default again for γ ≤ 5, where it is
-  dissipative (§14).
-- Keep the certified implicit step opt-in for the regimes where the
-  explicit step is not dissipative (γ ≥ 10), with its cost stated.
+The iterates are the same as in the first run: on these inputs no bin has
+low mass (q_min ≥ 4e-3), so the log-domain test was already met when the TV
+test stopped. Each case reaches a stationary point of the smoothed problem;
+this is not a global guarantee. Wall times were measured on a shared
+machine (load about 12).
+
+The explicit step takes about 0.6 s. A difficult step costs several
+minutes. The estimated cost of the certified implicit recomputation of
+sweep (a), paper-scale run (b) and preregistration (c) is 8 to 11 days on
+electron-server with 4 workers; it is not launched. The PI decided
+(2026-10-28) to keep the certified implicit step everywhere, with no
+return to the explicit step for γ ≤ 5, and to run the validation M5 first
+after merge. Records: `results/implicit_jko_certified_2026_10_27/`.
+
+**Stale commit message.** The message of commit `dd1efde` ends with "it
+is opt-in in practice for gamma >= 10 given its cost". That is superseded
+by the PI decision above; the code default is the implicit step.
+
+**Follow-up (out of scope).** `MultiscaleLoop` advances `tau` by its own
+counter independently of `JKOStep` (review m4); to be fixed separately.

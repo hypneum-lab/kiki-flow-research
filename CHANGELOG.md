@@ -14,6 +14,17 @@ All notable releases of `kiki-flow-research`. Dates in YYYY-MM-DD.
   term needs a declared smoothing (`T2FreeEnergy(turing_smoothing=...)`)
   for the implicit step. `run_paper` forwards `nonseparable` in all three
   branches and records the resolved solver and the certificates.
+- After the review of PR #51: the stopping rule adds a log-domain residual
+  (`log_tol`, default 1e-5) to the TV residual, which accepted false
+  stationary points in low-mass bins; underflow and off-simplex inputs fail
+  explicitly; `FreeEnergy.implicit_ready` defaults to False and is checked at
+  every step; `entropic_ot` is certified by a dual / rounded-primal bracket.
+
+### Changed
+- `T2FreeEnergy` smooths the Turing term by default (`turing_smoothing=1e-5`,
+  0 ≤ F − F_δ ≤ n_pairs · n · strength · δ) and its entropy uses 0 log 0 = 0
+  without the 1e-12 floor. Drivers and tests behind committed numbers pin
+  `turing_smoothing=None`.
 
 ## [Unreleased] — 2026-10-27 (implicit Turing term by default)
 
