@@ -1,5 +1,11 @@
 """Verification of the implicit treatment of the Turing term (2026-10-27).
 
+HISTORICAL (ERRATUM.md section 16): this driver exercised the damped-Picard
+implicit step of PR #50 (``fp_*`` settings, ``last_halvings``), which was found
+insufficient and replaced by the certified step; it is not runnable on later
+revisions and its results certify neither stationarity nor the merged code.
+See ``experiments/implicit_jko_certified_validation_2026_10_27.py``.
+
 PI decision of 2026-10-27 06:48 (ERRATUM.md section 14): the default slow step
 (entropic JKO step of F, non-separable terms linearised at rho_tau) is not
 dissipative for gamma >= 10. ``JKOStep(nonseparable="implicit")`` iterates the
