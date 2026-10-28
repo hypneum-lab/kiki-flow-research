@@ -2,6 +2,19 @@
 
 All notable releases of `kiki-flow-research`. Dates in YYYY-MM-DD.
 
+## [Unreleased] — 2026-10-28 (certified implicit JKO step, PROPOSED)
+
+### Fixed
+- The implicit entropic JKO step of PR #50 is replaced (`ERRATUM.md` §16,
+  PROPOSED). It now minimises Q_h by Bregman majorisation-minimisation
+  with a line search on Q_h and certifies a stationary point (KKT residual at
+  the returned point), or raises `ImplicitJKOError`; the "F decreases"
+  safeguard and the half-steps are removed. Inner Sinkhorn solves carry a
+  certificate (`jko_entropic_prox_certified`, `entropic_ot`). The Turing
+  term needs a declared smoothing (`T2FreeEnergy(turing_smoothing=...)`)
+  for the implicit step. `run_paper` forwards `nonseparable` in all three
+  branches and records the resolved solver and the certificates.
+
 ## [Unreleased] — 2026-10-27 (implicit Turing term by default)
 
 ### Changed

@@ -696,3 +696,94 @@ entropic numbers (sweep 2.72 ± 0.05 bits at (10, ·, 0), excess
 −0.39 bits, paper-scale gap 0.0098 bits) are entropic explicit. They are
 recomputed under the implicit default in PRs that follow; nothing is
 overwritten.
+
+## 16. The implicit step of PR #50 is insufficient; certified replacement (PROPOSED, 2026-10-27)
+
+**Status: PROPOSED — to be validated by the PI after review (Codex and Claude) of the
+replacement PR.**
+
+**Finding.** The Codex review of PR #50 (commit `49480e0`) found two
+blocking defects, reproduced by the PI on electron-server.
+
+- **B1: unconverged steps are accepted silently.** The damped Picard fixed
+  point exhausts its 30 iterations without converging, and the step is
+  accepted without any signal. The TV residual T(q) − q at the returned
+  point is 0.0052 at the paper's operating point (α, γ) = (8, 5) and
+  0.042 at (5, 30); only (10, 0) converges. The stopping rule (two
+  successive outputs equal) can also declare convergence falsely.
+- **B2: "F decreases" is not "the JKO problem is solved".** The entropic
+  objective is not debiased, so F can legitimately rise at the true
+  minimum of Q_h(q) = F(q) + Σ_i OT_reg(q_i, ρ_τ,i)/(2h). The
+  half-step safeguard then replaces the step by two steps of h/2, which is
+  a different problem.
+
+Further shortcomings (M1–M6):
+
+- the safeguard gives up at its depth limit without a signal;
+- the Turing gradient is a forward difference, not a derivative across
+  sign changes;
+- the inner prox is truncated without a certificate;
+- `run_paper` drops `nonseparable` in one branch and records no provenance;
+- the validation does not cover the merged stopping rule;
+- the tests do not detect B1.
+
+**Consequences.**
+
+- **PR #50 is declared insufficient.** Its implicit step is not used for
+  any number. Its dissipation check
+  (`results/turing_implicit_check_2026_10_27/`) stays as committed, as a
+  record of what was run, but it certifies neither stationarity nor the
+  merged code.
+- **The recomputations launched on 2026-10-27 at 16:49Z were stopped on
+  PI decision (17:40):** sweep (a), paper-scale run (b) and strong-Turing
+  preregistration (c). The 20 runs of (a) are kept on electron-server
+  under `INVALID-nonconverged-fp/` and are not used. The tag
+  `prereg-turing-strong-implicit-20261027` therefore marks a test that was
+  never run.
+- §15 ("default switched to the implicit treatment") is superseded by this
+  section.
+
+**Replacement (PR `fix/implicit-jko-certified`, draft, not merged).** The
+implicit step now minimises Q_h by Bregman (KL) majorisation-minimisation
+with a line search on Q_h itself.
+
+- **Objective value.** OT_reg is the transport value of each prox's own
+  Gibbs plan, which is certified.
+- **Stopping rule.** The stationarity (KKT) residual at the returned point,
+  max_i TV(T_0(q)_i, q_i), must be below `kkt_tol` (default 1e-6).
+- **Failures are explicit.** Exhausted outer iterations, a failed line
+  search or an uncertified inner solve raise `ImplicitJKOError`, with
+  status, iterations and residuals in `last_info`.
+- **No "F decreases" safeguard and no sub-stepping.**
+- **Turing term.** The implicit step requires a declared smoothing,
+  `T2FreeEnergy(turing_smoothing=δ)`, with an exact gradient.
+- **Provenance and validation.** `run_paper` forwards `nonseparable` in
+  all three branches and records the resolved configuration and the
+  certificates. Regression tests cover the Codex cases, and an
+  independent check verifies the stationarity of Q_h with POT dual
+  potentials on a small coupled problem. The versioned driver
+  `experiments/implicit_jko_certified_validation_2026_10_27.py` adds a
+  comparison with an independent minimiser (L-BFGS-B on Q_h) on small
+  grids, the dissipation-check grid and a study of the smoothing δ.
+
+**Cost found on the B1 cases** (grid 16, h = 0.05, reg = h², δ = 1e-5):
+all three are certified, with KKT residual below 1e-6 and Q_h decreasing
+from the explicit output.
+
+| point (α, γ) | wall time per step |
+|---|---|
+| (10, 0) | 4 s |
+| (5, 30) | 284 s |
+| (8, 5), the paper point | 407 s |
+
+The explicit step takes about 0.6 s. A difficult step therefore costs
+5–7 minutes, and a certified implicit recomputation of the γ ≤ 5 sweep is
+not affordable (on the order of 1000 CPU hours). Records:
+`results/implicit_jko_certified_2026_10_27/`.
+
+**Proposal.**
+
+- Make the explicit step the default again for γ ≤ 5, where it is
+  dissipative (§14).
+- Keep the certified implicit step opt-in for the regimes where the
+  explicit step is not dissipative (γ ≥ 10), with its cost stated.
