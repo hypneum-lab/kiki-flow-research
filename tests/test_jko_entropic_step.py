@@ -273,7 +273,13 @@ def test_entropic_step_on_t2_energy_keeps_invariants_for_all_species() -> None:
         metadata={"track_id": "T2"},
     )
     solver = FullJKOSolver(
-        f_functional=f, h=0.05, support=support, epsilon=0.01, max_iter=200, scheme="jko_entropic"
+        f_functional=f,
+        h=0.05,
+        support=support,
+        epsilon=0.01,
+        max_iter=200,
+        scheme="jko_entropic",
+        nonseparable="explicit",  # unsmoothed Turing term: explicit path (ERRATUM 16)
     )
     out = solver.step(state)
     assert_invariants(out)

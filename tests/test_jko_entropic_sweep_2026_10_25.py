@@ -75,6 +75,7 @@ def test_entropic_step_ignores_beta() -> None:
     for beta in (0.0, 0.5, 2.0):
         jko = mod.base.make_jko(f_func, support, beta, rigorous=True, epsilon=mod.MAIN_REG)
         jko.scheme = "jko_entropic"
+        jko.nonseparable = "explicit"  # as in the 2026-10-25 sweep (ERRATUM 16)
         jko.prox_n_iter = 50
         outs.append(jko.step(state).rho)
     for other in outs[1:]:
