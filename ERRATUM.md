@@ -771,11 +771,22 @@ with a line search on Q_h itself.
   of a float-resolution gap: the true minimiser lies within exp(−883) of
   1e-12.
 - **Independent Q_h brackets.** `entropic_ot` certifies OT_reg only by a
-  closed bracket 0 ≤ upper − lower ≤ `gap_tol`, from the dual value and a
-  rounded feasible plan. It refuses unequal masses and a reversed bracket.
-  Sinkhorn stalls near a gap of 1e-6 at the operating point
-  (cost / reg = 6400), so the dual is then polished by damped Newton ascent,
-  which closes the gap to about 1e-13. `JKOStep.objective_bounds` sums the
+  bracket from the dual value and a rounded feasible plan, widened on both
+  sides by a first-order bound on its floating-point error. The bound
+  scales with the terms that cancel (sum of q|f|, r|g|, π̃C, reg·π and
+  reg·|π̃(log π̃ − 1)|, times 4 (n² + 2n) ε, potentials centred first), not
+  with the result: with reg = 1e8 and a constant cost of 2.39e8 (third
+  review) the true value 1.9e-8 is lost in cancellation, and the call
+  refuses a tight tolerance and brackets the true value under a loose one
+  (test). The widened width ≤ `gap_tol` is the only criterion, for the
+  certificate and for stopping Sinkhorn, triggering Newton and stopping
+  it. It refuses unequal masses and a reversed bracket. Sinkhorn stalls
+  near a gap of 1e-6 at the operating point (cost / reg = 6400), so the
+  dual is then polished by damped Newton ascent (no convergence assumed;
+  the bracket decides). Measured widths at the step output, grid 16,
+  h = 0.05, `gap_tol` = 1e-11 (electron-server, 2026-10-29): at most
+  5.2e-12 per species at (10, 0) and 6.2e-12 at (8, 5), rounding bound
+  2.5e-13 to 6.4e-13, so the `operating` tolerance of 1e-11 holds. `JKOStep.objective_bounds` sums the
   brackets with the factor 1/(2h); `jko_entropic_prox_certified` requires a
   reference of mass 1.
 - **Failures are explicit.** Exhausted outer iterations, a failed line
@@ -914,9 +925,10 @@ the module's repository and records a SHA-256 of the tracked diff.
 - `entropic_ot` accepts masses equal within `MASS_TOL` = 1e-9 (times
   max(mass, 1)) and rescales the second marginal to the mass of the first,
   so its bracket is that of OT_reg(q, r~) with r~ = r |q| / |r| (r~ = r for
-  the normalised densities of the JKO step). Both bounds are widened by a
-  declared rounding allowance, so the certified interval is never reversed
-  and a tolerance below the rounding level is refused.
+  the normalised densities of the JKO step). Both bounds are widened by the
+  rounding bound above, so the certified interval is never reversed and a
+  tolerance below the rounding level is refused. The rounding bound is a
+  first-order estimate (Higham, section 4.2), not interval arithmetic.
 
 **Follow-up (out of scope).** `MultiscaleLoop` rebuilds the state with
 `tau = 0` before each JKO step (`multiscale_loop.py`, lines 84 and 148),

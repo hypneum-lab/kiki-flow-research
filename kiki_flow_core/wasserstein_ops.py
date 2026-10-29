@@ -306,17 +306,37 @@ def _entropic_ot_bounds(
     r: np.ndarray,
     cost_matrix: np.ndarray,
     reg: float,
-) -> tuple[float, float, float]:
-    """Certified bracket ``lower <= OT_reg(q, r) <= upper`` and the marginal residual.
+) -> tuple[float, float, float, float]:
+    """Bracket ``lower <= OT_reg(q, r) <= upper``, marginal residual and rounding slack.
 
     ``lower`` is the dual value <f, q> + <g, r> - reg * sum exp((f + g - C) / reg)
-    (weak duality); ``upper`` is the primal value of the plan built from (f, g)
-    and rounded to the exact marginals (Altschuler, Weed and Rigollet 2017,
-    Algorithm 2), hence feasible.
+    (weak duality, valid for any potentials); ``upper`` is the primal value of
+    the plan built from (f, g) and rounded to the marginals (Altschuler, Weed and
+    Rigollet 2017, Algorithm 2), hence feasible. Both need equal masses
+    (``entropic_ot`` harmonises them). The potentials are first centred,
+    (f + c, g - c) with c = (median g - median f) / 2, which leaves both values
+    unchanged in exact arithmetic and keeps the summands small.
+
+    ``slack`` bounds the floating-point error of either value to first order:
+    ``ROUNDING_FACTOR * (n m + n + m) * eps * S`` with S the sum of the absolute
+    values of the terms that are added and may cancel, S = sum q |f| + sum r |g|
+    + sum pi~ C + reg sum pi + reg sum |pi~ (log pi~ - 1)| (pi the Gibbs plan,
+    pi~ the rounded one). Each summand carries a relative error of a few eps
+    (products, exp and log, the exponent (f + g - C) / reg contributing
+    eps (|f| + |g| + C) / reg, i.e. eps pi (|f| + |g| + C) after multiplication by
+    reg pi), and a recursive sum of N terms adds at most N eps sum |terms|
+    (Higham, Accuracy and Stability of Numerical Algorithms, 2002, section 4.2).
+    The deviation of the rounded plan from the exact marginals is of order
+    (n + m) eps and moves the primal value by at most that times max |f| + max |g|,
+    which the q |f| and r |g| sums cover. It is a declared first-order bound, not
+    interval arithmetic.
     """
-    log_pi = (f_pot[:, None] + g_pot[None, :] - cost_matrix) / reg
+    shift = 0.5 * (float(np.median(g_pot)) - float(np.median(f_pot)))
+    f_c = f_pot + shift
+    g_c = g_pot - shift
+    log_pi = (f_c[:, None] + g_c[None, :] - cost_matrix) / reg
     pi = np.exp(log_pi)
-    lower = float(np.dot(f_pot, q) + np.dot(g_pot, r) - reg * pi.sum())
+    lower = float(np.dot(f_c, q) + np.dot(g_c, r) - reg * pi.sum())
     residual = float(np.abs(pi.sum(axis=1) - q).sum() + np.abs(pi.sum(axis=0) - r).sum())
     rows = pi.sum(axis=1)
     x = np.minimum(np.divide(q, rows, out=np.ones_like(q), where=rows > 0), 1.0)
@@ -331,11 +351,27 @@ def _entropic_ot_bounds(
         rounded = rounded + np.outer(err_r, err_c) / mass
     positive = rounded > 0.0
     log_rounded = np.where(positive, np.log(np.where(positive, rounded, 1.0)), 0.0)
-    upper = float(np.sum(rounded * cost_matrix) + reg * np.sum(rounded * (log_rounded - 1.0)))
-    return lower, upper, residual
+    entropy_terms = rounded * (log_rounded - 1.0)
+    upper = float(np.sum(rounded * cost_matrix) + reg * np.sum(entropy_terms))
+    scale = (
+        float(np.dot(np.abs(f_c), q))
+        + float(np.dot(np.abs(g_c), r))
+        + float(np.sum(rounded * np.abs(cost_matrix)))
+        + reg * float(pi.sum())
+        + reg * float(np.sum(np.abs(entropy_terms)))
+    )
+    n, m = cost_matrix.shape
+    slack = ROUNDING_FACTOR * (n * m + n + m) * float(np.finfo(float).eps) * scale
+    return lower, upper, residual, slack
 
 
-BRACKET_SLACK = 1e-12  # relative rounding slack allowed for a reversed OT bracket
+def _certified_width(lower: float, upper: float, slack: float) -> float:
+    """Width of the widened bracket [lower - slack, upper + slack]: the one stopping
+    criterion of Sinkhorn, the trigger and the stop of Newton, and the certificate."""
+    return (upper + slack) - (lower - slack)
+
+
+ROUNDING_FACTOR = 4.0  # safety factor of the first-order rounding bound of the OT bracket
 NEWTON_MAX_SIZE = 512  # dense Newton polishing of the OT dual up to this many bins
 NEWTON_MIN_STEP = 1e-12  # backtracking floor of the Newton line search
 
@@ -372,8 +408,8 @@ def _newton_polish(
     n = f_pot.size
     steps = 0
     for steps in range(1, max_steps + 1):
-        lo, up, _ = _entropic_ot_bounds(f_pot, g_pot, q, r, c, reg)
-        if 0.0 <= up - lo <= gap_tol:
+        lo, up, _, slack = _entropic_ot_bounds(f_pot, g_pot, q, r, c, reg)
+        if _certified_width(lo, up, slack) <= gap_tol:
             return f_pot, g_pot, steps - 1
         pi = np.exp((f_pot[:, None] + g_pot[None, :] - c) / reg)
         grad = np.concatenate([q - pi.sum(axis=1), r - pi.sum(axis=0)])
@@ -468,8 +504,8 @@ def _sinkhorn_stages(
             if delta < stage_tol:
                 break
             if last and iterations % check_every == 0:
-                lo, up, _ = _entropic_ot_bounds(f_pot, g_pot, qa, ra, cost_matrix, reg)
-                if 0.0 <= up - lo <= gap_tol:
+                lo, up, _, slack = _entropic_ot_bounds(f_pot, g_pot, qa, ra, cost_matrix, reg)
+                if _certified_width(lo, up, slack) <= gap_tol:
                     break
                 if iterations - last_start >= newton_after and qa.size <= NEWTON_MAX_SIZE:
                     break
@@ -508,11 +544,13 @@ def entropic_ot(
     ``q``, so both bounds are bounds of the same feasible problem
     OT_reg(q, r~), r~ = r |q| / |r| (r~ = r when the masses are equal, as for
     the normalised densities of the JKO step). Both bounds are widened by the
-    declared rounding allowance ``BRACKET_SLACK * (1 + |lower| + |upper|)``; the
-    call is certified when the widened width is <= ``gap_tol`` (checked on the
-    raw bracket every ``check_every`` iterations of the last stage, then on
-    the widened one), so a tolerance below the rounding level is refused, and
-    a raw bracket reversed beyond the allowance is an error. The
+    first-order rounding bound of ``_entropic_ot_bounds`` (scaled by the terms
+    that cancel, not by the result); the call is certified when the widened
+    width is <= ``gap_tol``. The same widened width is the only criterion used
+    to stop Sinkhorn (checked every ``check_every`` iterations of the last
+    stage), to trigger Newton polishing and to stop it, so a tolerance below
+    the rounding level is refused and a raw bracket reversed beyond the bound
+    is an error. The
     value returned is the midpoint, within gap / 2 of OT_reg; ``info["lower"]``
     and ``info["upper"]`` carry the bracket for callers that must compare
     values. ``marginal_tol`` is kept for the call signature and reported, it no
@@ -547,23 +585,23 @@ def entropic_ot(
         newton_after=newton_after,
     )
     newton = 0
-    lower, upper, residual = _entropic_ot_bounds(f_pot, g_pot, qa, ra, cost_matrix, reg)
-    if not (0.0 <= upper - lower <= gap_tol) and qa.size <= NEWTON_MAX_SIZE and newton_steps > 0:
+    lower, upper, residual, slack = _entropic_ot_bounds(f_pot, g_pot, qa, ra, cost_matrix, reg)
+    width = _certified_width(lower, upper, slack)
+    if not width <= gap_tol and qa.size <= NEWTON_MAX_SIZE and newton_steps > 0:
         f_pot, g_pot, newton = _newton_polish(
             f_pot, g_pot, qa, ra, cost_matrix, reg, gap_tol, newton_steps
         )
-        lower, upper, residual = _entropic_ot_bounds(f_pot, g_pot, qa, ra, cost_matrix, reg)
-    if not (np.isfinite(lower) and np.isfinite(upper)):
+        lower, upper, residual, slack = _entropic_ot_bounds(f_pot, g_pot, qa, ra, cost_matrix, reg)
+    if not (np.isfinite(lower) and np.isfinite(upper) and np.isfinite(slack)):
         raise SinkhornNotConvergedError(f"entropic OT bracket not finite: {lower!r}, {upper!r}")
-    slack = BRACKET_SLACK * (1.0 + abs(lower) + abs(upper))
     if upper - lower < -slack:
         raise SinkhornNotConvergedError(
             f"entropic OT bracket reversed (lower {lower!r} > upper {upper!r}): "
             "infeasible marginals or numerical failure"
         )
-    # The declared rounding allowance widens the bracket on both sides, so the
-    # certified interval is never reversed and a tolerance below the rounding
-    # level cannot be met.
+    # The rounding bound widens the bracket on both sides, so the certified
+    # interval is never reversed and a tolerance below the rounding level of
+    # the terms that cancel cannot be met.
     lower_c, upper_c = lower - slack, upper + slack
     info: dict[str, Any] = {
         "iterations": iterations,

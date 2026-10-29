@@ -9,6 +9,7 @@ stationary point (KKT residual at the returned point) or fails explicitly
 from __future__ import annotations
 
 import warnings
+from decimal import Decimal, getcontext
 
 import numpy as np
 import ot
@@ -474,3 +475,36 @@ def test_ot_bracket_is_never_reversed_and_refuses_unreachable_tolerances() -> No
     cost = np.array([[1000.0, 1001.0], [1001.0, 1000.0]])
     with pytest.raises(SinkhornNotConvergedError):
         entropic_ot(np.array([0.3, 0.7]), np.array([0.6, 0.4]), cost, 0.1, gap_tol=1e-16)
+
+
+def test_ot_bracket_slack_follows_the_terms_that_cancel() -> None:
+    """Codex counter-example: huge cancelling terms, true value 1.9e-8.
+
+    With q = r = (1/2, 1/2) and a constant cost C0, OT_reg = C0 - reg (1 + 2 ln 2)
+    exactly (the plan is q x r). In double precision the result is lost in the
+    cancellation of terms of order 1e8: the call must refuse a tight tolerance,
+    and a loose one must bracket the true value.
+    """
+    getcontext().prec = 60
+    c0, reg = 238629436.11198908, 1e8
+    exact = float(Decimal(c0) - Decimal(reg) * (1 + 2 * Decimal(2).ln()))
+    q = np.array([0.5, 0.5])
+    cost = np.full((2, 2), c0)
+    with pytest.raises(SinkhornNotConvergedError):
+        entropic_ot(q, q, cost, reg)
+    _, _, info = entropic_ot(q, q, cost, reg, gap_tol=1e-3)
+    assert info["lower"] <= exact <= info["upper"]
+
+
+def test_ot_bracket_contains_the_closed_form_value() -> None:
+    """Separable cost C_ij = a_i + b_j: the optimal plan is q x r and
+    OT_reg = <q, a> + <r, b> + reg (sum q log q + sum r log r - 1)."""
+    q, r = np.array([0.3, 0.7]), np.array([0.6, 0.4])
+    a, b = np.array([0.0, 2.0]), np.array([1.0, 3.0])
+    reg = 0.1
+    cost = a[:, None] + b[None, :]
+    exact = float(q @ a + r @ b + reg * (np.sum(q * np.log(q)) + np.sum(r * np.log(r)) - 1.0))
+    value, _, info = entropic_ot(q, r, cost, reg, gap_tol=1e-12)
+    assert info["lower"] <= exact <= info["upper"]
+    assert info["upper"] - info["lower"] <= 1e-12  # noqa: PLR2004
+    assert value == pytest.approx(exact, abs=1e-12)
