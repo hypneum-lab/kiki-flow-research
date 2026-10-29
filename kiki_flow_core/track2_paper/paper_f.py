@@ -46,8 +46,12 @@ class T2FreeEnergy(FreeEnergy):
     g = np.gradient(rho). It is not smooth. ``turing_smoothing = delta`` (default
     1e-5, PI decision of 2026-10-28, ERRATUM.md section 16) replaces |u| by
     sqrt(u^2 + delta^2) - delta in the value and uses the exact gradient of that
-    smoothed term, so 0 <= F - F_delta <= n_pairs * n * turing_strength * delta
-    (n_pairs = 6 species pairs, n grid points). ``None`` keeps the historical
+    smoothed term. The bound 0 <= T - T_delta <= n_pairs * n * turing_strength *
+    delta (n_pairs = 6 species pairs, n grid points) holds for the Turing term
+    T alone: the two energies also differ in their entropy (floored at 1e-12
+    for the historical energy, exact for the smoothed one), which adds a small
+    term of either sign (about -3e-10 for densities with zero bins on a 4-point
+    grid). ``None`` keeps the historical
     energy: exact |.| in the value and a forward-difference gradient, which is
     not a derivative of F across sign changes; drivers behind committed numbers
     pin it, and it also keeps the historical entropy floored at 1e-12, bit for

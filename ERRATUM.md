@@ -787,14 +787,18 @@ with a line search on Q_h itself.
   qualify) and is checked at every step.
 - **Turing term: two different energies.** `T2FreeEnergy` now smooths the
   Turing term by default, |u| → √(u² + δ²) − δ with δ = 1e-5 (PI decision of
-  2026-10-28), with an exact gradient, and 0 ≤ F − F_δ ≤ n_pairs · n · γ · δ
-  (n_pairs = 6, n grid points, γ the Turing strength; with the drivers'
+  2026-10-28), with an exact gradient. For the Turing term T alone,
+  0 ≤ T − T_δ ≤ n_pairs · n · γ · δ (n_pairs = 6, n grid points, γ the
+  Turing strength; with the drivers'
   Turing strength 0.1 γ on grid 16 the bound is 9.6e-5 · γ, i.e. 2.9e-3 at
   γ = 30). The implicit step therefore solves the JKO
   problem of F_δ, while the explicit step and every committed result keep
   the exact |·| (their drivers now pin `turing_smoothing=None`).
-  Comparisons between the two schemes mix two energies, which differ by at
-  most the bound above (2.9e-3 at γ = 30; a bound, not a measurement).
+  Comparisons between the two schemes mix two energies. Their Turing terms
+  differ by at most the bound above (2.9e-3 at γ = 30; a bound, not a
+  measurement); their entropies also differ, the historical one being
+  floored at 1e-12 (see below), by a term of either sign of order 1e-10
+  (−3.1e-10 for densities with zero bins on a 4-point grid, third review).
 - **Entropy: historical for the historical energy.** The smoothed energy
   uses the exact entropy 0 log 0 = 0, the function the closed-form prox
   minimises. The historical energy (`turing_smoothing=None`) keeps the
@@ -804,9 +808,15 @@ with a line search on Q_h itself.
   to 7.8e-3 in density (second review). A test runs main's energy
   (`49480e0`, stored verbatim) and the current one in the same process:
   the legacy split (20 steps) and the explicit step (5 steps) agree bit for
-  bit. A stored trajectory is not portable (it differs by up to 5e-3
-  between machines on this sensitive path). The historical energy is therefore
-  not `implicit_ready`, even without a Turing term.
+  bit. Scope: this establishes that the historical energy is restored, for
+  one input and these two paths, with the current `JKOStep` in both arms.
+  A comparison of the whole tree against main (legacy split and explicit
+  step, 20 steps, three input concentrations, electron-server) was also bit
+  for bit (third review), but neither check reproduces the published
+  numbers themselves: a stored trajectory is not portable (it differs by up
+  to 5e-3 between machines on this sensitive path), so published figures
+  are reproducible only on the platform that produced them. The historical
+  energy is therefore not `implicit_ready`, even without a Turing term.
 - **Provenance and validation.** `run_paper` forwards `nonseparable` in
   all three branches and records the resolved configuration and the
   certificates. Regression tests cover the Codex cases, and an
@@ -873,14 +883,36 @@ by the PI decision above; the code default is the implicit step.
 
 **Validation driver.** Each job runs isolated: an exception becomes a
 `job_error` record and the batch goes on. Records are written to JSONL as
-they complete, and each carries the solver version, δ and the trajectory
-length; `certify` resumes only from records with the same key. The
-`operating` check records the step status first; a step that is not
-certified is a result. Its transfers are capped at half the donor's mass,
-and it compares certified brackets (gap ≤ 1e-11 per OT_reg), never
-midpoints. The L-BFGS-B reference fails explicitly when no start succeeds,
+they complete, and each record (reference and smoothing included)
+carries the run key: solver version, δ, trajectory length, the effective
+default settings of `JKOStep` read from its signature, and the identity of
+the code (git commit, dirty flag, SHA-256 of the tracked diff); `certify`
+resumes only from records with the same key. The `operating` check
+records the step status first; a step that is not certified is a result.
+Its transfers are capped at half the donor's mass, and it compares
+certified brackets (gap ≤ 1e-11 per OT_reg), never midpoints. Its verdict
+has three states: `failed` on a certified decrease of Q_h, `passed` only
+when every transfer is a certified no-decrease, `inconclusive` otherwise
+(the absence of a demonstrated decrease is not a validation). A set of
+finite transfers of 1e-4 is a discrete local check, not a proof of
+stationarity. The L-BFGS-B reference fails explicitly when no start succeeds,
 and POT marginals are checked. The provenance of `run_paper` reads git from
 the module's repository and records a SHA-256 of the tracked diff.
+
+**Known limits (third review, no new computation).**
+
+- The L-BFGS-B reference of the `reference` check is judged by
+  `res.success` only; there is no final unweighted tangent residual of the
+  reference itself, so it is a local reference, not a certificate.
+- The B1 rerun records (`b1_rerun_*.jsonl`) use the prox plans of the
+  solver (`ot_calls = 0`), not the independent brackets. They store neither
+  the output densities nor their hashes, so "same iterates" is stated, not
+  verifiable from the records; the independent bracket quoted for (10, 0)
+  was computed separately and its bounds are not stored.
+- `entropic_ot` accepts masses equal within `MASS_TOL` = 1e-9 (times max(mass, 1)) and
+  a negative gap within rounding slack; its bracket is then that of
+  marginals perturbed by at most that mismatch (see its docstring). The JKO
+  step passes normalised densities.
 
 **Follow-up (out of scope).** `MultiscaleLoop` rebuilds the state with
 `tau = 0` before each JKO step (`multiscale_loop.py`, lines 84 and 148),

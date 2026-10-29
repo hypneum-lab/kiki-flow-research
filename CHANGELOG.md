@@ -30,10 +30,14 @@ All notable releases of `kiki-flow-research`. Dates in YYYY-MM-DD.
 
 ### Changed
 - `T2FreeEnergy` smooths the Turing term by default (`turing_smoothing=1e-5`,
-  0 ≤ F − F_δ ≤ n_pairs · n · strength · δ). The smoothed energy uses the
+  0 ≤ T − T_δ ≤ n_pairs · n · strength · δ for the Turing term T alone; the
+  entropies differ too, by about 1e-10). The smoothed energy uses the
   exact entropy 0 log 0 = 0; the historical energy (`turing_smoothing=None`),
   pinned by the drivers and tests behind committed numbers, keeps the 1e-12
-  floor and reproduces main bit for bit (`tests/test_legacy_t2_reproducible.py`).
+  floor. In the tested cases (one input, legacy split 20 steps, explicit
+  step 5 steps) it reproduces main bit for bit in the same environment
+  (`tests/test_legacy_t2_reproducible.py`); this restores the energy, it does
+  not by itself reproduce the published numbers.
 
 ## [Unreleased] — 2026-10-27 (implicit Turing term by default)
 

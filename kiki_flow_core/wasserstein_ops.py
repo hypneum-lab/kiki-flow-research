@@ -363,9 +363,11 @@ def _newton_polish(
     """Damped Newton ascent on the (concave) entropic OT dual, last g fixed.
 
     Sinkhorn converges linearly at a rate that degrades like exp(-C / reg); at
-    cost / reg in the thousands it stalls near a gap of 1e-6. Newton converges
-    quadratically from the Sinkhorn potentials; the certificate is unchanged
-    (the bracket of ``_entropic_ot_bounds``).
+    cost / reg in the thousands it stalls near a gap of 1e-6. Newton steps with
+    backtracking usually close it from the Sinkhorn potentials, but no
+    convergence is assumed (the Hessian can be numerically singular and the
+    ascent can stall): only the bracket of ``_entropic_ot_bounds``, recomputed
+    after polishing, certifies the result.
     """
     n = f_pot.size
     steps = 0
@@ -501,10 +503,17 @@ def entropic_ot(
     returned in ``info["potentials"]`` by a previous call at the same ``reg``)
     skips the scaling stages; the certificate is the same. Certificate: a
     bracket lower <= OT_reg(q, r) <= upper from the dual value and the rounded
-    feasible plan (``_entropic_ot_bounds``); the call is certified only when
-    ``0 <= upper - lower <= gap_tol`` (checked every ``check_every`` iterations of
-    the last stage). The rounding needs equal masses, checked first (within
-    ``MASS_TOL``); a reversed bracket beyond rounding error is an error. The
+    feasible plan (``_entropic_ot_bounds``); the call is certified when
+    ``upper - lower <= gap_tol`` (checked every ``check_every`` iterations of
+    the last stage), a slightly negative gap within the rounding slack
+    ``BRACKET_SLACK * (1 + |lower| + |upper|)`` being accepted as rounding
+    error; a reversed bracket beyond that slack is an error. The rounding
+    needs equal masses: they are checked first, but only within ``MASS_TOL``
+    (times max(mass, 1)), so for masses that differ by m <= MASS_TOL the bracket is that
+    of a problem whose marginals are perturbed by m, and the value can differ
+    from OT_reg(q, r) by about max|potential| * m. Callers that need the bracket
+    at the stated precision pass masses equal to rounding (the JKO step does:
+    its densities are normalised). The
     value returned is the midpoint, within gap / 2 of OT_reg; ``info["lower"]``
     and ``info["upper"]`` carry the bracket for callers that must compare
     values. ``marginal_tol`` is kept for the call signature and reported, it no
