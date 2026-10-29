@@ -6,9 +6,10 @@ All notable releases of `kiki-flow-research`. Dates in YYYY-MM-DD.
 
 ### Fixed
 - The implicit entropic JKO step of PR #50 is replaced (`ERRATUM.md` §16,
-  PROPOSED). It now minimises Q_h by Bregman majorisation-minimisation
-  with a line search on Q_h and certifies a stationary point (KKT residual at
-  the returned point), or raises `ImplicitJKOError`; the "F decreases"
+  PROPOSED). It now decreases Q_h monotonically by Bregman
+  majorisation-minimisation with a line search on Q_h and certifies a
+  stationary point of the smoothed problem (KKT residuals at the returned
+  point, no global guarantee), or raises `ImplicitJKOError`; the "F decreases"
   safeguard and the half-steps are removed. Inner Sinkhorn solves carry a
   certificate (`jko_entropic_prox_certified`, `entropic_ot`). The Turing
   term needs a declared smoothing (`T2FreeEnergy(turing_smoothing=...)`)
@@ -19,12 +20,20 @@ All notable releases of `kiki-flow-research`. Dates in YYYY-MM-DD.
   stationary points in low-mass bins; underflow and off-simplex inputs fail
   explicitly; `FreeEnergy.implicit_ready` defaults to False and is checked at
   every step; `entropic_ot` is certified by a dual / rounded-primal bracket.
+- After the second review of PR #51: inner prox solves are certified in
+  relative terms as well (`inner_log_tol`, 1e-9); `entropic_ot` certifies
+  only a closed bracket, refuses unequal masses and reversed brackets, and
+  polishes the dual by Newton ascent where Sinkhorn stalls;
+  `jko_entropic_prox_certified` requires a reference of mass 1;
+  `JKOStep.objective_bounds` returns the bracket of Q_h; the validation
+  driver isolates jobs and streams JSONL records.
 
 ### Changed
 - `T2FreeEnergy` smooths the Turing term by default (`turing_smoothing=1e-5`,
-  0 ≤ F − F_δ ≤ n_pairs · n · strength · δ) and its entropy uses 0 log 0 = 0
-  without the 1e-12 floor. Drivers and tests behind committed numbers pin
-  `turing_smoothing=None`.
+  0 ≤ F − F_δ ≤ n_pairs · n · strength · δ). The smoothed energy uses the
+  exact entropy 0 log 0 = 0; the historical energy (`turing_smoothing=None`),
+  pinned by the drivers and tests behind committed numbers, keeps the 1e-12
+  floor and reproduces main bit for bit (`tests/test_legacy_t2_reproducible.py`).
 
 ## [Unreleased] — 2026-10-27 (implicit Turing term by default)
 

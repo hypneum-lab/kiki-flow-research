@@ -1,4 +1,4 @@
-# Certified implicit JKO step — Codex B1 cases (2026-10-27, rerun 2026-10-28)
+# Certified implicit JKO step — Codex B1 cases (2026-10-27, reruns 2026-10-28 and 2026-10-29)
 
 One certified step per case on electron-server (nice 19, one process each): grid 16 on [-2, 2],
 T2 energy with declared Turing smoothing delta = 1e-5, Dirichlet input of seed 500,
@@ -33,3 +33,18 @@ committed).
 
 Same iterates as the first run (no low-mass bin on these inputs). Each case reaches a
 stationary point of the smoothed problem (energy F_delta); there is no global guarantee.
+
+## Second rerun after the second review (2026-10-29)
+
+Solver `certified-implicit-3` (relative inner certificate, `inner_log_tol` = 1e-9; Q_h
+brackets closed by Newton polishing), same inputs, 05:32Z on 2026-10-29, 3 workers, nice 19;
+raw records in `b1_rerun_20261029T053238Z.jsonl`.
+
+| case (alpha, gamma) | status | TV residual | log residual | inner log residual | q_min | outer iterations | wall time | Q_h explicit → certified |
+|---|---|---|---|---|---|---|---|---|
+| (8.0,5.0) | converged | 9.3e-07 | 7.8e-06 | 1.6e-13 | 1.4e-02 | 41 | 431 s | -1.08940 → -1.11587 |
+| (5.0,30.0) | converged | 7.9e-07 | 9.0e-06 | 1.3e-13 | 2.2e-02 | 65 | 288 s | 1.07766 → 0.81783 |
+| (10.0,0.0) | converged | 9.9e-07 | 5.8e-06 | 1.5e-13 | 4.0e-03 | 6 | 4 s | -3.33280 → -3.34252 |
+
+Same iterates as before. At (10, 0) the independent Q_h bracket at the output gives
+-3.3425246482 (solver: -3.3425246491).

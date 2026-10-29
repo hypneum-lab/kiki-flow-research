@@ -758,6 +758,26 @@ with a line search on Q_h itself.
   h = reg = 1 was declared converged at x = 1.3e-14 instead of
   x* = 1.13e-7, with dQ/dx = −8; regression test added). A density below
   1e-280 fails as `status="underflow"`; inputs off the simplex are refused.
+- **Inner solves are certified in relative terms too** (second review of
+  PR #51, B2). Each prox certifies its reference marginal in absolute
+  (L1 ≤ 1e-10) and relative terms, max_j |log (πᵀ1)_j − log ρ_τ,j| ≤
+  `inner_log_tol` = 1e-9 < `log_tol`, on every bin of mass ≥ 1e-280. The map
+  T₀ is then exact for a reference perturbed by at most 1e-9 per bin in
+  relative terms. Case: two sites, cost 1000, h = reg = 1, reference
+  (1e-12, 1 − 1e-12), one inner iteration: absolute residual 1e-12 (accepted
+  before), relative residual 26 in log; the step now fails. With the full
+  budget it is certified and returns 1e-12 within 4 ulps. The tangent
+  derivative of about −410 found there (verified in closed form) is the log
+  of a float-resolution gap: the true minimiser lies within exp(−883) of
+  1e-12.
+- **Independent Q_h brackets.** `entropic_ot` certifies OT_reg only by a
+  closed bracket 0 ≤ upper − lower ≤ `gap_tol`, from the dual value and a
+  rounded feasible plan. It refuses unequal masses and a reversed bracket.
+  Sinkhorn stalls near a gap of 1e-6 at the operating point
+  (cost / reg = 6400), so the dual is then polished by damped Newton ascent,
+  which closes the gap to about 1e-13. `JKOStep.objective_bounds` sums the
+  brackets with the factor 1/(2h); `jko_entropic_prox_certified` requires a
+  reference of mass 1.
 - **Failures are explicit.** Exhausted outer iterations, a failed line
   search or an uncertified inner solve raise `ImplicitJKOError`, with
   status, iterations and residuals in `last_info`.
@@ -773,11 +793,18 @@ with a line search on Q_h itself.
   γ = 30). The implicit step therefore solves the JKO
   problem of F_δ, while the explicit step and every committed result keep
   the exact |·| (their drivers now pin `turing_smoothing=None`).
-  Comparisons between the two schemes mix two energies; the measured
-  difference of F at γ = 30 is about 3e-3 (Codex probe). The entropy in
-  `T2FreeEnergy.value` uses the exact convention 0 log 0 = 0 without the
-  former 1e-12 floor, so value, gradient and prox minimise the same
-  function.
+  Comparisons between the two schemes mix two energies, which differ by at
+  most the bound above (2.9e-3 at γ = 30; a bound, not a measurement).
+- **Entropy: historical for the historical energy.** The smoothed energy
+  uses the exact entropy 0 log 0 = 0, the function the closed-form prox
+  minimises. The historical energy (`turing_smoothing=None`) keeps the
+  entropy floored at 1e-12 bit for bit, because its value feeds the
+  finite-difference gradient of the legacy, fast and explicit paths:
+  dropping the floor there changed 20-step legacy trajectories by 1.6e-4
+  to 7.8e-3 in density (second review). A test now checks the legacy split
+  (20 steps) and the explicit step (5 steps) against main (`49480e0`)
+  within 1e-12; they agree bit for bit. The historical energy is therefore
+  not `implicit_ready`, even without a Turing term.
 - **Provenance and validation.** `run_paper` forwards `nonseparable` in
   all three branches and records the resolved configuration and the
   certificates. Regression tests cover the Codex cases, and an
@@ -815,6 +842,21 @@ test stopped. Each case reaches a stationary point of the smoothed problem;
 this is not a global guarantee. Wall times were measured on a shared
 machine (load about 12).
 
+Second rerun on 2026-10-29 (05:32Z) after the second review (solver
+`certified-implicit-3`: relative inner certificate `inner_log_tol` = 1e-9,
+same inputs, shared machine):
+
+| point (α, γ) | status | TV residual | log residual | inner log residual | q_min | outer it. | wall time |
+|---|---|---|---|---|---|---|---|
+| (10, 0) | converged | 9.9e-7 | 5.8e-6 | 1.5e-13 | 4.0e-3 | 6 | 4 s |
+| (5, 30) | converged | 7.9e-7 | 9.0e-6 | 1.3e-13 | 2.2e-2 | 65 | 288 s |
+| (8, 5), the paper point | converged | 9.3e-7 | 7.8e-6 | 1.6e-13 | 1.4e-2 | 41 | 431 s |
+
+Same iterates again; the inner solves already met the relative test by four
+orders of magnitude. At (10, 0) the independent bracket of Q_h at the output
+(`JKOStep.objective_bounds`, which failed before) gives −3.3425246482,
+against −3.3425246491 from the solver's own plans.
+
 The explicit step takes about 0.6 s. A difficult step costs several
 minutes. The estimated cost of the certified implicit recomputation of
 sweep (a), paper-scale run (b) and preregistration (c) is 8 to 11 days on
@@ -827,5 +869,18 @@ after merge. Records: `results/implicit_jko_certified_2026_10_27/`.
 is opt-in in practice for gamma >= 10 given its cost". That is superseded
 by the PI decision above; the code default is the implicit step.
 
-**Follow-up (out of scope).** `MultiscaleLoop` advances `tau` by its own
-counter independently of `JKOStep` (review m4); to be fixed separately.
+**Validation driver.** Each job runs isolated: an exception becomes a
+`job_error` record and the batch goes on. Records are written to JSONL as
+they complete, and each carries the solver version, δ and the trajectory
+length; `certify` resumes only from records with the same key. The
+`operating` check records the step status first; a step that is not
+certified is a result. Its transfers are capped at half the donor's mass,
+and it compares certified brackets (gap ≤ 1e-11 per OT_reg), never
+midpoints. The L-BFGS-B reference fails explicitly when no start succeeds,
+and POT marginals are checked. The provenance of `run_paper` reads git from
+the module's repository and records a SHA-256 of the tracked diff.
+
+**Follow-up (out of scope).** `MultiscaleLoop` rebuilds the state with
+`tau = 0` before each JKO step (`multiscale_loop.py`, lines 84 and 148),
+so the output `tau` is 1 after every step instead of counting steps
+(review m4); to be fixed separately.
