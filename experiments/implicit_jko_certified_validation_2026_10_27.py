@@ -38,13 +38,16 @@ Outputs (JSONL, one record per job written as it completes; a job that raises is
 recorded with ``status = "job_error"`` and the batch goes on):
 ``results/implicit_jko_certified_2026_10_27/{b1_rerun_<UTC stamp>.jsonl,
 reference.jsonl, operating.jsonl, certify.jsonl, smoothing.jsonl}``. Every record
-carries ``RUN_KEY`` (solver version, delta, N_STEPS); ``certify`` resumes only from
-records with the same key.
+carries ``RUN_KEY``: solver version, delta, N_STEPS, the effective default
+settings of ``JKOStep`` (read from its signature) and the identity of the code
+(git commit, dirty flag, SHA-256 of the tracked diff); ``certify`` resumes only
+from records with the same key.
 """
 
 from __future__ import annotations
 
 import argparse
+import inspect
 import json
 import sys
 import time
@@ -61,6 +64,7 @@ from kiki_flow_core.master_equation import SOLVER_VERSION, ImplicitJKOError, JKO
 from kiki_flow_core.species import CanonicalSpecies
 from kiki_flow_core.state import FlowState
 from kiki_flow_core.track2_paper.paper_f import T2FreeEnergy
+from kiki_flow_core.track2_paper.paper_run import _git_commit, _git_diff_sha256, _git_dirty
 from kiki_flow_core.wasserstein_ops import SinkhornNotConvergedError
 
 OUT_DIR = Path("results/implicit_jko_certified_2026_10_27")
@@ -90,11 +94,28 @@ POT_MARGINAL_TOL = 1e-8
 OPERATING_GAP_TOL = 1e-11
 OPERATING_TRANSFER = 1e-4
 # Everything that can change a result; a resumed run reuses a record only if all match.
-RUN_KEY = {
+
+
+def _jko_defaults() -> dict[str, Any]:
+    """Effective default settings of ``JKOStep`` (its signature), JSON-normalised."""
+    params = inspect.signature(JKOStep.__init__).parameters.values()
+    defaults = {
+        p.name: p.default
+        for p in params
+        if p.default is not inspect.Parameter.empty and p.name != "prox_fn"
+    }
+    normalised: dict[str, Any] = json.loads(json.dumps(defaults, default=repr))
+    return normalised
+
+
+RUN_KEY: dict[str, Any] = {
     "solver_version": SOLVER_VERSION,
     "delta": DELTA,
     "n_steps": N_STEPS,
-    "jko_defaults": "JKOStep defaults (kkt_tol, log_tol, inner_*, ot_gap_tol)",
+    "jko_defaults": _jko_defaults(),
+    "git_commit": _git_commit(),
+    "git_dirty": _git_dirty(),
+    "git_diff_sha256": _git_diff_sha256(),
 }
 
 
@@ -273,8 +294,9 @@ def reference_job(grid: int, alpha: float, gamma: float, kind: str, h: float) ->
         "Q_step_minus_Q_reference": q_step_val - q_ref_val,
         "reference_lbfgs_success": ref_success,
         "log_residual": info.get("log_residual"),
-        "solver_version": SOLVER_VERSION,
+        "jko_overrides": {"kkt_tol": 1e-7},
         "seconds": time.perf_counter() - tic,
+        **RUN_KEY,
     }
 
 
@@ -288,7 +310,10 @@ def operating_job(alpha: float, gamma: float) -> dict[str, Any]:
     transfer is a certified decrease when its upper bound is below the lower
     bound at the output, no decrease when its lower bound is above the upper
     bound, indeterminate otherwise. The step status is recorded first; a step
-    that is not certified is a result, not a crash.
+    that is not certified is a result, not a crash. The verdict
+    (``operating_verdict``) is ``passed`` only when every transfer was compared
+    and none decreases Q_h, ``failed`` on a certified decrease, ``inconclusive``
+    otherwise.
     """
     f = problem(16, alpha, gamma)
     sup = support(16)
@@ -348,9 +373,25 @@ def operating_job(alpha: float, gamma: float) -> dict[str, Any]:
         Q_upper=base_up,
         transfers=counts,
         min_lower_pert_minus_upper_base=worst,
-        check="failed" if counts["certified_decrease"] else "passed",
+        check=operating_verdict(counts),
     )
     return row
+
+
+def operating_verdict(counts: dict[str, int]) -> str:
+    """Three-state verdict of the operating check.
+
+    ``failed``: at least one transfer certifiably decreases Q_h. ``passed``: every
+    transfer was compared and none decreases Q_h (all ``no_decrease``).
+    ``inconclusive``: otherwise (some comparison missing or indeterminate); the
+    absence of a demonstrated decrease is not a validation.
+    """
+    if counts["certified_decrease"] > 0:
+        return "failed"
+    total = sum(counts.values())
+    if total > 0 and counts["no_decrease"] == total:
+        return "passed"
+    return "inconclusive"
 
 
 def certify_job(alpha: float, gamma: float, h: float, seed: int) -> dict[str, Any]:
@@ -429,7 +470,7 @@ def smoothing_job(alpha: float, gamma: float) -> dict[str, Any]:
                 "tv_vs_smallest_delta": tv(q, outs[SMOOTHING_DELTAS[-1]][0]),
             }
         )
-    return {"alpha": alpha, "gamma": gamma, "rows": rows}
+    return {"alpha": alpha, "gamma": gamma, "rows": rows, **RUN_KEY}
 
 
 def _guarded(fn: Any, *job: Any) -> dict[str, Any]:
