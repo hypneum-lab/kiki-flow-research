@@ -462,3 +462,15 @@ def test_run_paper_forwards_nonseparable_in_all_branches() -> None:
     jko = _make_jko(f, support, False, "pot", None, "implicit", {"max_outer": 9})
     assert jko.scheme == "legacy_split"
     assert jko.max_outer == 9  # noqa: PLR2004
+
+
+def test_ot_bracket_is_never_reversed_and_refuses_unreachable_tolerances() -> None:
+    """Third review (N1): mismatched masses within MASS_TOL, tolerance below rounding."""
+    value, _, info = entropic_ot(
+        np.array([0.5, 0.5]), np.array([0.5, 0.5000000005]), np.zeros((2, 2)), 1.0
+    )
+    assert info["lower"] <= value <= info["upper"]
+    assert info["gap"] >= 0.0
+    cost = np.array([[1000.0, 1001.0], [1001.0, 1000.0]])
+    with pytest.raises(SinkhornNotConvergedError):
+        entropic_ot(np.array([0.3, 0.7]), np.array([0.6, 0.4]), cost, 0.1, gap_tol=1e-16)

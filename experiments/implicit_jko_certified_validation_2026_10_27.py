@@ -47,8 +47,10 @@ from records with the same key.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import inspect
 import json
+import subprocess
 import sys
 import time
 import traceback
@@ -64,7 +66,6 @@ from kiki_flow_core.master_equation import SOLVER_VERSION, ImplicitJKOError, JKO
 from kiki_flow_core.species import CanonicalSpecies
 from kiki_flow_core.state import FlowState
 from kiki_flow_core.track2_paper.paper_f import T2FreeEnergy
-from kiki_flow_core.track2_paper.paper_run import _git_commit, _git_diff_sha256, _git_dirty
 from kiki_flow_core.wasserstein_ops import SinkhornNotConvergedError
 
 OUT_DIR = Path("results/implicit_jko_certified_2026_10_27")
@@ -95,6 +96,30 @@ OPERATING_GAP_TOL = 1e-11
 OPERATING_TRANSFER = 1e-4
 # Everything that can change a result; a resumed run reuses a record only if all match.
 
+_REPO_DIR = Path(__file__).resolve().parents[1]
+
+
+def _git(*args: str) -> str | None:
+    """Output of a git command in this repository, None on failure (no solver imports)."""
+    try:
+        out = subprocess.run(
+            ["git", *args], capture_output=True, text=True, check=False, timeout=10, cwd=_REPO_DIR
+        )
+    except OSError, subprocess.SubprocessError:
+        return None
+    return out.stdout if out.returncode == 0 else None
+
+
+def _code_identity() -> dict[str, Any]:
+    head = _git("rev-parse", "HEAD")
+    status = _git("status", "--porcelain", "--untracked-files=no")
+    diff = _git("diff", "HEAD", "--no-color")
+    return {
+        "git_commit": head.strip() if head else "unknown",
+        "git_dirty": None if status is None else bool(status.strip()),
+        "git_diff_sha256": None if diff is None else hashlib.sha256(diff.encode()).hexdigest(),
+    }
+
 
 def _jko_defaults() -> dict[str, Any]:
     """Effective default settings of ``JKOStep`` (its signature), JSON-normalised."""
@@ -113,9 +138,7 @@ RUN_KEY: dict[str, Any] = {
     "delta": DELTA,
     "n_steps": N_STEPS,
     "jko_defaults": _jko_defaults(),
-    "git_commit": _git_commit(),
-    "git_dirty": _git_dirty(),
-    "git_diff_sha256": _git_diff_sha256(),
+    **_code_identity(),
 }
 
 

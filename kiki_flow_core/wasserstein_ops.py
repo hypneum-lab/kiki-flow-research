@@ -503,17 +503,16 @@ def entropic_ot(
     returned in ``info["potentials"]`` by a previous call at the same ``reg``)
     skips the scaling stages; the certificate is the same. Certificate: a
     bracket lower <= OT_reg(q, r) <= upper from the dual value and the rounded
-    feasible plan (``_entropic_ot_bounds``); the call is certified when
-    ``upper - lower <= gap_tol`` (checked every ``check_every`` iterations of
-    the last stage), a slightly negative gap within the rounding slack
-    ``BRACKET_SLACK * (1 + |lower| + |upper|)`` being accepted as rounding
-    error; a reversed bracket beyond that slack is an error. The rounding
-    needs equal masses: they are checked first, but only within ``MASS_TOL``
-    (times max(mass, 1)), so for masses that differ by m <= MASS_TOL the bracket is that
-    of a problem whose marginals are perturbed by m, and the value can differ
-    from OT_reg(q, r) by about max|potential| * m. Callers that need the bracket
-    at the stated precision pass masses equal to rounding (the JKO step does:
-    its densities are normalised). The
+    feasible plan (``_entropic_ot_bounds``). The masses must agree within
+    ``MASS_TOL`` (times max(mass, 1)); ``r`` is then rescaled to the mass of
+    ``q``, so both bounds are bounds of the same feasible problem
+    OT_reg(q, r~), r~ = r |q| / |r| (r~ = r when the masses are equal, as for
+    the normalised densities of the JKO step). Both bounds are widened by the
+    declared rounding allowance ``BRACKET_SLACK * (1 + |lower| + |upper|)``; the
+    call is certified when the widened width is <= ``gap_tol`` (checked on the
+    raw bracket every ``check_every`` iterations of the last stage, then on
+    the widened one), so a tolerance below the rounding level is refused, and
+    a raw bracket reversed beyond the allowance is an error. The
     value returned is the midpoint, within gap / 2 of OT_reg; ``info["lower"]``
     and ``info["upper"]`` carry the bracket for callers that must compare
     values. ``marginal_tol`` is kept for the call signature and reported, it no
@@ -530,6 +529,9 @@ def entropic_ot(
     bracket is not certified at the end of the budget.
     """
     qa, ra = _check_ot_inputs(q, r, reg, scaling_factor)
+    # Harmonise the masses (they agree within MASS_TOL): both bounds below are
+    # then bounds of the same feasible problem OT_reg(q, r~), r~ = r * |q| / |r|.
+    ra = ra * (float(qa.sum()) / float(ra.sum()))
     stages = _scaling_stages(reg, float(cost_matrix.max()), scaling_factor, warm_start)
     f_pot, g_pot, iterations, delta = _sinkhorn_stages(
         qa,
@@ -559,20 +561,27 @@ def entropic_ot(
             f"entropic OT bracket reversed (lower {lower!r} > upper {upper!r}): "
             "infeasible marginals or numerical failure"
         )
+    # The declared rounding allowance widens the bracket on both sides, so the
+    # certified interval is never reversed and a tolerance below the rounding
+    # level cannot be met.
+    lower_c, upper_c = lower - slack, upper + slack
     info: dict[str, Any] = {
         "iterations": iterations,
         "newton_steps": newton,
         "stages": len(stages),
         "last_delta": delta,
         "marginal_residual": residual,
-        "lower": lower,
-        "upper": upper,
-        "gap": upper - lower,
+        "lower": lower_c,
+        "upper": upper_c,
+        "gap": upper_c - lower_c,
+        "lower_raw": lower,
+        "upper_raw": upper,
+        "rounding_slack": slack,
         "marginal_tol": marginal_tol,
-        "converged": bool(upper - lower <= gap_tol),
+        "converged": bool(upper_c - lower_c <= gap_tol),
     }
     if not info["converged"]:
         raise SinkhornNotConvergedError(f"entropic OT not converged: {info}")
-    value = 0.5 * (lower + upper)
+    value = 0.5 * (lower_c + upper_c)
     info["potentials"] = (f_pot.copy(), g_pot.copy())
     return value, f_pot, info

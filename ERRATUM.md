@@ -811,11 +811,13 @@ with a line search on Q_h itself.
   bit. Scope: this establishes that the historical energy is restored, for
   one input and these two paths, with the current `JKOStep` in both arms.
   A comparison of the whole tree against main (legacy split and explicit
-  step, 20 steps, three input concentrations, electron-server) was also bit
-  for bit (third review), but neither check reproduces the published
-  numbers themselves: a stored trajectory is not portable (it differs by up
-  to 5e-3 between machines on this sensitive path), so published figures
-  are reproducible only on the platform that produced them. The historical
+  step, 20 steps, Dirichlet concentrations 1, 0.3 and 0.05, α = 8, γ = 5,
+  grid 16, electron-server, 2026-10-29) was also bit for bit (Claude review
+  of the third pass; the script is not committed). Neither check
+  reproduces the published numbers themselves: a stored trajectory is not
+  portable (it differs by up to 5e-3 between machines on this sensitive
+  path), so a published figure can at best be reproduced on the platform
+  that produced it, which has not been verified here. The historical
   energy is therefore not `implicit_ready`, even without a Turing term.
 - **Provenance and validation.** `run_paper` forwards `nonseparable` in
   all three branches and records the resolved configuration and the
@@ -909,10 +911,12 @@ the module's repository and records a SHA-256 of the tracked diff.
   the output densities nor their hashes, so "same iterates" is stated, not
   verifiable from the records; the independent bracket quoted for (10, 0)
   was computed separately and its bounds are not stored.
-- `entropic_ot` accepts masses equal within `MASS_TOL` = 1e-9 (times max(mass, 1)) and
-  a negative gap within rounding slack; its bracket is then that of
-  marginals perturbed by at most that mismatch (see its docstring). The JKO
-  step passes normalised densities.
+- `entropic_ot` accepts masses equal within `MASS_TOL` = 1e-9 (times
+  max(mass, 1)) and rescales the second marginal to the mass of the first,
+  so its bracket is that of OT_reg(q, r~) with r~ = r |q| / |r| (r~ = r for
+  the normalised densities of the JKO step). Both bounds are widened by a
+  declared rounding allowance, so the certified interval is never reversed
+  and a tolerance below the rounding level is refused.
 
 **Follow-up (out of scope).** `MultiscaleLoop` rebuilds the state with
 `tau = 0` before each JKO step (`multiscale_loop.py`, lines 84 and 148),
