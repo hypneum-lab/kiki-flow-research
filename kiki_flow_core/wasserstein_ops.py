@@ -328,8 +328,12 @@ def _entropic_ot_bounds(
     (Higham, Accuracy and Stability of Numerical Algorithms, 2002, section 4.2).
     The deviation of the rounded plan from the exact marginals is of order
     (n + m) eps and moves the primal value by at most that times max |f| + max |g|,
-    which the q |f| and r |g| sums cover. It is a declared first-order bound, not
-    interval arithmetic.
+    which the q |f| and r |g| sums cover. Results that underflow to subnormal
+    numbers lose their relative accuracy: each operation then carries an
+    absolute error of up to the smallest subnormal eta, possibly multiplied by
+    the factors that follow, so the bound adds ``ROUNDING_FACTOR * (n m + n + m)
+    * eta * A`` with A = 1 + max C + max |f| + max |g| + reg (1 + max |log pi~|).
+    It is a declared first-order bound, not interval arithmetic.
     """
     shift = 0.5 * (float(np.median(g_pot)) - float(np.median(f_pot)))
     f_c = f_pot + shift
@@ -361,7 +365,16 @@ def _entropic_ot_bounds(
         + reg * float(np.sum(np.abs(entropy_terms)))
     )
     n, m = cost_matrix.shape
-    slack = ROUNDING_FACTOR * (n * m + n + m) * float(np.finfo(float).eps) * scale
+    count = ROUNDING_FACTOR * (n * m + n + m)
+    amplification = (
+        1.0
+        + float(np.max(np.abs(cost_matrix)))
+        + float(np.max(np.abs(f_c)))
+        + float(np.max(np.abs(g_c)))
+        + reg * (1.0 + float(np.max(np.abs(log_rounded))))
+    )
+    eta = float(np.finfo(float).smallest_subnormal)
+    slack = count * (float(np.finfo(float).eps) * scale + eta * amplification)
     return lower, upper, residual, slack
 
 
@@ -546,11 +559,13 @@ def entropic_ot(
     the normalised densities of the JKO step). Both bounds are widened by the
     first-order rounding bound of ``_entropic_ot_bounds`` (scaled by the terms
     that cancel, not by the result); the call is certified when the widened
-    width is <= ``gap_tol``. The same widened width is the only criterion used
-    to stop Sinkhorn (checked every ``check_every`` iterations of the last
-    stage), to trigger Newton polishing and to stop it, so a tolerance below
-    the rounding level is refused and a raw bracket reversed beyond the bound
-    is an error. The
+    width is <= ``gap_tol``. The same widened width is the criterion that
+    certifies the result, stops Sinkhorn early (checked every ``check_every``
+    iterations of the last stage), triggers Newton polishing and stops it; the
+    stall test of Sinkhorn (max change of the potentials below ``tol``) is only
+    an early exit that hands over to Newton, never a certificate. A tolerance
+    below the rounding level is refused and a raw bracket reversed beyond the
+    bound is an error. The
     value returned is the midpoint, within gap / 2 of OT_reg; ``info["lower"]``
     and ``info["upper"]`` carry the bracket for callers that must compare
     values. ``marginal_tol`` is kept for the call signature and reported, it no

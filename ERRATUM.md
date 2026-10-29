@@ -778,9 +778,12 @@ with a line search on Q_h itself.
   with the result: with reg = 1e8 and a constant cost of 2.39e8 (third
   review) the true value 1.9e-8 is lost in cancellation, and the call
   refuses a tight tolerance and brackets the true value under a loose one
-  (test). The widened width ≤ `gap_tol` is the only criterion, for the
-  certificate and for stopping Sinkhorn, triggering Newton and stopping
-  it. It refuses unequal masses and a reversed bracket. Sinkhorn stalls
+  (test). The widened width ≤ `gap_tol` is the criterion of the
+  certificate and of the early stop of Sinkhorn, the trigger of Newton and
+  its stop; the stall test of Sinkhorn is only an early exit to Newton. The
+  bound also has an absolute term for subnormal results, so a regime such as
+  reg = 1e-320 is refused at a tolerance below it rather than certified
+  (fourth review, test). It refuses unequal masses and a reversed bracket. Sinkhorn stalls
   near a gap of 1e-6 at the operating point (cost / reg = 6400), so the
   dual is then polished by damped Newton ascent (no convergence assumed;
   the bracket decides). Measured widths at the step output, grid 16,
@@ -928,7 +931,10 @@ the module's repository and records a SHA-256 of the tracked diff.
   the normalised densities of the JKO step). Both bounds are widened by the
   rounding bound above, so the certified interval is never reversed and a
   tolerance below the rounding level is refused. The rounding bound is a
-  first-order estimate (Higham, section 4.2), not interval arithmetic.
+  first-order estimate (Higham, section 4.2) with an absolute underflow
+  term, not interval arithmetic: it covers the regimes tested here (the
+  operating point, the cancellation and subnormal counter-examples), not
+  every floating-point input.
 
 **Follow-up (out of scope).** `MultiscaleLoop` rebuilds the state with
 `tau = 0` before each JKO step (`multiscale_loop.py`, lines 84 and 148),

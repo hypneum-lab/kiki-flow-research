@@ -23,7 +23,8 @@ All notable releases of `kiki-flow-research`. Dates in YYYY-MM-DD.
 - After the second review of PR #51: inner prox solves are certified in
   relative terms as well (`inner_log_tol`, 1e-9); `entropic_ot` certifies
   only a bracket widened by a rounding bound scaled to the cancelling
-  terms (one criterion for the certificate, Sinkhorn and Newton), refuses
+  terms and an underflow term (the criterion of the certificate, of the
+  early stop of Sinkhorn and of Newton), refuses
   unequal masses and reversed brackets, and polishes the dual by Newton
   ascent where Sinkhorn stalls;
   `jko_entropic_prox_certified` requires a reference of mass 1;

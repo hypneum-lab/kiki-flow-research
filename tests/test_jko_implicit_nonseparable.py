@@ -508,3 +508,14 @@ def test_ot_bracket_contains_the_closed_form_value() -> None:
     assert info["lower"] <= exact <= info["upper"]
     assert info["upper"] - info["lower"] <= 1e-12  # noqa: PLR2004
     assert value == pytest.approx(exact, abs=1e-12)
+
+
+def test_ot_bracket_covers_subnormal_results() -> None:
+    """Fourth review: reg = 1e-320, zero cost, OT_reg = -reg (1 + 2 ln 2) exactly."""
+    q = np.array([0.5, 0.5])
+    reg = 1e-320
+    exact = float(-Decimal(reg) * (1 + 2 * Decimal(2).ln()))
+    with pytest.raises(SinkhornNotConvergedError):
+        entropic_ot(q, q, np.zeros((2, 2)), reg, gap_tol=1e-323)
+    _, _, info = entropic_ot(q, q, np.zeros((2, 2)), reg, gap_tol=1e-300)
+    assert info["lower"] <= exact <= info["upper"]
