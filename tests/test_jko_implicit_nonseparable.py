@@ -176,7 +176,7 @@ def test_energy_without_exact_gradient_is_refused_even_after_mutation() -> None:
 
 def test_t2_entropy_has_no_floor_below_1e_12() -> None:
     """Codex M2 on PR #51: value() and the prox must minimise the same entropy."""
-    f = _t2(4, 0.0, 0.0, None)
+    f = _t2(4, 0.0, 0.0, 1e-5)  # smoothed energy: exact entropy
     names = f.species.species_names()
     rho = {n: np.full(4, 0.25) for n in names}
     tiny = np.array([1e-14, 0.0, 0.5, 0.5 - 1e-14])
@@ -201,6 +201,85 @@ def _coupling_delta(f: T2FreeEnergy, rho: dict[str, np.ndarray], names: list[str
         return float(sum(j[i, k] * np.dot(rs[i], rs[k]) for i in range(4) for k in range(4)))
 
     return coupling(rhos) - coupling(ref)
+
+
+class ShiftedEntropy(FreeEnergy):
+    """F = 100 q_0 + sum q log q with its exact prox (Codex B2 on PR #51, review v2)."""
+
+    @property
+    def implicit_ready(self) -> bool:
+        return True
+
+    def value(self, state: FlowState) -> float:
+        q = state.rho["a"]
+        return float(np.sum(q * np.log(q)) + 100.0 * q[0])
+
+    def kl_prox_log(self, state: FlowState, species_name: str):  # type: ignore[no-untyped-def]
+        shift = np.array([100.0, 0.0])
+        return lambda lp, tau: (lp - tau * shift) / (1.0 + tau)
+
+
+def test_tiny_reference_mass_inner_solve_is_certified_in_relative_terms() -> None:
+    """Review v2, B2: cost 1000, h = reg = 1, reference (1e-12, 1 - 1e-12).
+
+    With one inner iteration the absolute marginal residual is 1e-12 (accepted
+    before) but the relative residual on the tiny bin is about 26 in log: the
+    step must fail. With the full budget the step is certified. The 2x2 problem
+    is solved in closed form: the optimal plan has pi_01 pi_10 = exp(-2000)
+    pi_00 pi_11, and the tangent derivative of Q_h is 1.5 log x - 400 -
+    log(r_0 - x) / 2 for x < r_0, which vanishes at r_0 - x* ~ exp(-883): x*
+    rounds to r_0 in double precision, and the step returns r_0 within a few
+    ulps (the derivative there, about -410, is the log of a float-resolution
+    gap of 8e-28).
+    """
+    r = np.array([1e-12, 1.0 - 1e-12])
+    support = np.array([[0.0], [np.sqrt(1000.0)]])
+    one = JKOStep(ShiftedEntropy(), 1.0, support, scheme="jko_entropic", reg=1.0, inner_n_iter=1)
+    with pytest.raises(ImplicitJKOError) as err:
+        one.step(_state({"a": r}))
+    assert err.value.info["status"] == "inner_not_converged"
+    full = JKOStep(ShiftedEntropy(), 1.0, support, scheme="jko_entropic", reg=1.0)
+    x = float(full.step(_state({"a": r})).rho["a"][0])
+    assert full.last_info["status"] == "converged"
+    assert full.last_info["inner_max_log_residual"] <= full.inner_log_tol
+    assert abs(x / r[0] - 1.0) < 1e-14  # noqa: PLR2004
+
+
+def test_inner_certificate_is_relative_on_low_mass_bins() -> None:
+    """An absolute marginal residual alone accepts a wrong low-mass column."""
+    ref = np.array([1e-12, 1.0 - 1e-12])
+    support = np.array([[0.0], [np.sqrt(1000.0)]])
+    shift = np.array([100.0, 0.0])
+
+    def prox(log_p: np.ndarray, tau: float) -> np.ndarray:
+        return (log_p - tau * shift) / (1.0 + tau)
+
+    _, info = jko_entropic_prox_certified(
+        prox, ref, 1.0, support, reg=1.0, n_iter=1, marginal_log_tol=np.inf
+    )
+    assert info["marginal_residual"] <= 1e-10  # noqa: PLR2004  absolute test passes
+    assert info["marginal_log_residual"] > 1.0  # relative error on the tiny bin
+    with pytest.raises(SinkhornNotConvergedError):
+        jko_entropic_prox_certified(prox, ref, 1.0, support, reg=1.0, n_iter=1)
+
+
+def test_certified_entry_points_check_masses() -> None:
+    """Review v2, M4 / m1: unequal masses are refused, not certified."""
+    with pytest.raises(ValueError, match="equal masses"):
+        entropic_ot(np.array([0.5, 0.5]), np.ones(2), np.zeros((2, 2)), 1.0, n_iter=10)
+    with pytest.raises(ValueError, match="mass 1"):
+        jko_entropic_prox_certified(lambda lp, t: lp, np.ones(2), 1.0, np.zeros((2, 1)), reg=1.0)
+
+
+def test_operating_point_bracket_is_certified_by_newton_polishing() -> None:
+    """Sinkhorn stalls near a gap of 1e-6 at cost / reg = 6400; the bracket must still close."""
+    rng = np.random.default_rng(500)
+    support = np.linspace(-2.0, 2.0, 16).reshape(-1, 1)
+    cost = ((support - support.T) ** 2).astype(float)
+    q, r = rng.dirichlet(np.ones(16)), rng.dirichlet(np.ones(16))
+    _, _, info = entropic_ot(q, r, cost, 0.0025, gap_tol=1e-11)
+    assert 0.0 <= info["upper"] - info["lower"] <= 1e-11  # noqa: PLR2004
+    assert info["newton_steps"] > 0
 
 
 def test_off_simplex_input_is_refused() -> None:
@@ -276,7 +355,9 @@ def test_implicit_requires_a_declared_turing_smoothing() -> None:
         f_functional=_t2(6, 5.0, 5.0, None), h=0.05, support=support, nonseparable="explicit"
     )
     assert explicit.nonseparable == "explicit"
-    assert _t2(6, 5.0, 0.0, None).implicit_ready
+    # the historical energy keeps the floored entropy: refused even without Turing
+    assert not _t2(6, 5.0, 0.0, None).implicit_ready
+    assert _t2(6, 5.0, 0.0, 1e-5).implicit_ready
     assert _t2(6, 5.0, 5.0, 1e-5).implicit_ready
     solver = FullJKOSolver(
         f_functional=_t2(6, 5.0, 5.0, 1e-5),

@@ -18,6 +18,18 @@ def gradient_operator(n: int) -> np.ndarray:
     return np.stack([np.gradient(e) for e in np.eye(n)], axis=1)
 
 
+def _kl_historical(rho: np.ndarray, prior: np.ndarray) -> float:
+    """Historical entropy: sum rho log(rho / prior) with rho and prior floored at 1e-12.
+
+    Kept bit for bit for the historical energy (``turing_smoothing=None``): its
+    value feeds the finite-difference gradient of the legacy, fast and explicit
+    paths, so changing it would change committed trajectories.
+    """
+    rho_safe = np.clip(rho, RHO_FLOOR, None)
+    prior_safe = np.clip(prior, RHO_FLOOR, None)
+    return float(np.sum(rho_safe * np.log(rho_safe / prior_safe)))
+
+
 def _kl(rho: np.ndarray, prior: np.ndarray) -> float:
     """sum rho log(rho / prior) with 0 log 0 = 0 (no floor on positive masses)."""
     r = np.maximum(np.asarray(rho, dtype=float), 0.0)
@@ -38,9 +50,10 @@ class T2FreeEnergy(FreeEnergy):
     (n_pairs = 6 species pairs, n grid points). ``None`` keeps the historical
     energy: exact |.| in the value and a forward-difference gradient, which is
     not a derivative of F across sign changes; drivers behind committed numbers
-    pin it. The entropy uses the exact convention 0 log 0 = 0 (no floor), the
-    same function the KL-prox minimises. The implicit JKO step requires a
-    smoothed Turing term (``implicit_ready``).
+    pin it, and it also keeps the historical entropy floored at 1e-12, bit for
+    bit. The smoothed energy uses the exact entropy convention 0 log 0 = 0 (no
+    floor), the function the KL-prox minimises. The certified implicit JKO step
+    requires the smoothed energy (``implicit_ready``).
     """
 
     def __init__(
@@ -73,9 +86,10 @@ class T2FreeEnergy(FreeEnergy):
         names = self.species.species_names()
         rhos = [state.rho[n] for n in names]
 
+        kl = _kl_historical if self.turing_smoothing is None else _kl
         for n, rho in zip(names, rhos, strict=True):
             total += float(np.dot(rho, self.potentials[n]))
-            total += _kl(rho, self.prior[n])
+            total += kl(rho, self.prior[n])
 
         # Route the coupling energy through J_sym: mathematically equivalent
         # to using the full J (antisymmetric contribution vanishes), but makes
@@ -92,8 +106,13 @@ class T2FreeEnergy(FreeEnergy):
 
     @property
     def implicit_ready(self) -> bool:
-        """True when every non-separable term has an exact gradient (see class doc)."""
-        return self.turing_strength == 0.0 or self.turing_smoothing is not None
+        """True for the smoothed energy only: exact gradients and exact entropy.
+
+        The historical energy (``turing_smoothing=None``) keeps the floored
+        entropy, which the closed-form prox does not minimise, so it is refused
+        by the certified step even when ``turing_strength == 0``.
+        """
+        return self.turing_smoothing is not None
 
     def _abs(self, u: np.ndarray) -> np.ndarray:
         if self.turing_smoothing is None:

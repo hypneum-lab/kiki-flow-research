@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import subprocess
 from pathlib import Path
@@ -114,29 +115,44 @@ def _make_jko(
     return jko
 
 
-def _git_commit() -> str:
-    try:
-        out = subprocess.run(
-            ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=False, timeout=10
-        )
-    except OSError, subprocess.SubprocessError:
-        return "unknown"
-    return out.stdout.strip() or "unknown"
+# Provenance is read from the repository that holds this module, not from the
+# current working directory (a driver may run from elsewhere).
+_REPO_DIR = Path(__file__).resolve().parents[2]
 
 
-def _git_dirty() -> bool | None:
-    """True when tracked files differ from the commit (results not reproducible as is)."""
+def _git(*args: str) -> subprocess.CompletedProcess[str] | None:
     try:
-        out = subprocess.run(
-            ["git", "status", "--porcelain", "--untracked-files=no"],
+        return subprocess.run(
+            ["git", *args],
             capture_output=True,
             text=True,
             check=False,
             timeout=10,
+            cwd=_REPO_DIR,
         )
     except OSError, subprocess.SubprocessError:
         return None
-    return bool(out.stdout.strip()) if out.returncode == 0 else None
+
+
+def _git_commit() -> str:
+    out = _git("rev-parse", "HEAD")
+    return (out.stdout.strip() or "unknown") if out is not None else "unknown"
+
+
+def _git_dirty() -> bool | None:
+    """True when tracked files differ from the commit (results not reproducible as is)."""
+    out = _git("status", "--porcelain", "--untracked-files=no")
+    if out is None or out.returncode != 0:
+        return None
+    return bool(out.stdout.strip())
+
+
+def _git_diff_sha256() -> str | None:
+    """SHA-256 of ``git diff HEAD`` (tracked changes), identifying a dirty tree."""
+    out = _git("diff", "HEAD", "--no-color")
+    if out is None or out.returncode != 0:
+        return None
+    return hashlib.sha256(out.stdout.encode()).hexdigest()
 
 
 def run_paper(
@@ -308,12 +324,15 @@ def run_paper(
             "inner_n_iter": jko.inner_n_iter,
             "inner_tol": jko.inner_tol,
             "inner_marginal_tol": jko.inner_marginal_tol,
+            "inner_log_tol": jko.inner_log_tol,
+            "ot_gap_tol": jko.ot_gap_tol,
             "on_failure": jko.on_failure,
             "solver_version": SOLVER_VERSION,
             "turing_smoothing": smoothing,
             "reinject": reinject,
             "git_commit": _git_commit(),
             "git_dirty": _git_dirty(),
+            "git_diff_sha256": _git_diff_sha256(),
         },
     }
 

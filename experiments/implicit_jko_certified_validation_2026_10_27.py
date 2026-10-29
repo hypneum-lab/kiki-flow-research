@@ -34,8 +34,12 @@ Parts (all on electron-server, nice 19, at most 4 workers):
   h = 0.05, reg = h^2, delta = 1e-5): (8, 5), (5, 30), (10, 0); one certified
   step each, with status, KKT residual, iterations, Q_h and wall time.
 
-Outputs (new files): ``results/implicit_jko_certified_2026_10_27/{b1_probe.jsonl,
-reference.json, certify.jsonl, smoothing.json, summary.md}``.
+Outputs (JSONL, one record per job written as it completes; a job that raises is
+recorded with ``status = "job_error"`` and the batch goes on):
+``results/implicit_jko_certified_2026_10_27/{b1_rerun_<UTC stamp>.jsonl,
+reference.jsonl, operating.jsonl, certify.jsonl, smoothing.jsonl}``. Every record
+carries ``RUN_KEY`` (solver version, delta, N_STEPS); ``certify`` resumes only from
+records with the same key.
 """
 
 from __future__ import annotations
@@ -44,6 +48,7 @@ import argparse
 import json
 import sys
 import time
+import traceback
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
@@ -56,6 +61,7 @@ from kiki_flow_core.master_equation import SOLVER_VERSION, ImplicitJKOError, JKO
 from kiki_flow_core.species import CanonicalSpecies
 from kiki_flow_core.state import FlowState
 from kiki_flow_core.track2_paper.paper_f import T2FreeEnergy
+from kiki_flow_core.wasserstein_ops import SinkhornNotConvergedError
 
 OUT_DIR = Path("results/implicit_jko_certified_2026_10_27")
 DELTA = 1e-5
@@ -74,14 +80,30 @@ REF_HALF_WIDTH = 0.5  # reference support [-0.5, 0.5]: max cost / reg = 25, so t
 # kernel underflows and different potentials give the same plan)
 SMOOTHING_CELLS = [(5.0, 5.0), (5.0, 30.0), (10.0, 100.0)]
 FLOOR = 1e-300
+POT_MARGINAL_TOL = 1e-8
+# Operating-point check: each OT_reg bracket certified to OPERATING_GAP_TOL (attainable
+# with the Newton polishing of entropic_ot; Sinkhorn alone stalls near 1e-6 here), so
+# the summed Q_h uncertainty is <= 4 * 2 * OPERATING_GAP_TOL / (2h) = 8e-10. A transfer of
+# t = OPERATING_TRANSFER (capped at half the donor's mass) changes Q_h by
+# g t + O(t^2 H) with H >= 1 (entropy), i.e. by >= ~5e-9 at a stationary point: well
+# above the uncertainty, so every comparison is decidable unless g t ~ -t^2 H / 2.
+OPERATING_GAP_TOL = 1e-11
+OPERATING_TRANSFER = 1e-4
+# Everything that can change a result; a resumed run reuses a record only if all match.
+RUN_KEY = {
+    "solver_version": SOLVER_VERSION,
+    "delta": DELTA,
+    "n_steps": N_STEPS,
+    "jko_defaults": "JKOStep defaults (kkt_tol, log_tol, inner_*, ot_gap_tol)",
+}
 
 
 def output_paths() -> dict[str, Path]:
     return {
-        "reference": OUT_DIR / "reference.json",
-        "operating": OUT_DIR / "operating.json",
+        "reference": OUT_DIR / "reference.jsonl",
+        "operating": OUT_DIR / "operating.jsonl",
         "certify": OUT_DIR / "certify.jsonl",
-        "smoothing": OUT_DIR / "smoothing.json",
+        "smoothing": OUT_DIR / "smoothing.jsonl",
         "summary": OUT_DIR / "summary.md",
     }
 
@@ -155,6 +177,9 @@ def pot_entropic_ot(
     plan, log = ot.sinkhorn(
         q, r, cost, reg, method="sinkhorn_log", numItermax=20_000, stopThr=1e-11, log=True
     )
+    err = float(np.abs(plan.sum(axis=1) - q).sum() + np.abs(plan.sum(axis=0) - r).sum())
+    if err > POT_MARGINAL_TOL:
+        raise RuntimeError(f"POT Sinkhorn marginals not met ({err:.2e})")
     safe = np.where(plan > 0.0, np.log(np.maximum(plan, 1e-300)), 0.0)
     value = float(np.sum(plan * cost) + reg * np.sum(plan * (safe - 1.0)))
     return value, reg * np.asarray(log["log_u"], dtype=float)
@@ -167,8 +192,12 @@ def reference_minimiser(  # local reference (L-BFGS-B), no global guarantee
     h: float,
     reg: float,
     starts: list[dict[str, np.ndarray]],
-) -> tuple[dict[str, np.ndarray], float]:
-    """Independent reference: L-BFGS-B on Q_h(softmax(z)), exact gradient."""
+) -> tuple[dict[str, np.ndarray], float, bool]:
+    """Independent reference: L-BFGS-B on Q_h(softmax(z)), exact gradient.
+
+    Returns (q, Q_h(q), success). Raises ``RuntimeError`` when no start succeeds:
+    a failed optimisation is not a reference.
+    """
     names = f.species.species_names()
     grid = sup.shape[0]
     cost = ot.dist(sup, sup, metric="sqeuclidean")
@@ -204,7 +233,8 @@ def reference_minimiser(  # local reference (L-BFGS-B), no global guarantee
         # a successful run beats a failed one; among equals, the lower value wins
         if best is None or (ok, -float(res.fun)) > (best[2], -best[1]):
             best = (q, float(res.fun), ok)
-    assert best is not None
+    if best is None or not best[2]:
+        raise RuntimeError("L-BFGS-B reference failed from every start")
     return best
 
 
@@ -252,8 +282,13 @@ def operating_job(alpha: float, gamma: float) -> dict[str, Any]:
     """Operating point: independent check by certified Q_h brackets and mass transfers.
 
     At cost / reg up to 6400 the dual potentials are not identifiable, so the
-    check uses Q_h values (``JKOStep.objective``: certified dual / rounded-primal
-    bracket of OT_reg) along absolute mass transfers between neighbouring bins.
+    check compares certified brackets of Q_h (``JKOStep.objective_bounds``) at the
+    step output and after absolute mass transfers between neighbouring bins
+    (``OPERATING_TRANSFER``, capped at half the donor's mass, never negative). A
+    transfer is a certified decrease when its upper bound is below the lower
+    bound at the output, no decrease when its lower bound is above the upper
+    bound, indeterminate otherwise. The step status is recorded first; a step
+    that is not certified is a result, not a crash.
     """
     f = problem(16, alpha, gamma)
     sup = support(16)
@@ -261,29 +296,61 @@ def operating_job(alpha: float, gamma: float) -> dict[str, Any]:
     rho = {n: rng.dirichlet(np.ones(16)) for n in f.species.species_names()}
     jko = JKOStep(f, 0.05, sup, scheme="jko_entropic", on_failure="warn")
     out = jko.step(state_of(rho))
-    q = {n: out.rho[n] for n in rho}
-    base = jko.objective(state_of(rho), q, rho)
-    worst = 0.0
-    for n in rho:
-        for a in range(15):
-            for sign in (1.0, -1.0):
-                moved = q[n].copy()
-                t = 1e-6
-                moved[a] += sign * t
-                moved[a + 1] -= sign * t
-                val = jko.objective(state_of(rho), {**q, n: moved}, rho)
-                worst = min(worst, val - base)
-    return {
+    info = jko.last_info
+    row: dict[str, Any] = {
         "alpha": alpha,
         "gamma": gamma,
-        "status": jko.last_info["status"],
-        "kkt_residual": jko.last_info["kkt_residual"],
-        "log_residual": jko.last_info["log_residual"],
-        "q_min": jko.last_info["q_min"],
-        "Q_step": base,
-        "worst_transfer_decrease": worst,
-        "solver_version": SOLVER_VERSION,
+        "status": info["status"],
+        "kkt_residual": info["kkt_residual"],
+        "log_residual": info["log_residual"],
+        "q_min": info["q_min"],
+        "step_seconds": info.get("seconds"),
+        "ot_gap_tol": OPERATING_GAP_TOL,
+        "transfer": OPERATING_TRANSFER,
+        **RUN_KEY,
     }
+    if info["status"] != "converged":
+        row["check"] = "not_run: step not certified"
+        return row
+    q = {n: out.rho[n] for n in rho}
+    state = state_of(rho)
+    try:
+        base_lo, base_up = jko.objective_bounds(state, q, rho, gap_tol=OPERATING_GAP_TOL)
+    except SinkhornNotConvergedError as exc:
+        row["check"] = "not_run: Q_h bracket not certified at the output"
+        row["error"] = str(exc)[:400]
+        return row
+    counts = {"certified_decrease": 0, "no_decrease": 0, "indeterminate": 0, "not_certified": 0}
+    worst = np.inf  # min over transfers of lower(pert) - upper(base)
+    for n in rho:
+        for a in range(15):
+            for donor, receiver in ((a + 1, a), (a, a + 1)):
+                t = min(OPERATING_TRANSFER, 0.5 * float(q[n][donor]))
+                moved = q[n].copy()
+                moved[receiver] += t
+                moved[donor] -= t
+                try:
+                    lo, up = jko.objective_bounds(
+                        state, {**q, n: moved}, rho, gap_tol=OPERATING_GAP_TOL
+                    )
+                except SinkhornNotConvergedError:
+                    counts["not_certified"] += 1
+                    continue
+                worst = min(worst, lo - base_up)
+                if up < base_lo:
+                    counts["certified_decrease"] += 1
+                elif lo > base_up:
+                    counts["no_decrease"] += 1
+                else:
+                    counts["indeterminate"] += 1
+    row.update(
+        Q_lower=base_lo,
+        Q_upper=base_up,
+        transfers=counts,
+        min_lower_pert_minus_upper_base=worst,
+        check="failed" if counts["certified_decrease"] else "passed",
+    )
+    return row
 
 
 def certify_job(alpha: float, gamma: float, h: float, seed: int) -> dict[str, Any]:
@@ -311,7 +378,7 @@ def certify_job(alpha: float, gamma: float, h: float, seed: int) -> dict[str, An
         "gamma": gamma,
         "h": h,
         "seed": seed,
-        "solver_version": SOLVER_VERSION,
+        **RUN_KEY,
         "steps": steps,
     }
 
@@ -325,6 +392,7 @@ def b1_job(alpha: float, gamma: float) -> dict[str, Any]:
     out = jko.step(state_of(rho))
     info = {k: v for k, v in jko.last_info.items() if k != "inner_error"}
     info.update(
+        **RUN_KEY,
         case=f"T2({alpha},{gamma}) delta={DELTA} h=0.05",
         wall=time.perf_counter() - tic,
         dF=f.value(out) - f.value(state_of(rho)),
@@ -364,15 +432,49 @@ def smoothing_job(alpha: float, gamma: float) -> dict[str, Any]:
     return {"alpha": alpha, "gamma": gamma, "rows": rows}
 
 
-def run_pool(fn: Any, jobs: list[tuple[Any, ...]], workers: int) -> list[Any]:
-    with ProcessPoolExecutor(max_workers=workers) as pool:
-        futs = {pool.submit(fn, *j): j for j in jobs}
-        out = []
+def _guarded(fn: Any, *job: Any) -> dict[str, Any]:
+    """Run one job; an exception becomes a record, never the end of the batch."""
+    try:
+        result: dict[str, Any] = fn(*job)
+    except Exception as exc:  # noqa: BLE001 - every failure is recorded as data
+        return {
+            "job": list(job),
+            "status": "job_error",
+            "error": f"{type(exc).__name__}: {exc}"[:2000],
+            "traceback": traceback.format_exc()[-4000:],
+            **RUN_KEY,
+        }
+    return result
+
+
+def run_pool(fn: Any, jobs: list[tuple[Any, ...]], workers: int, path: Path) -> list[Any]:
+    """Run isolated jobs, appending each record to ``path`` (JSONL) as it completes.
+
+    ``workers <= 1`` runs the jobs in this process (no pool).
+    """
+    out = []
+    if workers <= 1:
+        with path.open("a") as fh:
+            for j in jobs:
+                r = _guarded(fn, *j)
+                fh.write(json.dumps(r, default=float) + "\n")
+                fh.flush()
+                out.append(r)
+                print(json.dumps({"job": j, "status": r.get("status", "")}), flush=True)
+        return out
+    with ProcessPoolExecutor(max_workers=workers) as pool, path.open("a") as fh:
+        futs = {pool.submit(_guarded, fn, *j): j for j in jobs}
         for fut in as_completed(futs):
             r = fut.result()
+            fh.write(json.dumps(r, default=float) + "\n")
+            fh.flush()
             out.append(r)
             print(json.dumps({"job": futs[fut], "status": r.get("status", "")}), flush=True)
-        return out
+    return out
+
+
+def _same_run(record: dict[str, Any]) -> bool:
+    return all(record.get(k) == v for k, v in RUN_KEY.items())
 
 
 def run_certify(workers: int) -> None:
@@ -381,7 +483,7 @@ def run_certify(workers: int) -> None:
     if path.exists():
         for line in path.read_text().splitlines():
             r = json.loads(line)
-            if r.get("solver_version") == SOLVER_VERSION:  # never reuse another solver
+            if _same_run(r) and "steps" in r:  # never reuse another solver or setting
                 done.add((r["alpha"], r["gamma"], r["h"], r["seed"]))
     jobs = [
         (a, g, h, s)
@@ -392,16 +494,13 @@ def run_certify(workers: int) -> None:
         if (a, g, h, s) not in done
     ]
     with ProcessPoolExecutor(max_workers=workers) as pool, path.open("a") as fh:
-        futs = [pool.submit(certify_job, *j) for j in jobs]
+        futs = {pool.submit(_guarded, certify_job, *j): j for j in jobs}
         for i, fut in enumerate(as_completed(futs), 1):
             r = fut.result()
             fh.write(json.dumps(r, default=float) + "\n")
             fh.flush()
-            st = [s["status"] for s in r["steps"]]
-            print(
-                f"[{i}/{len(jobs)}] a={r['alpha']} g={r['gamma']} h={r['h']} s={r['seed']} {st}",
-                flush=True,
-            )
+            st = [s["status"] for s in r.get("steps", [])] or r.get("status")
+            print(f"[{i}/{len(jobs)}] {futs[fut]} {st}", flush=True)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -411,15 +510,12 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     if args.cmd == "b1":
-        res = run_pool(b1_job, [(8.0, 5.0), (5.0, 30.0), (10.0, 0.0)], args.workers)
         stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
         target = OUT_DIR / f"b1_rerun_{stamp}.jsonl"  # never overwrite the committed records
-        with target.open("x") as fh:
-            for r in res:
-                fh.write(json.dumps(r, default=float) + "\n")
+        target.touch(exist_ok=False)
+        run_pool(b1_job, [(8.0, 5.0), (5.0, 30.0), (10.0, 0.0)], args.workers, target)
     elif args.cmd == "operating":
-        res = run_pool(operating_job, OPERATING_CELLS, args.workers)
-        output_paths()["operating"].write_text(json.dumps(res, indent=1, default=float))
+        run_pool(operating_job, OPERATING_CELLS, args.workers, output_paths()["operating"])
     elif args.cmd == "reference":
         jobs = [
             (g, a, gm, k, REF_H)
@@ -427,13 +523,11 @@ def main(argv: list[str] | None = None) -> int:
             for a, gm in REF_CELLS
             for k in ("dirichlet", "gibbs", "sparse_histogram")
         ]
-        res = run_pool(reference_job, jobs, args.workers)
-        output_paths()["reference"].write_text(json.dumps(res, indent=1, default=float))
+        run_pool(reference_job, jobs, args.workers, output_paths()["reference"])
     elif args.cmd == "certify":
         run_certify(args.workers)
     else:
-        res = run_pool(smoothing_job, [c for c in SMOOTHING_CELLS], args.workers)
-        output_paths()["smoothing"].write_text(json.dumps(res, indent=1, default=float))
+        run_pool(smoothing_job, list(SMOOTHING_CELLS), args.workers, output_paths()["smoothing"])
     return 0
 
 

@@ -21,8 +21,14 @@ def test_multiscale_loop_produces_manifest():
         turing_smoothing=None,
     )
     support = np.linspace(-2, 2, n).reshape(-1, 1)
-    jko = FullJKOSolver(
-        f_functional=f, h=0.05, support=support, epsilon=0.05, max_iter=50, n_inner=5
+    jko = FullJKOSolver(  # historical energy: not certifiable, explicit treatment
+        f_functional=f,
+        h=0.05,
+        support=support,
+        epsilon=0.05,
+        max_iter=50,
+        n_inner=5,
+        nonseparable="explicit",
     )
     loop = MultiscaleLoop(sim=sim, jko=jko, n_fast=20, n_slow=3, support=support)
     manifest = loop.run(seed=0)

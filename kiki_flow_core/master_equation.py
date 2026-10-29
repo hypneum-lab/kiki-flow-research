@@ -30,7 +30,7 @@ OnFailure = Literal["raise", "warn"]
 _FLOOR = 1e-300
 UNDERFLOW = 1e-280  # densities below this cannot carry a meaningful log residual
 SIMPLEX_TOL = 1e-9
-SOLVER_VERSION = "certified-implicit-2"
+SOLVER_VERSION = "certified-implicit-3"
 
 
 class FreeEnergy(ABC):
@@ -163,8 +163,13 @@ class JKOStep:
       positive declaration checked at every step). A density below
       ``UNDERFLOW`` makes the log residual meaningless and fails as
       ``status="underflow"``. Inputs must lie on the simplex (total mass 1 within
-      ``SIMPLEX_TOL``). Every inner Sinkhorn solve and every OT_reg
-      evaluation carries its own certificate (marginal residual). Exhausting
+      ``SIMPLEX_TOL``). Each inner solve is certified in absolute
+      (``inner_marginal_tol``) and relative (``inner_log_tol`` < ``log_tol``)
+      terms on the reference marginal, so T_0(q) is the exact map for a
+      reference perturbed by at most ``inner_log_tol`` per bin; the outer log
+      residual is meaningful only above that level. Every inner Sinkhorn solve and every OT_reg
+      evaluation carries its own certificate (marginal residuals; a closed
+      dual / primal bracket for OT_reg, see ``objective_bounds``). Exhausting
       ``max_outer`` iterations, a line search beyond ``l_max`` or an inner
       certificate failure raises ``ImplicitJKOError`` (``on_failure="raise"``,
       default); ``on_failure="warn"`` returns the last iterate with a warning
@@ -197,6 +202,8 @@ class JKOStep:
         inner_n_iter: int = 200_000,
         inner_tol: float = 1e-13,
         inner_marginal_tol: float = 1e-10,
+        inner_log_tol: float = 1e-9,
+        ot_gap_tol: float = 1e-10,
         on_failure: OnFailure = "raise",
     ) -> None:
         if not (h > 0 and np.isfinite(h)):
@@ -213,7 +220,13 @@ class JKOStep:
             raise ValueError("on_failure must be 'raise' or 'warn'")
         if not (kkt_tol > 0 and log_tol > 0 and max_outer >= 1 and 0 < l0 <= l_max and sigma >= 0):
             raise ValueError("invalid implicit-solver settings")
-        if not (inner_n_iter >= 1 and inner_tol > 0 and inner_marginal_tol > 0):
+        if not (
+            inner_n_iter >= 1
+            and inner_tol > 0
+            and inner_marginal_tol > 0
+            and 0 < inner_log_tol < log_tol
+            and ot_gap_tol > 0
+        ):
             raise ValueError("invalid inner-solver settings")
         self.f_functional = f_functional
         self.h = h
@@ -238,6 +251,8 @@ class JKOStep:
         self.inner_n_iter = inner_n_iter
         self.inner_tol = inner_tol
         self.inner_marginal_tol = inner_marginal_tol
+        self.inner_log_tol = inner_log_tol
+        self.ot_gap_tol = ot_gap_tol
         self.on_failure: OnFailure = on_failure
         self.last_info: dict[str, Any] = {}
         self._check_implicit_ready()
@@ -369,6 +384,7 @@ class JKOStep:
                 n_iter=self.inner_n_iter,
                 tol=self.inner_tol,
                 marginal_tol=self.inner_marginal_tol,
+                marginal_log_tol=self.inner_log_tol,
                 init_log_b=warm.get(name),
             )
             warm[name] = info["log_b"]
@@ -379,10 +395,73 @@ class JKOStep:
             stats["inner_max_residual"] = max(
                 stats["inner_max_residual"], float(info["marginal_residual"])
             )
+            stats["inner_max_log_residual"] = max(
+                stats["inner_max_log_residual"], float(info["marginal_log_residual"])
+            )
             out[name] = q
             transport += float(info["transport_value"])
         value = self.f_functional.value(state.model_copy(update={"rho": {**state.rho, **out}}))
         return out, value + transport / (2.0 * self.h)
+
+    def objective_bounds(
+        self,
+        state: FlowState,
+        q: dict[str, np.ndarray],
+        reference: dict[str, np.ndarray],
+        stats: dict[str, Any] | None = None,
+        gap_tol: float | None = None,
+    ) -> tuple[float, float]:
+        """Certified bracket lower <= Q_h(q) <= upper at an arbitrary q.
+
+        Q_h(q) = F(q) + sum_i OT_reg(q_i, rho_tau_i) / (2h). Independent of the
+        solver: each OT_reg is bracketed by ``entropic_ot`` (dual value and
+        rounded feasible plan, gap <= ``gap_tol``, default ``ot_gap_tol``) and the
+        brackets are summed with the factor 1 / (2h). F is evaluated exactly.
+        Raises ``SinkhornNotConvergedError`` when a bracket is not certified.
+        """
+        tol = self.ot_gap_tol if gap_tol is None else gap_tol
+        cost = ot.dist(self.support, self.support, metric="sqeuclidean")
+        f_val = self.f_functional.value(state.model_copy(update={"rho": {**state.rho, **q}}))
+        lower = upper = float(f_val)
+        warm = stats.setdefault("_warm", {}) if stats is not None else {}
+        for name, ref in reference.items():
+            try:
+                info = self._bracket(q[name], ref, cost, tol, warm.get(name))
+            except SinkhornNotConvergedError:
+                if warm.get(name) is None:
+                    raise
+                # A warm start that does not certify is retried from scratch.
+                info = self._bracket(q[name], ref, cost, tol, None)
+            warm[name] = info["potentials"]
+            lower += float(info["lower"]) / (2.0 * self.h)
+            upper += float(info["upper"]) / (2.0 * self.h)
+            if stats is not None:
+                stats["ot_calls"] += 1
+                stats["ot_max_residual"] = max(
+                    stats["ot_max_residual"], float(info["marginal_residual"])
+                )
+        return lower, upper
+
+    def _bracket(
+        self,
+        q: np.ndarray,
+        ref: np.ndarray,
+        cost: np.ndarray,
+        gap_tol: float,
+        warm: tuple[np.ndarray, np.ndarray] | None,
+    ) -> dict[str, Any]:
+        _, _, info = entropic_ot(
+            q,
+            ref,
+            cost,
+            self.entropic_reg,
+            n_iter=self.inner_n_iter,
+            tol=self.inner_tol,
+            marginal_tol=self.inner_marginal_tol,
+            gap_tol=gap_tol,
+            warm_start=warm,
+        )
+        return info
 
     def objective(
         self,
@@ -391,47 +470,9 @@ class JKOStep:
         reference: dict[str, np.ndarray],
         stats: dict[str, Any] | None = None,
     ) -> float:
-        """Q_h(q) = F(q) + sum_i OT_reg(q_i, rho_tau_i) / (2h) at an arbitrary q.
-
-        Independent evaluation by balanced log-domain Sinkhorn (``entropic_ot``,
-        certified); the solver itself uses the values of its prox plans.
-        """
-        cost = ot.dist(self.support, self.support, metric="sqeuclidean")
-        total = self.f_functional.value(state.model_copy(update={"rho": {**state.rho, **q}}))
-        warm = stats.setdefault("_warm", {}) if stats is not None else {}
-        for name, ref in reference.items():
-            try:
-                value, _, info = entropic_ot(
-                    q[name],
-                    ref,
-                    cost,
-                    self.entropic_reg,
-                    n_iter=self.inner_n_iter,
-                    tol=self.inner_tol,
-                    marginal_tol=self.inner_marginal_tol,
-                    warm_start=warm.get(name),
-                )
-            except SinkhornNotConvergedError:
-                if warm.get(name) is None:
-                    raise
-                # A warm start that does not certify is retried from scratch.
-                value, _, info = entropic_ot(
-                    q[name],
-                    ref,
-                    cost,
-                    self.entropic_reg,
-                    n_iter=self.inner_n_iter,
-                    tol=self.inner_tol,
-                    marginal_tol=self.inner_marginal_tol,
-                )
-            warm[name] = info["potentials"]
-            total += value / (2.0 * self.h)
-            if stats is not None:
-                stats["ot_calls"] += 1
-                stats["ot_max_residual"] = max(
-                    stats["ot_max_residual"], float(info["marginal_residual"])
-                )
-        return float(total)
+        """Midpoint of ``objective_bounds``: Q_h(q) within half the summed gap."""
+        lower, upper = self.objective_bounds(state, q, reference, stats)
+        return 0.5 * (lower + upper)
 
     @staticmethod
     def _check_densities(reference: dict[str, np.ndarray]) -> None:
@@ -480,6 +521,8 @@ class JKOStep:
             "q_min": float("nan"),
             "kkt_tol": self.kkt_tol,
             "log_tol": self.log_tol,
+            "inner_log_tol": self.inner_log_tol,
+            "inner_max_log_residual": 0.0,
             "solver_version": SOLVER_VERSION,
             "h": self.h,
             "reg": self.entropic_reg,

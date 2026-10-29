@@ -116,6 +116,8 @@ def _logsumexp_rows(m: np.ndarray) -> np.ndarray:
 
 
 INTERMEDIATE_STAGE_CAP = 2000  # iterations per non-final epsilon-scaling stage
+MASS_TOL = 1e-9  # certified entry points: masses must match (and be 1 for the prox)
+LOG_FLOOR = 1e-280  # bins below this mass are checked in absolute terms only
 
 
 class SinkhornNotConvergedError(RuntimeError):
@@ -132,6 +134,7 @@ def _entropic_prox_core(
     tol: float,
     marginal_tol: float,
     init_log_b: np.ndarray | None = None,
+    marginal_log_tol: float = np.inf,
 ) -> tuple[np.ndarray, dict[str, Any]]:
     if epsilon < 0.0 or not np.isfinite(epsilon):
         raise ValueError("epsilon (JKO step) must be finite and non-negative")
@@ -167,6 +170,15 @@ def _entropic_prox_core(
     log_a_chk = log_a_chk - log_a_chk.max()
     second = np.exp(log_b + _logsumexp_rows(log_kernel.T + log_a_chk[None, :]))
     residual = float(np.abs(second - ref).sum())
+    # Relative (log-domain) residual of the second marginal on every bin that
+    # can carry a logarithm: an absolute L1 residual says nothing about bins
+    # of tiny mass (review of PR #51, B2).
+    live = ref >= LOG_FLOOR
+    with np.errstate(divide="ignore"):
+        log_second = np.log(second)
+    log_residual = float(np.max(np.abs(log_second[live] - log_ref[live]))) if live.any() else 0.0
+    if not np.isfinite(log_residual):
+        log_residual = np.inf
     log_q = log_a + _logsumexp_rows(log_kernel + log_b[None, :])
     if not np.all(np.isfinite(log_q)):
         raise FloatingPointError(
@@ -185,7 +197,8 @@ def _entropic_prox_core(
         "iterations": iterations,
         "last_delta": delta,
         "marginal_residual": residual,
-        "converged": bool(residual <= marginal_tol),
+        "marginal_log_residual": log_residual,
+        "converged": bool(residual <= marginal_tol and log_residual <= marginal_log_tol),
         "transport_value": transport,
         "log_b": log_b.copy(),
     }
@@ -244,9 +257,14 @@ def jko_entropic_prox_certified(
     n_iter: int = 200_000,
     tol: float = 1e-13,
     marginal_tol: float = 1e-10,
+    marginal_log_tol: float = 1e-9,
     init_log_b: np.ndarray | None = None,
 ) -> tuple[np.ndarray, dict[str, Any]]:
     """``jko_entropic_prox`` with a certificate; raise if it is not met.
+
+    The reference must be a probability vector (mass 1 within ``MASS_TOL``): the
+    output is normalised, so a reference of another mass would be certified
+    against a plan it cannot be the marginal of.
 
     ``init_log_b`` warm-starts the scaling (e.g. ``info["log_b"]`` of a previous
     call on a nearby subproblem); the certificate is unchanged.
@@ -254,11 +272,27 @@ def jko_entropic_prox_certified(
     Runs the same scaling iteration until the max change of ``log b`` is below
     ``tol`` or ``n_iter`` iterations, then checks the second-marginal violation
     ``|| pi^T 1 - reference ||_1 <= marginal_tol`` of the plan induced by the
-    final scaling. Returns ``(q, info)``; raises ``SinkhornNotConvergedError`` (with
-    the info in the message) when the certificate fails.
+    final scaling, and its relative form ``max_j |log (pi^T 1)_j - log
+    reference_j| <= marginal_log_tol`` over the bins of mass >= ``LOG_FLOOR``.
+    The output is then the exact prox for a reference perturbed by at most
+    ``marginal_log_tol`` in relative terms. Returns ``(q, info)``; raises
+    ``SinkhornNotConvergedError`` (with the info in the message) when the
+    certificate fails.
     """
+    mass = float(np.sum(reference))
+    if not abs(mass - 1.0) <= MASS_TOL:
+        raise ValueError(f"reference must have mass 1 (got {mass!r})")
     out, info = _entropic_prox_core(
-        kl_prox_log, reference, epsilon, support, n_iter, reg, tol, marginal_tol, init_log_b
+        kl_prox_log,
+        reference,
+        epsilon,
+        support,
+        n_iter,
+        reg,
+        tol,
+        marginal_tol,
+        init_log_b,
+        marginal_log_tol,
     )
     if not info["converged"]:
         raise SinkhornNotConvergedError(f"entropic prox not converged: {info}")
@@ -301,6 +335,66 @@ def _entropic_ot_bounds(
     return lower, upper, residual
 
 
+BRACKET_SLACK = 1e-12  # relative rounding slack allowed for a reversed OT bracket
+NEWTON_MAX_SIZE = 512  # dense Newton polishing of the OT dual up to this many bins
+NEWTON_MIN_STEP = 1e-12  # backtracking floor of the Newton line search
+
+
+def _ot_dual(
+    f_pot: np.ndarray, g_pot: np.ndarray, q: np.ndarray, r: np.ndarray, c: np.ndarray, reg: float
+) -> float:
+    with np.errstate(over="ignore"):
+        mass = float(np.exp((f_pot[:, None] + g_pot[None, :] - c) / reg).sum())
+    if not np.isfinite(mass):
+        return -np.inf
+    return float(np.dot(f_pot, q) + np.dot(g_pot, r) - reg * mass)
+
+
+def _newton_polish(
+    f_pot: np.ndarray,
+    g_pot: np.ndarray,
+    q: np.ndarray,
+    r: np.ndarray,
+    c: np.ndarray,
+    reg: float,
+    gap_tol: float,
+    max_steps: int,
+) -> tuple[np.ndarray, np.ndarray, int]:
+    """Damped Newton ascent on the (concave) entropic OT dual, last g fixed.
+
+    Sinkhorn converges linearly at a rate that degrades like exp(-C / reg); at
+    cost / reg in the thousands it stalls near a gap of 1e-6. Newton converges
+    quadratically from the Sinkhorn potentials; the certificate is unchanged
+    (the bracket of ``_entropic_ot_bounds``).
+    """
+    n = f_pot.size
+    steps = 0
+    for steps in range(1, max_steps + 1):
+        lo, up, _ = _entropic_ot_bounds(f_pot, g_pot, q, r, c, reg)
+        if 0.0 <= up - lo <= gap_tol:
+            return f_pot, g_pot, steps - 1
+        pi = np.exp((f_pot[:, None] + g_pot[None, :] - c) / reg)
+        grad = np.concatenate([q - pi.sum(axis=1), r - pi.sum(axis=0)])
+        hess = np.block([[np.diag(pi.sum(axis=1)), pi], [pi.T, np.diag(pi.sum(axis=0))]])
+        direction = np.zeros(2 * n)
+        try:
+            direction[:-1] = reg * np.linalg.solve(hess[:-1, :-1], grad[:-1])
+        except np.linalg.LinAlgError:
+            direction[:-1] = reg * np.linalg.lstsq(hess[:-1, :-1], grad[:-1], rcond=None)[0]
+        current = _ot_dual(f_pot, g_pot, q, r, c, reg)
+        t = 1.0
+        while t > NEWTON_MIN_STEP:
+            f_new = f_pot + t * direction[:n]
+            g_new = g_pot + t * direction[n:]
+            if _ot_dual(f_new, g_new, q, r, c, reg) >= current:
+                break
+            t *= 0.5
+        else:
+            break  # no ascent: leave the bracket to decide
+        f_pot, g_pot = f_new, g_new
+    return f_pot, g_pot, steps
+
+
 def _scaling_stages(
     reg: float,
     top: float,
@@ -316,6 +410,70 @@ def _scaling_stages(
     return stages[::-1]
 
 
+def _check_ot_inputs(
+    q: np.ndarray, r: np.ndarray, reg: float, scaling_factor: float
+) -> tuple[np.ndarray, np.ndarray]:
+    qa = np.asarray(q, dtype=float)
+    ra = np.asarray(r, dtype=float)
+    for name, v in (("q", qa), ("r", ra)):
+        if not np.all(np.isfinite(v)) or np.any(v < 0.0) or v.sum() <= 0.0:
+            raise ValueError(f"{name} must be finite, non-negative and of positive mass")
+    if not (reg > 0.0 and np.isfinite(reg)):
+        raise ValueError("reg must be finite and positive")
+    if not abs(float(qa.sum()) - float(ra.sum())) <= MASS_TOL * max(float(qa.sum()), 1.0):
+        raise ValueError(f"q and r must have equal masses (got {qa.sum()!r}, {ra.sum()!r})")
+    if not 0.0 < scaling_factor < 1.0:
+        raise ValueError("scaling_factor must be in (0, 1)")
+    return qa, ra
+
+
+def _sinkhorn_stages(
+    qa: np.ndarray,
+    ra: np.ndarray,
+    cost_matrix: np.ndarray,
+    reg: float,
+    stages: list[float],
+    warm_start: tuple[np.ndarray, np.ndarray] | None,
+    *,
+    n_iter: int,
+    tol: float,
+    gap_tol: float,
+    check_every: int,
+    newton_after: int,
+) -> tuple[np.ndarray, np.ndarray, int, float]:
+    """Log-domain Sinkhorn with epsilon-scaling; stops early on a closed bracket."""
+    log_q = np.log(np.clip(qa, 1e-300, None))
+    log_r = np.log(np.clip(ra, 1e-300, None))
+    if warm_start is None:
+        f_pot = np.zeros_like(log_q)
+        g_pot = np.zeros_like(log_r)
+    else:
+        f_pot = np.array(warm_start[0], dtype=float)
+        g_pot = np.array(warm_start[1], dtype=float)
+    iterations = 0
+    delta = np.inf
+    for k, eps in enumerate(stages):
+        last = k == len(stages) - 1
+        stage_tol = tol if last else 1e-6
+        last_start = iterations
+        stage_cap = n_iter if last else iterations + INTERMEDIATE_STAGE_CAP
+        while iterations < min(n_iter, stage_cap):
+            iterations += 1
+            f_pot = eps * log_q - eps * _logsumexp_rows((g_pot[None, :] - cost_matrix) / eps)
+            new_g = eps * log_r - eps * _logsumexp_rows((f_pot[None, :] - cost_matrix.T) / eps)
+            delta = float(np.max(np.abs(new_g - g_pot))) / eps
+            g_pot = new_g
+            if delta < stage_tol:
+                break
+            if last and iterations % check_every == 0:
+                lo, up, _ = _entropic_ot_bounds(f_pot, g_pot, qa, ra, cost_matrix, reg)
+                if 0.0 <= up - lo <= gap_tol:
+                    break
+                if iterations - last_start >= newton_after and qa.size <= NEWTON_MAX_SIZE:
+                    break
+    return f_pot, g_pot, iterations, delta
+
+
 def entropic_ot(
     q: np.ndarray,
     r: np.ndarray,
@@ -329,6 +487,8 @@ def entropic_ot(
     warm_start: tuple[np.ndarray, np.ndarray] | None = None,
     gap_tol: float = 1e-10,
     check_every: int = 200,
+    newton_after: int = 2_000,
+    newton_steps: int = 100,
 ) -> tuple[float, np.ndarray, dict[str, Any]]:
     """Entropic OT value OT_reg(q, r) = min_pi <C, pi> + reg * sum pi (log pi - 1).
 
@@ -341,63 +501,66 @@ def entropic_ot(
     returned in ``info["potentials"]`` by a previous call at the same ``reg``)
     skips the scaling stages; the certificate is the same. Certificate: a
     bracket lower <= OT_reg(q, r) <= upper from the dual value and the rounded
-    feasible plan (``_entropic_ot_bounds``); the call is certified when
-    ``upper - lower <= gap_tol`` (checked every ``check_every`` iterations of the
-    last stage) or the marginal residual is below ``marginal_tol``. The value
-    returned is the midpoint, within gap / 2 of OT_reg. Returns
+    feasible plan (``_entropic_ot_bounds``); the call is certified only when
+    ``0 <= upper - lower <= gap_tol`` (checked every ``check_every`` iterations of
+    the last stage). The rounding needs equal masses, checked first (within
+    ``MASS_TOL``); a reversed bracket beyond rounding error is an error. The
+    value returned is the midpoint, within gap / 2 of OT_reg; ``info["lower"]``
+    and ``info["upper"]`` carry the bracket for callers that must compare
+    values. ``marginal_tol`` is kept for the call signature and reported, it no
+    longer certifies on its own. When the last stage has not certified after
+    ``newton_after`` iterations (or at the end of the budget) and the problem has
+    at most ``NEWTON_MAX_SIZE`` bins, the dual is polished by damped Newton
+    ascent (``newton_steps`` at most): Sinkhorn stalls near a gap of 1e-6 at the
+    operating point (cost / reg = 6400). Returns
     ``(value, f, info)``, ``f``
     the dual potential of the first marginal (the gradient of the value with
     respect to ``q`` up to an additive constant). This is, up to an additive
     constant, the transport part of the objective that ``jko_entropic_prox``
-    minimises (reg * KL(pi || K)). Raises ``SinkhornNotConvergedError`` when
-    ``|| pi 1 - q ||_1 + || pi^T 1 - r ||_1 > marginal_tol`` at the end.
+    minimises (reg * KL(pi || K)). Raises ``SinkhornNotConvergedError`` when the
+    bracket is not certified at the end of the budget.
     """
-    qa = np.asarray(q, dtype=float)
-    ra = np.asarray(r, dtype=float)
-    for name, v in (("q", qa), ("r", ra)):
-        if not np.all(np.isfinite(v)) or np.any(v < 0.0) or v.sum() <= 0.0:
-            raise ValueError(f"{name} must be finite, non-negative and of positive mass")
-    if not (reg > 0.0 and np.isfinite(reg)):
-        raise ValueError("reg must be finite and positive")
-    if not 0.0 < scaling_factor < 1.0:
-        raise ValueError("scaling_factor must be in (0, 1)")
-    log_q = np.log(np.clip(qa, 1e-300, None))
-    log_r = np.log(np.clip(ra, 1e-300, None))
+    qa, ra = _check_ot_inputs(q, r, reg, scaling_factor)
     stages = _scaling_stages(reg, float(cost_matrix.max()), scaling_factor, warm_start)
-    if warm_start is None:
-        f_pot = np.zeros_like(log_q)
-        g_pot = np.zeros_like(log_r)
-    else:
-        f_pot = np.array(warm_start[0], dtype=float)
-        g_pot = np.array(warm_start[1], dtype=float)
-    iterations = 0
-    delta = np.inf
-    for k, eps in enumerate(stages):
-        last = k == len(stages) - 1
-        stage_tol = tol if last else 1e-6
-        stage_cap = n_iter if last else iterations + INTERMEDIATE_STAGE_CAP
-        while iterations < min(n_iter, stage_cap):
-            iterations += 1
-            f_pot = eps * log_q - eps * _logsumexp_rows((g_pot[None, :] - cost_matrix) / eps)
-            new_g = eps * log_r - eps * _logsumexp_rows((f_pot[None, :] - cost_matrix.T) / eps)
-            delta = float(np.max(np.abs(new_g - g_pot))) / eps
-            g_pot = new_g
-            if delta < stage_tol:
-                break
-            if last and iterations % check_every == 0:
-                lo, up, _ = _entropic_ot_bounds(f_pot, g_pot, qa, ra, cost_matrix, reg)
-                if up - lo <= gap_tol:
-                    break
+    f_pot, g_pot, iterations, delta = _sinkhorn_stages(
+        qa,
+        ra,
+        cost_matrix,
+        reg,
+        stages,
+        warm_start,
+        n_iter=n_iter,
+        tol=tol,
+        gap_tol=gap_tol,
+        check_every=check_every,
+        newton_after=newton_after,
+    )
+    newton = 0
     lower, upper, residual = _entropic_ot_bounds(f_pot, g_pot, qa, ra, cost_matrix, reg)
+    if not (0.0 <= upper - lower <= gap_tol) and qa.size <= NEWTON_MAX_SIZE and newton_steps > 0:
+        f_pot, g_pot, newton = _newton_polish(
+            f_pot, g_pot, qa, ra, cost_matrix, reg, gap_tol, newton_steps
+        )
+        lower, upper, residual = _entropic_ot_bounds(f_pot, g_pot, qa, ra, cost_matrix, reg)
+    if not (np.isfinite(lower) and np.isfinite(upper)):
+        raise SinkhornNotConvergedError(f"entropic OT bracket not finite: {lower!r}, {upper!r}")
+    slack = BRACKET_SLACK * (1.0 + abs(lower) + abs(upper))
+    if upper - lower < -slack:
+        raise SinkhornNotConvergedError(
+            f"entropic OT bracket reversed (lower {lower!r} > upper {upper!r}): "
+            "infeasible marginals or numerical failure"
+        )
     info: dict[str, Any] = {
         "iterations": iterations,
+        "newton_steps": newton,
         "stages": len(stages),
         "last_delta": delta,
         "marginal_residual": residual,
         "lower": lower,
         "upper": upper,
         "gap": upper - lower,
-        "converged": bool(upper - lower <= gap_tol or residual <= marginal_tol),
+        "marginal_tol": marginal_tol,
+        "converged": bool(upper - lower <= gap_tol),
     }
     if not info["converged"]:
         raise SinkhornNotConvergedError(f"entropic OT not converged: {info}")

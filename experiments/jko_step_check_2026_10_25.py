@@ -224,8 +224,6 @@ class PotentialEntropyF(FreeEnergy):
     the plain first variation dF_i = V_i + theta (log rho_i + 1).
     """
 
-    implicit_ready = True  # exact KL-prox (kl_prox_log override)
-
     def __init__(self, spec: EnergySpec, grad_mode: str = "numerical") -> None:
         if grad_mode not in GRAD_MODES:
             raise ValueError(f"grad_mode must be one of {GRAD_MODES}, got {grad_mode!r}")

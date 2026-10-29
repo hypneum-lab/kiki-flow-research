@@ -60,8 +60,9 @@ class PotentialEntropyF(FreeEnergy):
 
     def value(self, state: FlowState) -> float:
         rho = next(iter(state.rho.values()))
-        safe = np.clip(rho, 1e-12, None)
-        return float(np.dot(rho, self.potential) + self.theta * np.sum(safe * np.log(safe)))
+        # exact entropy (0 log 0 = 0), the function the closed-form prox minimises
+        ent = np.where(rho > 0, rho * np.log(np.where(rho > 0, rho, 1.0)), 0.0)
+        return float(np.dot(rho, self.potential) + self.theta * np.sum(ent))
 
     def kl_prox_log(self, state: FlowState, species_name: str):  # type: ignore[no-untyped-def]
         potential, theta = self.potential, self.theta
