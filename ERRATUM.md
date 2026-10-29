@@ -801,9 +801,11 @@ with a line search on Q_h itself.
   entropy floored at 1e-12 bit for bit, because its value feeds the
   finite-difference gradient of the legacy, fast and explicit paths:
   dropping the floor there changed 20-step legacy trajectories by 1.6e-4
-  to 7.8e-3 in density (second review). A test now checks the legacy split
-  (20 steps) and the explicit step (5 steps) against main (`49480e0`)
-  within 1e-12; they agree bit for bit. The historical energy is therefore
+  to 7.8e-3 in density (second review). A test runs main's energy
+  (`49480e0`, stored verbatim) and the current one in the same process:
+  the legacy split (20 steps) and the explicit step (5 steps) agree bit for
+  bit. A stored trajectory is not portable (it differs by up to 5e-3
+  between machines on this sensitive path). The historical energy is therefore
   not `implicit_ready`, even without a Turing term.
 - **Provenance and validation.** `run_paper` forwards `nonseparable` in
   all three branches and records the resolved configuration and the
