@@ -25,12 +25,12 @@ from kiki_flow_core.state import FlowState
 from kiki_flow_core.track2_paper.paper_f import T2FreeEnergy
 
 GRID = 8
-N_SAMPLES = 200          # random simplex points for convexity / Lipschitz scan
+N_SAMPLES = 200  # random simplex points for convexity / Lipschitz scan
 SEED = 0
-FD_EPS = 1e-5            # finite-difference step for Hessian / gradient
-EIG_TOL = 1e-6           # eigenvalue significance threshold (convexity / LSI calls)
-DX_MIN = 1e-9            # simplex pairs closer than this are skipped for Lipschitz
-PAIR_STRIDE = 4          # subsampling stride over pairs for the Lipschitz scan
+FD_EPS = 1e-5  # finite-difference step for Hessian / gradient
+EIG_TOL = 1e-6  # eigenvalue significance threshold (convexity / LSI calls)
+DX_MIN = 1e-9  # simplex pairs closer than this are skipped for Lipschitz
+PAIR_STRIDE = 4  # subsampling stride over pairs for the Lipschitz scan
 
 
 def make_state(rhos: dict[str, np.ndarray]) -> FlowState:
@@ -114,7 +114,13 @@ def main() -> None:
     # Literature-style potentials and priors on the grid (fixed, seeded).
     potentials = {n: rng.normal(scale=1.0, size=GRID) for n in names}
     prior = {n: np.ones(GRID) / GRID for n in names}
-    f = T2FreeEnergy(species=species, potentials=potentials, prior=prior, turing_strength=0.1)
+    f = T2FreeEnergy(
+        species=species,
+        potentials=potentials,
+        prior=prior,
+        turing_strength=0.1,
+        turing_smoothing=None,
+    )
 
     # (a) Convexity: scan Hessian eigenvalues over many random simplex points.
     raw_min_eigs: list[float] = []

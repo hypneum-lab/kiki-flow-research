@@ -37,6 +37,7 @@ def _instantiate_default_f(grid: int) -> T2FreeEnergy:
         potentials=potentials,
         prior=prior,
         turing_strength=0.0,
+        turing_smoothing=None,
     )
 
 

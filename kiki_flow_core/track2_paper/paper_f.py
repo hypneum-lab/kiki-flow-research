@@ -13,8 +13,52 @@ RHO_FLOOR = 1e-12
 TURING_FD_EPS = 1e-4
 
 
+def gradient_operator(n: int) -> np.ndarray:
+    """Matrix D with D @ v == np.gradient(v) (unit spacing, one-sided ends)."""
+    return np.stack([np.gradient(e) for e in np.eye(n)], axis=1)
+
+
+def _kl_historical(rho: np.ndarray, prior: np.ndarray) -> float:
+    """Historical entropy: sum rho log(rho / prior) with rho and prior floored at 1e-12.
+
+    Kept bit for bit for the historical energy (``turing_smoothing=None``): its
+    value feeds the finite-difference gradient of the legacy, fast and explicit
+    paths, so changing it would change committed trajectories.
+    """
+    rho_safe = np.clip(rho, RHO_FLOOR, None)
+    prior_safe = np.clip(prior, RHO_FLOOR, None)
+    return float(np.sum(rho_safe * np.log(rho_safe / prior_safe)))
+
+
+def _kl(rho: np.ndarray, prior: np.ndarray) -> float:
+    """sum rho log(rho / prior) with 0 log 0 = 0 (no floor on positive masses)."""
+    r = np.maximum(np.asarray(rho, dtype=float), 0.0)
+    positive = r > 0.0
+    prior_safe = np.clip(prior, RHO_FLOOR, None)
+    terms = np.where(positive, r * np.log(np.where(positive, r, 1.0) / prior_safe), 0.0)
+    return float(np.sum(terms))
+
+
 class T2FreeEnergy(FreeEnergy):
-    """F_T2 = sum_i <rho_i, V_i> + sum_i KL(rho_i || prior_i) + reaction + turing."""
+    """F_T2 = sum_i <rho_i, V_i> + sum_i KL(rho_i || prior_i) + reaction + turing.
+
+    The Turing term is turing_strength * sum_{i<k} sum_x |g_i(x) g_k(x)| with
+    g = np.gradient(rho). It is not smooth. ``turing_smoothing = delta`` (default
+    1e-5, PI decision of 2026-10-28, ERRATUM.md section 16) replaces |u| by
+    sqrt(u^2 + delta^2) - delta in the value and uses the exact gradient of that
+    smoothed term. The bound 0 <= T - T_delta <= n_pairs * n * turing_strength *
+    delta (n_pairs = 6 species pairs, n grid points) holds for the Turing term
+    T alone: the two energies also differ in their entropy (floored at 1e-12
+    for the historical energy, exact for the smoothed one), which adds a small
+    term of either sign (about -3e-10 for densities with zero bins on a 4-point
+    grid). ``None`` keeps the historical
+    energy: exact |.| in the value and a forward-difference gradient, which is
+    not a derivative of F across sign changes; drivers behind committed numbers
+    pin it, and it also keeps the historical entropy floored at 1e-12, bit for
+    bit. The smoothed energy uses the exact entropy convention 0 log 0 = 0 (no
+    floor), the function the KL-prox minimises. The certified implicit JKO step
+    requires the smoothed energy (``implicit_ready``).
+    """
 
     def __init__(
         self,
@@ -22,11 +66,15 @@ class T2FreeEnergy(FreeEnergy):
         potentials: dict[str, np.ndarray],
         prior: dict[str, np.ndarray],
         turing_strength: float = 0.1,
+        turing_smoothing: float | None = 1e-5,
     ) -> None:
+        if turing_smoothing is not None and not (turing_smoothing > 0.0):
+            raise ValueError("turing_smoothing must be positive or None")
         self.species = species
         self.potentials = potentials
         self.prior = prior
         self.turing_strength = turing_strength
+        self.turing_smoothing = turing_smoothing
         self._coupling = species.coupling_matrix()
         # Canonical J split: J = J_sym + J_asym.
         # J_sym carries the conservative (gradient-of-scalar-energy) piece;
@@ -42,11 +90,10 @@ class T2FreeEnergy(FreeEnergy):
         names = self.species.species_names()
         rhos = [state.rho[n] for n in names]
 
+        kl = _kl_historical if self.turing_smoothing is None else _kl
         for n, rho in zip(names, rhos, strict=True):
             total += float(np.dot(rho, self.potentials[n]))
-            rho_safe = np.clip(rho, 1e-12, None)
-            prior_safe = np.clip(self.prior[n], 1e-12, None)
-            total += float(np.sum(rho_safe * np.log(rho_safe / prior_safe)))
+            total += kl(rho, self.prior[n])
 
         # Route the coupling energy through J_sym: mathematically equivalent
         # to using the full J (antisymmetric contribution vanishes), but makes
@@ -57,27 +104,56 @@ class T2FreeEnergy(FreeEnergy):
                 total += float(j[i, k] * np.dot(ri, rk))
 
         if self.turing_strength > 0.0:
-            turing = 0.0
-            for i, ri in enumerate(rhos):
-                for k in range(i + 1, len(rhos)):
-                    rk = rhos[k]
-                    turing += float(np.sum(np.abs(np.gradient(ri) * np.gradient(rk))))
-            total += self.turing_strength * turing
+            total += self._turing_value(rhos)
 
         return total
+
+    @property
+    def implicit_ready(self) -> bool:
+        """True for the smoothed energy only: exact gradients and exact entropy.
+
+        The historical energy (``turing_smoothing=None``) keeps the floored
+        entropy, which the closed-form prox does not minimise, so it is refused
+        by the certified step even when ``turing_strength == 0``.
+        """
+        return self.turing_smoothing is not None
+
+    def _abs(self, u: np.ndarray) -> np.ndarray:
+        if self.turing_smoothing is None:
+            absolute: np.ndarray = np.abs(u)
+            return absolute
+        d = self.turing_smoothing
+        out: np.ndarray = np.sqrt(u * u + d * d) - d
+        return out
 
     def _turing_value(self, rhos: list[np.ndarray]) -> float:
         turing = 0.0
         for i, ri in enumerate(rhos):
             for k in range(i + 1, len(rhos)):
-                turing += float(np.sum(np.abs(np.gradient(ri) * np.gradient(rhos[k]))))
+                turing += float(np.sum(self._abs(np.gradient(ri) * np.gradient(rhos[k]))))
         return self.turing_strength * turing
+
+    def _turing_grad_smoothed(self, rhos: list[np.ndarray], idx: int) -> np.ndarray:
+        """Exact gradient of the smoothed Turing term w.r.t. rho_idx."""
+        assert self.turing_smoothing is not None
+        d_op = gradient_operator(rhos[idx].size)
+        gs = [d_op @ r for r in rhos]
+        acc = np.zeros(rhos[idx].size)
+        for k, gk in enumerate(gs):
+            if k == idx:
+                continue
+            u = gs[idx] * gk
+            acc += u * gk / np.sqrt(u * u + self.turing_smoothing**2)
+        out: np.ndarray = self.turing_strength * (d_op.T @ acc)
+        return out
 
     def nonseparable_grad(self, state: FlowState, species_name: str) -> np.ndarray:
         """Gradient w.r.t. rho[species_name] of the terms of F without a closed-form prox.
 
         Coupling: d/d rho_i of sum_{i,k} J_sym[i,k] <rho_i, rho_k> = 2 (J_sym rho)_i.
-        Turing term: finite difference (it is not smooth), zero if its strength is 0.
+        Turing term: exact gradient of the smoothed term when ``turing_smoothing``
+        is set; otherwise the historical forward difference (not a derivative of
+        F across sign changes); zero if its strength is 0.
         Evaluated at ``state`` (the other species frozen there); used by
         ``kl_prox_log`` to linearise these terms into an effective potential.
         """
@@ -85,7 +161,9 @@ class T2FreeEnergy(FreeEnergy):
         idx = names.index(species_name)
         rhos = [state.rho[n] for n in names]
         grad: np.ndarray = 2.0 * np.asarray(self._grad_conservative(rhos)[idx], dtype=float)
-        if self.turing_strength > 0.0:
+        if self.turing_strength > 0.0 and self.turing_smoothing is not None:
+            grad = grad + self._turing_grad_smoothed(rhos, idx)
+        elif self.turing_strength > 0.0:
             base = self._turing_value(rhos)
             rho = rhos[idx]
             fd = np.zeros_like(rho)

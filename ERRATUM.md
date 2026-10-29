@@ -696,3 +696,248 @@ entropic numbers (sweep 2.72 ± 0.05 bits at (10, ·, 0), excess
 −0.39 bits, paper-scale gap 0.0098 bits) are entropic explicit. They are
 recomputed under the implicit default in PRs that follow; nothing is
 overwritten.
+
+## 16. The implicit step of PR #50 is insufficient; certified replacement (PROPOSED, 2026-10-27)
+
+**Status: PROPOSED — to be validated by the PI after review (Codex and Claude) of the
+replacement PR.**
+
+**Finding.** The Codex review of PR #50 (commit `49480e0`) found two
+blocking defects, reproduced by the PI on electron-server.
+
+- **B1: unconverged steps are accepted silently.** The damped Picard fixed
+  point exhausts its 30 iterations without converging, and the step is
+  accepted without any signal. The TV residual T(q) − q at the returned
+  point is 0.0052 at the paper's operating point (α, γ) = (8, 5) and
+  0.042 at (5, 30); only (10, 0) converges. The stopping rule (two
+  successive outputs equal) can also declare convergence falsely.
+- **B2: "F decreases" is not "the JKO problem is solved".** The entropic
+  objective is not debiased, so F can legitimately rise at the true
+  minimum of Q_h(q) = F(q) + Σ_i OT_reg(q_i, ρ_τ,i)/(2h). The
+  half-step safeguard then replaces the step by two steps of h/2, which is
+  a different problem.
+
+Further shortcomings (M1–M6):
+
+- the safeguard gives up at its depth limit without a signal;
+- the Turing gradient is a forward difference, not a derivative across
+  sign changes;
+- the inner prox is truncated without a certificate;
+- `run_paper` drops `nonseparable` in one branch and records no provenance;
+- the validation does not cover the merged stopping rule;
+- the tests do not detect B1.
+
+**Consequences.**
+
+- **PR #50 is declared insufficient.** Its implicit step is not used for
+  any number. Its dissipation check
+  (`results/turing_implicit_check_2026_10_27/`) stays as committed, as a
+  record of what was run, but it certifies neither stationarity nor the
+  merged code.
+- **The recomputations launched on 2026-10-27 at 16:49Z were stopped on
+  PI decision (17:40):** sweep (a), paper-scale run (b) and strong-Turing
+  preregistration (c). The 20 runs of (a) are kept on electron-server
+  under `INVALID-nonconverged-fp/` and are not used. The tag
+  `prereg-turing-strong-implicit-20261027` therefore marks a test that was
+  never run.
+- §15 ("default switched to the implicit treatment") is superseded by this
+  section.
+
+**Replacement (PR `fix/implicit-jko-certified`, draft, not merged).** The
+implicit step now minimises Q_h by Bregman (KL) majorisation-minimisation
+with a line search on Q_h itself.
+
+- **Objective value.** OT_reg is the transport value of each prox's own
+  Gibbs plan, which is certified.
+- **Stopping rule.** Two stationarity (KKT) residuals at the returned point
+  must be below their declared thresholds: the absolute one,
+  max_i TV(T_0(q)_i, q_i) < `kkt_tol` (default 1e-6), and the relative one,
+  max_{i,x} |log T_0(q)_i(x) − log q_i(x)| < `log_tol` (default 1e-5). The
+  TV residual alone is absolute in mass and accepted false stationary
+  points in low-mass bins (review of PR #51: F = 8x + 8x², zero cost,
+  h = reg = 1 was declared converged at x = 1.3e-14 instead of
+  x* = 1.13e-7, with dQ/dx = −8; regression test added). A density below
+  1e-280 fails as `status="underflow"`; inputs off the simplex are refused.
+- **Inner solves are certified in relative terms too** (second review of
+  PR #51, B2). Each prox certifies its reference marginal in absolute
+  (L1 ≤ 1e-10) and relative terms, max_j |log (πᵀ1)_j − log ρ_τ,j| ≤
+  `inner_log_tol` = 1e-9 < `log_tol`, on every bin of mass ≥ 1e-280. The map
+  T₀ is then exact for a reference perturbed by at most 1e-9 per bin in
+  relative terms. Case: two sites, cost 1000, h = reg = 1, reference
+  (1e-12, 1 − 1e-12), one inner iteration: absolute residual 1e-12 (accepted
+  before), relative residual 26 in log; the step now fails. With the full
+  budget it is certified and returns 1e-12 within 4 ulps. The tangent
+  derivative of about −410 found there (verified in closed form) is the log
+  of a float-resolution gap: the true minimiser lies within exp(−883) of
+  1e-12.
+- **Independent Q_h brackets.** `entropic_ot` certifies OT_reg only by a
+  bracket from the dual value and a rounded feasible plan, widened on both
+  sides by a first-order bound on its floating-point error. The bound
+  scales with the terms that cancel (sum of q|f|, r|g|, π̃C, reg·π and
+  reg·|π̃(log π̃ − 1)|, times 4 (n² + 2n) ε, potentials centred first), not
+  with the result: with reg = 1e8 and a constant cost of 2.39e8 (third
+  review) the true value 1.9e-8 is lost in cancellation, and the call
+  refuses a tight tolerance and brackets the true value under a loose one
+  (test). The widened width ≤ `gap_tol` is the criterion of the
+  certificate and of the early stop of Sinkhorn, the trigger of Newton and
+  its stop; the stall test of Sinkhorn is only an early exit (to Newton
+  when enabled, otherwise to the final check, which may refuse). The
+  bound also has an absolute term for subnormal results, so a regime such as
+  reg = 1e-320 is refused at a tolerance below it rather than certified
+  (fourth review, test). It refuses unequal masses and a reversed bracket. Sinkhorn stalls
+  near a gap of 1e-6 at the operating point (cost / reg = 6400), so the
+  dual is then polished by damped Newton ascent (no convergence assumed;
+  the bracket decides). Measured widths at the step output, grid 16,
+  h = 0.05, `gap_tol` = 1e-11 (electron-server, 2026-10-29): at most
+  5.2e-12 per species at (10, 0) and 6.2e-12 at (8, 5), rounding bound
+  2.5e-13 to 6.4e-13, so the `operating` tolerance of 1e-11 holds. `JKOStep.objective_bounds` sums the
+  brackets with the factor 1/(2h); `jko_entropic_prox_certified` requires a
+  reference of mass 1.
+- **Failures are explicit.** Exhausted outer iterations, a failed line
+  search or an uncertified inner solve raise `ImplicitJKOError`, with
+  status, iterations and residuals in `last_info`.
+- **No "F decreases" safeguard and no sub-stepping.**
+- **Exact gradients are declared, never assumed.** `FreeEnergy.implicit_ready`
+  is False by default (the inherited finite-difference gradient does not
+  qualify) and is checked at every step.
+- **Turing term: two different energies.** `T2FreeEnergy` now smooths the
+  Turing term by default, |u| → √(u² + δ²) − δ with δ = 1e-5 (PI decision of
+  2026-10-28), with an exact gradient. For the Turing term T alone,
+  0 ≤ T − T_δ ≤ n_pairs · n · γ · δ (n_pairs = 6, n grid points, γ the
+  Turing strength; with the drivers'
+  Turing strength 0.1 γ on grid 16 the bound is 9.6e-5 · γ, i.e. 2.9e-3 at
+  γ = 30). The implicit step therefore solves the JKO
+  problem of F_δ, while the explicit step and every committed result keep
+  the exact |·| (their drivers now pin `turing_smoothing=None`).
+  Comparisons between the two schemes mix two energies. Their Turing terms
+  differ by at most the bound above (2.9e-3 at γ = 30; a bound, not a
+  measurement); their entropies also differ, the historical one being
+  floored at 1e-12 (see below), by a term of either sign of order 1e-10
+  (−3.1e-10 for densities with zero bins on a 4-point grid, third review).
+- **Entropy: historical for the historical energy.** The smoothed energy
+  uses the exact entropy 0 log 0 = 0, the function the closed-form prox
+  minimises. The historical energy (`turing_smoothing=None`) keeps the
+  entropy floored at 1e-12 bit for bit, because its value feeds the
+  finite-difference gradient of the legacy, fast and explicit paths:
+  dropping the floor there changed 20-step legacy trajectories by 1.6e-4
+  to 7.8e-3 in density (second review). A test runs main's energy
+  (`49480e0`, stored verbatim) and the current one in the same process:
+  the legacy split (20 steps) and the explicit step (5 steps) agree bit for
+  bit. Scope: this establishes that the historical energy is restored, for
+  one input and these two paths, with the current `JKOStep` in both arms.
+  A comparison of the whole tree against main (legacy split and explicit
+  step, 20 steps, Dirichlet concentrations 1, 0.3 and 0.05, α = 8, γ = 5,
+  grid 16, electron-server, 2026-10-29) was also bit for bit (Claude review
+  of the third pass; the script is not committed). Neither check
+  reproduces the published numbers themselves: a stored trajectory is not
+  portable (it differs by up to 5e-3 between machines on this sensitive
+  path), so a published figure can at best be reproduced on the platform
+  that produced it, which has not been verified here. The historical
+  energy is therefore not `implicit_ready`, even without a Turing term.
+- **Provenance and validation.** `run_paper` forwards `nonseparable` in
+  all three branches and records the resolved configuration and the
+  certificates. Regression tests cover the Codex cases, and an
+  independent check verifies the stationarity of Q_h with POT dual
+  potentials on a small coupled problem. The versioned driver
+  `experiments/implicit_jko_certified_validation_2026_10_27.py` adds a
+  comparison with an independent minimiser (L-BFGS-B on Q_h) on small
+  grids, the dissipation-check grid and a study of the smoothing δ.
+
+**What is certified.** A stationary point of the smoothed problem Q_h
+for F_δ, reached by monotone decrease of Q_h from the explicit output. Q_h
+is not convex in general (Turing coupling): there is no global guarantee.
+
+**Cost found on the B1 cases** (grid 16, h = 0.05, reg = h², δ = 1e-5),
+first run with the TV criterion only (superseded by the rerun below):
+
+| point (α, γ) | wall time per step |
+|---|---|
+| (10, 0) | 4 s |
+| (5, 30) | 284 s |
+| (8, 5), the paper point | 407 s |
+
+Rerun on 2026-10-28 (17:08Z) with the two-residual stopping rule (solver
+`certified-implicit-2`, `kkt_tol` = 1e-6, `log_tol` = 1e-5), same inputs:
+
+| point (α, γ) | status | TV residual | log residual | q_min | outer it. | wall time |
+|---|---|---|---|---|---|---|
+| (10, 0) | converged | 9.9e-7 | 5.8e-6 | 4.0e-3 | 6 | 6 s |
+| (5, 30) | converged | 7.9e-7 | 9.0e-6 | 2.2e-2 | 65 | 301 s |
+| (8, 5), the paper point | converged | 9.3e-7 | 7.8e-6 | 1.4e-2 | 41 | 439 s |
+
+The iterates are the same as in the first run: on these inputs no bin has
+low mass (q_min ≥ 4e-3), so the log-domain test was already met when the TV
+test stopped. Each case reaches a stationary point of the smoothed problem;
+this is not a global guarantee. Wall times were measured on a shared
+machine (load about 12).
+
+Second rerun on 2026-10-29 (05:32Z) after the second review (solver
+`certified-implicit-3`: relative inner certificate `inner_log_tol` = 1e-9,
+same inputs, shared machine):
+
+| point (α, γ) | status | TV residual | log residual | inner log residual | q_min | outer it. | wall time |
+|---|---|---|---|---|---|---|---|
+| (10, 0) | converged | 9.9e-7 | 5.8e-6 | 1.5e-13 | 4.0e-3 | 6 | 4 s |
+| (5, 30) | converged | 7.9e-7 | 9.0e-6 | 1.3e-13 | 2.2e-2 | 65 | 288 s |
+| (8, 5), the paper point | converged | 9.3e-7 | 7.8e-6 | 1.6e-13 | 1.4e-2 | 41 | 431 s |
+
+Same iterates again; the inner solves already met the relative test by four
+orders of magnitude. At (10, 0) the independent bracket of Q_h at the output
+(`JKOStep.objective_bounds`, which failed before) gives −3.3425246482,
+against −3.3425246491 from the solver's own plans.
+
+The explicit step takes about 0.6 s. A difficult step costs several
+minutes. The estimated cost of the certified implicit recomputation of
+sweep (a), paper-scale run (b) and preregistration (c) is 8 to 11 days on
+electron-server with 4 workers; it is not launched. The PI decided
+(2026-10-28) to keep the certified implicit step everywhere, with no
+return to the explicit step for γ ≤ 5, and to run the validation M5 first
+after merge. Records: `results/implicit_jko_certified_2026_10_27/`.
+
+**Stale commit message.** The message of commit `dd1efde` ends with "it
+is opt-in in practice for gamma >= 10 given its cost". That is superseded
+by the PI decision above; the code default is the implicit step.
+
+**Validation driver.** Each job runs isolated: an exception becomes a
+`job_error` record and the batch goes on. Records are written to JSONL as
+they complete, and each record (reference and smoothing included)
+carries the run key: solver version, δ, trajectory length, the effective
+default settings of `JKOStep` read from its signature, and the identity of
+the code (git commit, dirty flag, SHA-256 of the tracked diff); `certify`
+resumes only from records with the same key. The `operating` check
+records the step status first; a step that is not certified is a result.
+Its transfers are capped at half the donor's mass, and it compares
+certified brackets (gap ≤ 1e-11 per OT_reg), never midpoints. Its verdict
+has three states: `failed` on a certified decrease of Q_h, `passed` only
+when every transfer is a certified no-decrease, `inconclusive` otherwise
+(the absence of a demonstrated decrease is not a validation). A set of
+finite transfers of 1e-4 is a discrete local check, not a proof of
+stationarity. The L-BFGS-B reference fails explicitly when no start succeeds,
+and POT marginals are checked. The provenance of `run_paper` reads git from
+the module's repository and records a SHA-256 of the tracked diff.
+
+**Known limits (third review, no new computation).**
+
+- The L-BFGS-B reference of the `reference` check is judged by
+  `res.success` only; there is no final unweighted tangent residual of the
+  reference itself, so it is a local reference, not a certificate.
+- The B1 rerun records (`b1_rerun_*.jsonl`) use the prox plans of the
+  solver (`ot_calls = 0`), not the independent brackets. They store neither
+  the output densities nor their hashes, so "same iterates" is stated, not
+  verifiable from the records; the independent bracket quoted for (10, 0)
+  was computed separately and its bounds are not stored.
+- `entropic_ot` accepts masses equal within `MASS_TOL` = 1e-9 (times
+  max(mass, 1)) and rescales the second marginal to the mass of the first,
+  so its bracket is that of OT_reg(q, r~) with r~ = r |q| / |r| (r~ = r for
+  the normalised densities of the JKO step). Both bounds are widened by the
+  rounding bound above, so the certified interval is never reversed and a
+  tolerance below the rounding level is refused. The rounding bound is a
+  first-order estimate (Higham, section 4.2) with an absolute underflow
+  term, not interval arithmetic: it covers the regimes tested here (the
+  operating point, the cancellation and subnormal counter-examples), not
+  every floating-point input.
+
+**Follow-up (out of scope).** `MultiscaleLoop` rebuilds the state with
+`tau = 0` before each JKO step (`multiscale_loop.py`, lines 84 and 148),
+so the output `tau` is 1 after every step instead of counting steps
+(review m4); to be fixed separately.

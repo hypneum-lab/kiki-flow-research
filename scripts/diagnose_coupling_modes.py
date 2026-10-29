@@ -40,6 +40,7 @@ def build_energy(mode: str) -> object:
         potentials=potentials,
         prior=prior,
         turing_strength=0.0,
+        turing_smoothing=None,
     )
     if mode.startswith("symmetric-"):
         zero = np.zeros_like(f._J_asym)
