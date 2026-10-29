@@ -780,7 +780,8 @@ with a line search on Q_h itself.
   refuses a tight tolerance and brackets the true value under a loose one
   (test). The widened width ≤ `gap_tol` is the criterion of the
   certificate and of the early stop of Sinkhorn, the trigger of Newton and
-  its stop; the stall test of Sinkhorn is only an early exit to Newton. The
+  its stop; the stall test of Sinkhorn is only an early exit (to Newton
+  when enabled, otherwise to the final check, which may refuse). The
   bound also has an absolute term for subnormal results, so a regime such as
   reg = 1e-320 is refused at a tolerance below it rather than certified
   (fourth review, test). It refuses unequal masses and a reversed bracket. Sinkhorn stalls

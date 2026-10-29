@@ -519,3 +519,10 @@ def test_ot_bracket_covers_subnormal_results() -> None:
         entropic_ot(q, q, np.zeros((2, 2)), reg, gap_tol=1e-323)
     _, _, info = entropic_ot(q, q, np.zeros((2, 2)), reg, gap_tol=1e-300)
     assert info["lower"] <= exact <= info["upper"]
+
+
+def test_ot_bracket_bound_does_not_overflow_for_finite_values() -> None:
+    """Fifth review: huge reg with finite bounds must not give an infinite slack."""
+    q = np.array([1e-10])
+    _, _, info = entropic_ot(q, q, np.zeros((1, 1)), 5e306, gap_tol=1e290)
+    assert np.isfinite(info["rounding_slack"])

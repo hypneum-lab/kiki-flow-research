@@ -366,21 +366,27 @@ def _entropic_ot_bounds(
     )
     n, m = cost_matrix.shape
     count = ROUNDING_FACTOR * (n * m + n + m)
-    amplification = (
-        1.0
-        + float(np.max(np.abs(cost_matrix)))
-        + float(np.max(np.abs(f_c)))
-        + float(np.max(np.abs(g_c)))
-        + reg * (1.0 + float(np.max(np.abs(log_rounded))))
-    )
     eta = float(np.finfo(float).smallest_subnormal)
-    slack = count * (float(np.finfo(float).eps) * scale + eta * amplification)
+    # Each factor is multiplied by eta before summing, so the underflow term
+    # cannot overflow when the values themselves are finite.
+    underflow = (
+        eta
+        + eta * float(np.max(np.abs(cost_matrix)))
+        + eta * float(np.max(np.abs(f_c)))
+        + eta * float(np.max(np.abs(g_c)))
+        + (eta * reg) * (1.0 + float(np.max(np.abs(log_rounded))))
+    )
+    slack = count * (float(np.finfo(float).eps) * scale + underflow)
     return lower, upper, residual, slack
 
 
 def _certified_width(lower: float, upper: float, slack: float) -> float:
-    """Width of the widened bracket [lower - slack, upper + slack]: the one stopping
-    criterion of Sinkhorn, the trigger and the stop of Newton, and the certificate."""
+    """Width of the widened bracket [lower - slack, upper + slack].
+
+    It certifies the result and drives the early stop of Sinkhorn and the
+    trigger and stop of Newton; the Sinkhorn stall test is a separate early
+    exit (to Newton when it is enabled and applicable, otherwise to the final
+    check, which may refuse)."""
     return (upper + slack) - (lower - slack)
 
 
@@ -563,7 +569,8 @@ def entropic_ot(
     certifies the result, stops Sinkhorn early (checked every ``check_every``
     iterations of the last stage), triggers Newton polishing and stops it; the
     stall test of Sinkhorn (max change of the potentials below ``tol``) is only
-    an early exit that hands over to Newton, never a certificate. A tolerance
+    an early exit, to Newton when it is enabled and applicable and otherwise
+    to the final check, which may refuse; it is never a certificate. A tolerance
     below the rounding level is refused and a raw bracket reversed beyond the
     bound is an error. The
     value returned is the midpoint, within gap / 2 of OT_reg; ``info["lower"]``
