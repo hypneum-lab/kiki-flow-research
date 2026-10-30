@@ -133,7 +133,9 @@ References for a step of length h from ρ0:
   (cooperative: a long native call can delay the interruption). A capped solve
   is `status = "timeout"` (not certified; a splitting step keeps the
   diagnostics of its finished sub-steps); capped brackets are a missing
-  measurement. Same caps for all schemes. (M5 recorded single failing steps of
+  measurement. An unexpected exception inside a step is recorded as
+  `status = "step_error"` (not certified), keeping the earlier steps of the
+  trajectory. Same caps for all schemes. (M5 recorded single failing steps of
   up to 6 h at γ = 100.)
 - **Recorded per step:** status and certificates of every sub-step, solver and
   bracket wall times, F before and after, output densities, and at h ∈ {0.05,
@@ -358,8 +360,10 @@ i.e. about 4.5 h to 38 h of wall time on 4 workers, central estimate about
 9 h). The cap of 1 800 s is kept; changing it is a PI decision to be taken
 before the tag, or an amendment.
 
-The confirmatory run starts only on the PI's GO, after the end of E1-small on
-the host, and records the GO reference in every record.
+The confirmatory run starts only on the PI's GO, after the end of E1-small and
+of the NH-81 measurement on the host (the pilot, at nice 19 and CPU-only,
+slowed the overlapping E1-small cells from about 177 s to up to 345 s), and
+records the GO reference in every record.
 
 ## 11. Limits
 
@@ -404,7 +408,10 @@ Using a splitting step in any other driver needs a separate PI decision.
   was run by the reviewer.
 - **Findings:** 3 BLOQUANT, 8 MAJEUR, 2 MINEUR groups. Each was checked against
   the source before any change; all BLOQUANT and MAJEUR findings were
-  confirmed and fixed or bounded in this revision:
+  confirmed and fixed or bounded in this revision (a verification pass by an
+  independent Claude critic agent on `f8cbe96` found all 13 corrections
+  resolved and no new blocking or major issue; its one minor remark, the
+  undocumented `step_error` status, is fixed in §4):
   1. Q3 ignored missing slopes (B): missing exponents now count against the
      majority over gated cells (§7), test added.
   2. Margin coverage depended on X (B): usability is computed from S and R only;

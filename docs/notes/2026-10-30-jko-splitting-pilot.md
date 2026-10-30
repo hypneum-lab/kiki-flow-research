@@ -130,4 +130,9 @@ the cap.
 - E1-small (tmux `e1s-conf`) was at 287 of an estimated 423 cells at 13:11Z
   (about 177 s per cell, end expected around 20:00Z); the pilot finished
   long before and did not use the GPU.
+- **Interference observed.** Although at nice 19 and CPU-only, the pilot
+  slowed E1-small: the four E1 cells that overlapped it took 254, 345, 284 and
+  246 s instead of about 177 s (about 6 min of delay in total). E1 itself was
+  not touched. The confirmatory run (hours, 4 workers) should therefore not
+  run while E1-small or the NH-81 measurement is running on this host.
 - The confirmatory run is not launched. It needs the PI's GO (`confirm --go`).
