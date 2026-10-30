@@ -14,9 +14,9 @@ from ``default_rng(seed)``.
 Subcommands:
 
 * ``pilot``: timing only, on seed ``PILOT_SEED`` (not a confirmatory seed),
-  one step per (cell, scheme, h). Records status, wall time and iteration
-  counts, and the wall time of the Q_h brackets; it stores no density, no
-  F or Q_h value and computes no error.
+  one step per (cell, scheme, h). Records, by whitelist, statuses, iteration
+  counts and wall times (solver and Q_h brackets); no density, no F or Q_h
+  value, no residual, no error.
 * ``confirm``: the preregistered run. Refuses to start without ``--go`` (the
   reference of the PI's GO, recorded in every record). One job per (cell,
   scheme, h) trajectory; every step record stores the output densities, the
@@ -24,21 +24,33 @@ Subcommands:
 * ``analyse``: the preregistered analysis of the ``confirm`` records
   (metrics, gates, verdicts), written to ``summary.json``.
 
-Each step runs under a wall-clock cap (``signal.alarm``, POSIX); a step that
-hits it is recorded with ``status = "timeout"`` (not certified). Records are
-JSONL, written as jobs complete, each with ``RUN_KEY`` (code identity and
-settings); ``confirm`` resumes only from records with the same key.
+Caps. Each step's solve runs under ``STEP_CAP_S`` and its Q_h brackets under
+``BRACKET_CAP_S`` (``signal.alarm``, POSIX; cooperative: a long native call
+can delay the interruption). A capped solve is ``status = "timeout"`` (not
+certified; the finished sub-steps of a splitting step are kept); capped
+brackets are ``bracket = "timeout"`` (a missing measurement).
+
+Attempts. Every job writes one JSONL record (success, ``job_error`` from the
+job itself, or ``job_error`` of kind ``infrastructure`` when the worker pool
+breaks), with the job identity and ``RUN_KEY`` (code identity and settings).
+The first non-infrastructure record of a job is its observation; ``confirm``
+never re-runs a job that has one, and re-runs infrastructure failures only
+with ``--retry-infrastructure``.
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import importlib.util
 import json
+import os
+import platform
 import signal
 import sys
 import time
 import traceback
+from collections import Counter, defaultdict
 from collections.abc import Iterator
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from contextlib import contextmanager
@@ -70,18 +82,19 @@ LADDER = (0.1, 0.05, 0.025, 0.0125)  # step sizes of the order ladder
 ORDER_HS = (0.1, 0.05, 0.025)  # s_Y(h) = TV(Y_h, Y_{h/2} o Y_{h/2}) at these h
 SCHEMES = ("implicit", "lie", "strang")  # "implicit" = S_h, the certified full step
 SPLITS = ("lie", "strang")
-STEP_CAP_S = 1800  # wall-clock cap per step (all sub-steps), seconds
+STEP_CAP_S = 1800  # wall-clock cap per step solve (all sub-steps), seconds
+BRACKET_CAP_S = 600  # wall-clock cap on the Q_h brackets of one step, seconds
 PILOT_SEED = 999
 PILOT_CAP_S = 240  # 60 jobs x 240 s / 4 workers <= 1 h worst case
 PILOT_CELLS = [(2.0, 0.0), (10.0, 5.0), (5.0, 30.0), (2.0, 70.0), (10.0, 100.0)]
-
-# Decision constants (justified in the preregistration, section 6).
-TV_FLOOR = 1e-5  # 10 x kkt_tol: below this a TV difference is not resolved by the solver
-ORDER_THRESHOLD = 2.5  # midpoint of the competing slope predictions 2 and 3
-CONTROL_BAND = (1.5, 2.5)  # control slope of S must be within 0.5 of its prediction 2
-MIN_GATED_FRACTION = 0.5  # order verdict only if at least half of the cells pass the gate
-MIN_MARGIN_FRACTION = 0.5  # C2 decidable only if the margin exists in half the configs
 MAX_WORKERS = 4  # host rule (KXKM-AI, shared machine)
+
+# Decision constants (preregistration, section 6). They are conventions, stated as such.
+TV_FLOOR = 1e-5  # heuristic resolution floor of a TV difference (not a certified bound)
+DEGENERATE_MARGIN = 0.5  # margin unusable when s_S >= 0.5 * TV(S_h, rho0)
+FIRST_BAND = (1.5, 2.5)  # local exponent predicted 2 (first order), +- half the gap
+SECOND_BAND = (2.5, 3.5)  # local exponent predicted 3 (second order), +- half the gap
+MIN_FRACTION = 0.5  # coverage needed for a verdict (margins, gated cells)
 
 
 def n_steps(scheme: str, h: float) -> int:
@@ -99,9 +112,26 @@ RUN_KEY: dict[str, Any] = {
     "delta": m5.DELTA,
     "grid": GRID,
     "step_cap_s": STEP_CAP_S,
+    "bracket_cap_s": BRACKET_CAP_S,
     "jko_defaults": m5._jko_defaults(),
     **m5._code_identity(),
 }
+
+
+def host_info() -> dict[str, Any]:
+    """Where and how a record was produced (not part of the run key)."""
+    import ot  # noqa: PLC0415 - version only
+
+    return {
+        "node": platform.node(),
+        "machine": platform.machine(),
+        "python": platform.python_version(),
+        "numpy": np.__version__,
+        "pot": ot.__version__,
+        "threads": {k: os.environ.get(k) for k in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS")},
+        "cuda_visible_devices": os.environ.get("CUDA_VISIBLE_DEVICES"),
+        "nice": os.nice(0),
+    }
 
 
 class StepTimeoutError(RuntimeError):
@@ -113,7 +143,7 @@ def wall_cap(seconds: int) -> Iterator[None]:
     """Raise ``StepTimeoutError`` in the main thread after ``seconds`` (POSIX only)."""
 
     def _handler(signum: int, frame: Any) -> None:
-        raise StepTimeoutError(f"step exceeded {seconds} s")
+        raise StepTimeoutError(f"exceeded {seconds} s")
 
     previous = signal.signal(signal.SIGALRM, _handler)
     signal.alarm(seconds)
@@ -122,6 +152,16 @@ def wall_cap(seconds: int) -> Iterator[None]:
     finally:
         signal.alarm(0)
         signal.signal(signal.SIGALRM, previous)
+
+
+def probe_cap(sleep_s: float, cap_s: int) -> str:
+    """Worker-side check of the cap (tests): 'timeout' or 'done'."""
+    try:
+        with wall_cap(cap_s):
+            time.sleep(sleep_s)
+    except StepTimeoutError:
+        return "timeout"
+    return "done"
 
 
 def initial_state(alpha: float, gamma: float, seed: int) -> tuple[Any, FlowState]:
@@ -138,22 +178,26 @@ def make_step(f: Any, scheme: str, h: float) -> JKOStep | SplitJKOStep:
     return SplitJKOStep(f, h, sup, scheme, on_failure="raise")  # type: ignore[arg-type]
 
 
-def _short_info(info: dict[str, Any]) -> dict[str, Any]:
-    """JSON-friendly certificate summary of a JKOStep or SplitJKOStep ``last_info``."""
-    keys = (
-        "status",
-        "outer_iterations",
-        "prox_calls",
-        "kkt_residual",
-        "log_residual",
-        "q_min",
-        "inner_max_iterations",
-        "inner_max_log_residual",
-        "max_anchor_weight",
-        "seconds",
-        "Q_final",
-        "Q_explicit",
-    )
+FULL_KEYS = (
+    "status",
+    "outer_iterations",
+    "prox_calls",
+    "kkt_residual",
+    "log_residual",
+    "q_min",
+    "inner_max_iterations",
+    "inner_max_log_residual",
+    "max_anchor_weight",
+    "seconds",
+    "Q_final",
+    "Q_explicit",
+)
+PILOT_KEYS = ("status", "outer_iterations", "prox_calls", "seconds")  # whitelist
+
+
+def _short_info(info: dict[str, Any], pilot: bool) -> dict[str, Any]:
+    """JSON-friendly summary of a JKOStep or SplitJKOStep ``last_info``."""
+    keys = PILOT_KEYS if pilot else FULL_KEYS
     out = {k: info[k] for k in keys if k in info}
     if "substeps" in info:
         out["substeps"] = [
@@ -161,6 +205,7 @@ def _short_info(info: dict[str, Any]) -> dict[str, Any]:
             for s in info["substeps"]
         ]
         out["failed_part"] = info.get("failed_part")
+        out["active_part"] = info.get("active_part")
     return out
 
 
@@ -170,10 +215,13 @@ def q_brackets(f: Any, h: float, state_in: FlowState, out: FlowState) -> dict[st
     ref = {n: state_in.rho[n] for n in f.species.species_names()}
     q_out = {n: out.rho[n] for n in ref}
     try:
-        lo_out, up_out = jko.objective_bounds(state_in, q_out, ref)
-        lo_in, up_in = jko.objective_bounds(state_in, ref, ref)
+        with wall_cap(BRACKET_CAP_S):
+            lo_out, up_out = jko.objective_bounds(state_in, q_out, ref)
+            lo_in, up_in = jko.objective_bounds(state_in, ref, ref)
     except SinkhornNotConvergedError as exc:
         return {"bracket": "not_certified", "error": str(exc)[:300]}
+    except StepTimeoutError:
+        return {"bracket": "timeout"}
     return {"bracket": "ok", "Q_out": [lo_out, up_out], "Q_in": [lo_in, up_in]}
 
 
@@ -190,65 +238,97 @@ class Job(NamedTuple):
     store: bool
     go: str | None
 
+    def key(self) -> tuple[Any, ...]:
+        return (self.alpha, self.gamma, self.seed, self.scheme, self.h)
+
+
+def _solve(jko: JKOStep | SplitJKOStep, state: FlowState, cap: int, pilot: bool) -> Any:
+    """One capped step: (new state or None, record of the step)."""
+    new: FlowState | None = None
+    tic = time.perf_counter()
+    try:
+        with wall_cap(cap):
+            new = jko.step(state)
+        info = _short_info(jko.last_info, pilot)
+    except ImplicitJKOError as exc:
+        info = _short_info(exc.info, pilot)
+    except StepTimeoutError:
+        # a splitting step keeps its finished sub-steps; JKOStep publishes nothing mid-step
+        info = _short_info(jko.last_info, pilot) if isinstance(jko, SplitJKOStep) else {}
+        info["status"] = "timeout"
+    except Exception as exc:  # noqa: BLE001 - recorded as data, earlier steps are kept
+        info = {"status": "step_error", "error": f"{type(exc).__name__}: {exc}"[:2000]}
+    info["solver_wall"] = time.perf_counter() - tic
+    return new, info
+
 
 def trajectory_job(job: Job) -> dict[str, Any]:
     """Up to ``job.steps`` steps of one scheme from the cell's input; stops at a failure."""
     f, state = initial_state(job.alpha, job.gamma, job.seed)
     names = f.species.species_names()
     jko = make_step(f, job.scheme, job.h)
+    pilot = not job.store
     records: list[dict[str, Any]] = []
+    started = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     for k in range(job.steps):
-        tic = time.perf_counter()
-        new: FlowState | None
-        try:
-            with wall_cap(job.cap):
-                new = jko.step(state)
-            info = _short_info(jko.last_info)
-        except ImplicitJKOError as exc:
-            info, new = _short_info(exc.info), None
-        except StepTimeoutError:
-            info, new = {"status": "timeout"}, None
-        info["wall"] = time.perf_counter() - tic
+        new, info = _solve(jko, state, job.cap, pilot)
         info["k"] = k
-        if new is not None and job.store:
-            info["F_in"] = f.value(state)
-            info["F_out"] = f.value(new)
-            info["rho_out"] = {n: new.rho[n].tolist() for n in names}
-            if job.h in M5_HS:
-                info["dissipation"] = q_brackets(f, job.h, state, new)
-        elif new is not None and job.h in M5_HS:  # pilot: time the brackets, keep no value
-            tic_b = time.perf_counter()
-            q_brackets(f, job.h, state, new)
-            info["bracket_wall"] = time.perf_counter() - tic_b
+        if new is not None and info.get("status") == "converged":
+            tic = time.perf_counter()
+            if job.store:
+                info["F_in"] = f.value(state)
+                info["F_out"] = f.value(new)
+                info["rho_out"] = {n: new.rho[n].tolist() for n in names}
+                if job.h in M5_HS:
+                    info["dissipation"] = q_brackets(f, job.h, state, new)
+            elif job.h in M5_HS:  # pilot: time the brackets, keep no value
+                info["bracket_status"] = q_brackets(f, job.h, state, new)["bracket"]
+            info["bracket_wall"] = time.perf_counter() - tic
         records.append(info)
         if new is None or info.get("status") != "converged":
             break
         state = new
-    return {**job._asdict(), "n_steps": job.steps, "steps": records, **RUN_KEY}
+    return {
+        **job._asdict(),
+        "kind": "trajectory",
+        "started": started,
+        "host": host_info(),
+        "steps": records,
+        **RUN_KEY,
+    }
+
+
+def _error_record(job: Job, kind: str, exc: BaseException) -> dict[str, Any]:
+    return {
+        **job._asdict(),
+        "kind": kind,
+        "status": "job_error",
+        "error": f"{type(exc).__name__}: {exc}"[:2000],
+        "traceback": traceback.format_exc()[-4000:],
+        "steps": [],
+        **RUN_KEY,
+    }
 
 
 def _guarded(job: Job) -> dict[str, Any]:
     try:
         return trajectory_job(job)
     except Exception as exc:  # noqa: BLE001 - every failure is recorded as data
-        return {
-            "job": list(job),
-            "status": "job_error",
-            "error": f"{type(exc).__name__}: {exc}"[:2000],
-            "traceback": traceback.format_exc()[-4000:],
-            **RUN_KEY,
-        }
+        return _error_record(job, "code", exc)
 
 
 def run_jobs(jobs: list[Job], workers: int, path: Path) -> None:
     with ProcessPoolExecutor(max_workers=workers) as pool, path.open("a") as fh:
         futs = {pool.submit(_guarded, j): j for j in jobs}
         for i, fut in enumerate(as_completed(futs), 1):
-            r = fut.result()
+            try:
+                r = fut.result()
+            except Exception as exc:  # noqa: BLE001 - broken pool, killed worker
+                r = _error_record(futs[fut], "infrastructure", exc)
             fh.write(json.dumps(r, default=float) + "\n")
             fh.flush()
             st = [s.get("status") for s in r.get("steps", [])] or r.get("status")
-            print(f"[{i}/{len(jobs)}] {tuple(futs[fut])[:5]} {st}", flush=True)
+            print(f"[{i}/{len(jobs)}] {futs[fut].key()} {st}", flush=True)
 
 
 def confirm_jobs(go: str, done: set[tuple[Any, ...]]) -> list[Job]:
@@ -272,7 +352,7 @@ def pilot_jobs() -> list[Job]:
     ]
 
 
-# ----- analysis (preregistered) -------------------------------------------------------
+# ----- attempts ------------------------------------------------------------------------
 
 Records = dict[tuple[Any, ...], dict[str, Any]]
 
@@ -281,30 +361,61 @@ def _same_run(record: dict[str, Any]) -> bool:
     return all(record.get(k) == v for k, v in RUN_KEY.items())
 
 
-def load_records(path: Path) -> Records:
-    """Confirmatory records by (alpha, gamma, seed, scheme, h); the last one wins."""
-    out: Records = {}
+def _record_key(r: dict[str, Any]) -> tuple[Any, ...]:
+    return (r["alpha"], r["gamma"], r["seed"], r["scheme"], r["h"])
+
+
+def load_attempts(path: Path) -> dict[tuple[Any, ...], list[dict[str, Any]]]:
+    """Every record of this run, by job identity, in file order."""
+    out: dict[tuple[Any, ...], list[dict[str, Any]]] = defaultdict(list)
     if not path.exists():
         return out
     for line in path.read_text().splitlines():
         r = json.loads(line)
-        if "steps" in r and _same_run(r):
-            out[(r["alpha"], r["gamma"], r["seed"], r["scheme"], r["h"])] = r
+        if "scheme" in r and _same_run(r):
+            out[_record_key(r)].append(r)
     return out
+
+
+def primary_records(attempts: dict[tuple[Any, ...], list[dict[str, Any]]]) -> Records:
+    """The observation of each job: its first record that is not an infrastructure failure."""
+    out: Records = {}
+    for key, rows in attempts.items():
+        for r in rows:
+            if r.get("kind") != "infrastructure":
+                out[key] = r
+                break
+    return out
+
+
+def done_keys(path: Path, retry_infrastructure: bool) -> set[tuple[Any, ...]]:
+    attempts = load_attempts(path)
+    if retry_infrastructure:
+        return set(primary_records(attempts))
+    return set(attempts)
+
+
+def expected_keys() -> set[tuple[Any, ...]]:
+    return {j.key() for j in confirm_jobs("", set())}
+
+
+# ----- analysis (preregistered) -------------------------------------------------------
 
 
 def _steps(records: Records, *key: Any) -> list[dict[str, Any]]:
     r = records.get(tuple(key))
-    return [] if r is None else list(r["steps"])
+    return [] if r is None else list(r.get("steps", []))
 
 
 def _certified(steps: list[dict[str, Any]], k: int) -> bool:
-    return len(steps) > k and steps[k].get("status") == "converged"
+    """Steps 0..k all converged with their densities recorded."""
+    return len(steps) > k and all(
+        steps[j].get("status") == "converged" and "rho_out" in steps[j] for j in range(k + 1)
+    )
 
 
 def _rho(steps: list[dict[str, Any]], k: int) -> dict[str, np.ndarray] | None:
-    """Output of step k, if every step up to k is certified (trajectories stop at a failure)."""
-    if not all(_certified(steps, j) for j in range(k + 1)) or "rho_out" not in steps[k]:
+    if not _certified(steps, k):
         return None
     return {n: np.asarray(v, dtype=float) for n, v in steps[k]["rho_out"].items()}
 
@@ -318,41 +429,58 @@ def _tv_or_none(a: dict[str, np.ndarray] | None, b: dict[str, np.ndarray] | None
     return None if a is None or b is None else tv(a, b)
 
 
-def slope(hs: list[float], values: list[float]) -> float:
-    """Least-squares slope of log(values) against log(hs)."""
-    return float(np.polyfit(np.log(np.asarray(hs)), np.log(np.asarray(values)), 1)[0])
+def dissipation_state(step: dict[str, Any]) -> str:
+    """Three-state comparison of Q_h(out; in) with Q_h(in; in), or ``missing``.
 
-
-def dissipation_ok(step: dict[str, Any]) -> bool | None:
-    """C3 on one step: False on a certified violation or an uncertified bracket.
-
-    Violation: lower(Q_h(out; in)) > upper(Q_h(in; in)). Overlapping brackets
-    (equality within the certified precision) satisfy the inequality.
+    ``proven``: upper(out) <= lower(in); ``violated``: lower(out) > upper(in);
+    ``indeterminate``: overlapping brackets; ``missing``: no certified, finite,
+    ordered brackets (not computed, not certified, timed out).
     """
     d = step.get("dissipation")
-    if d is None:
-        return None
-    if d.get("bracket") != "ok":
-        return False
-    return not d["Q_out"][0] > d["Q_in"][1]
+    if not d or d.get("bracket") != "ok":
+        return "missing"
+    lo_o, up_o = d["Q_out"]
+    lo_i, up_i = d["Q_in"]
+    if not all(np.isfinite([lo_o, up_o, lo_i, up_i])) or lo_o > up_o or lo_i > up_i:
+        return "missing"
+    if up_o <= lo_i:
+        return "proven"
+    if lo_o > up_i:
+        return "violated"
+    return "indeterminate"
 
 
 def _split_row(
     xs: list[dict[str, Any]],
+    *,
+    rho0: dict[str, np.ndarray],
     ref: dict[str, np.ndarray] | None,
     small_h_ref: dict[str, np.ndarray] | None,
+    margin_ok: bool,
     margin: float | None,
 ) -> dict[str, Any]:
     out = _rho(xs, 0)
     error = _tv_or_none(out, ref)
+    states = [dissipation_state(st) for st in xs if st.get("status") == "converged"]
+    if not margin_ok:
+        c2 = None  # no usable margin: not counted
+    elif error is None:
+        c2 = "not_evaluable"  # X has no certified first step (a C1 failure too)
+    else:
+        c2 = "pass" if error <= margin else "fail"  # type: ignore[operator]
     return {
-        "certified_3_steps": all(_certified(xs, k) for k in range(3)),
+        "certified_step1": _certified(xs, 0),
+        "certified_3_steps": _certified(xs, 2),
+        "statuses": [st.get("status") for st in xs],
+        "displacement": _tv_or_none(out, rho0),
         "error_vs_S": error,
         "error_vs_small_h": _tv_or_none(out, small_h_ref),
-        "accurate": None if error is None or margin is None else error <= margin,
-        "dissipation_violation": any(dissipation_ok(st) is False for st in xs[:3]),
+        "c2": c2,
+        "near_tie": error is not None and margin is not None and abs(error - margin) < TV_FLOOR,
+        "dissipation": dict(Counter(states)),
+        "c3_fail": any(s in ("violated", "missing") for s in states),
         "F_increase_steps": sum(1 for st in xs[:3] if "F_out" in st and st["F_out"] > st["F_in"]),
-        "wall_step1": xs[0].get("wall") if xs else None,
+        "solver_wall_step1": xs[0].get("solver_wall") if xs else None,
     }
 
 
@@ -362,25 +490,41 @@ def config_rows(records: Records) -> list[dict[str, Any]]:
     for g in GAMMAS:
         for a in ALPHAS:
             for s in SEEDS:
+                _, state0 = initial_state(a, g, s)
+                rho0 = dict(state0.rho)
                 for h in M5_HS:
                     s_steps = _steps(records, a, g, s, "implicit", h)
                     ref = _rho(s_steps, 0)
                     small_h_ref = _rho(_steps(records, a, g, s, "implicit", h / 2), 1)
                     margin = _tv_or_none(ref, small_h_ref)
+                    d_s = _tv_or_none(ref, rho0)
+                    margin_ok = (
+                        margin is not None and d_s is not None and margin < DEGENERATE_MARGIN * d_s
+                    )
                     row: dict[str, Any] = {
                         "alpha": a,
                         "gamma": g,
                         "seed": s,
                         "h": h,
                         "stratum": "primary" if g in PRIMARY_GAMMAS else "stress",
+                        "S_recorded": bool(s_steps),
                         "S_certified": ref is not None,
+                        "S_status_step1": s_steps[0].get("status") if s_steps else None,
                         "small_h_reference": small_h_ref is not None,
                         "margin_s_S": margin,
-                        "S_wall": s_steps[0].get("wall", 0.0) if s_steps else 0.0,
+                        "displacement_S": d_s,
+                        "displacement_R": _tv_or_none(small_h_ref, rho0),
+                        "margin_usable": margin_ok,
+                        "S_solver_wall": s_steps[0].get("solver_wall") if s_steps else None,
                     }
                     for x in SPLITS:
                         row[x] = _split_row(
-                            _steps(records, a, g, s, x, h), ref, small_h_ref, margin
+                            _steps(records, a, g, s, x, h),
+                            rho0=rho0,
+                            ref=ref,
+                            small_h_ref=small_h_ref,
+                            margin_ok=margin_ok,
+                            margin=margin,
                         )
                     rows.append(row)
     return rows
@@ -390,54 +534,91 @@ def _cfg(c: dict[str, Any]) -> list[Any]:
     return [c["alpha"], c["gamma"], c["seed"], c["h"]]
 
 
+def _rates(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """Certification rates by gamma, alpha and h (S step 1; X step 1 and 3 steps)."""
+    out: dict[str, Any] = {}
+    for axis in ("gamma", "alpha", "h"):
+        table: dict[str, Any] = {}
+        for v in sorted({c[axis] for c in rows}):
+            sub = [c for c in rows if c[axis] == v]
+            table[str(v)] = {
+                "n": len(sub),
+                "S_step1": sum(c["S_certified"] for c in sub),
+                **{f"{x}_step1": sum(c[x]["certified_step1"] for c in sub) for x in SPLITS},
+                **{f"{x}_3_steps": sum(c[x]["certified_3_steps"] for c in sub) for x in SPLITS},
+            }
+        out[axis] = table
+    return out
+
+
 def substitution_verdicts(rows: list[dict[str, Any]]) -> dict[str, Any]:
-    """C1-C3 on the primary stratum, coverage on the stress stratum (prereg section 7)."""
+    """Q1 (C1-C3) on the primary stratum and Q2 (rescue) on the stress stratum."""
     primary = [c for c in rows if c["stratum"] == "primary"]
     stress = [c for c in rows if c["stratum"] == "stress"]
+    usable = [c for c in primary if c["margin_usable"]]
     verdicts: dict[str, Any] = {
-        "implicit_stress_certified_step1": sum(1 for c in stress if c["S_certified"]),
-        "implicit_primary_certified_step1": sum(1 for c in primary if c["S_certified"]),
+        "primary_configs": len(primary),
+        "usable_margins": len(usable),
+        "degenerate_margins": [
+            _cfg(c) for c in primary if c["margin_s_S"] is not None and not c["margin_usable"]
+        ],
+        "rates": _rates(rows),
     }
     for x in SPLITS:
         c1 = [c for c in primary if not c[x]["certified_3_steps"]]
-        with_margin = [c for c in primary if c[x]["accurate"] is not None]
-        c2 = [c for c in with_margin if not c[x]["accurate"]]
-        c3 = [c for c in primary if c[x]["dissipation_violation"]]
-        if len(with_margin) < MIN_MARGIN_FRACTION * len(primary):
-            verdict = "undecided"
-        elif c1 or c2 or c3:
+        c2_fail = [c for c in usable if c[x]["c2"] in ("fail", "not_evaluable")]
+        c3 = [c for c in primary if c[x]["c3_fail"]]
+        if c1 or c2_fail or c3:  # a certain failure decides first
             verdict = "not_substitutable"
+        elif len(usable) < MIN_FRACTION * len(primary):
+            verdict = "undecided"
         else:
             verdict = "substitutable"
         rescued = [
             c
             for c in stress
-            if not c["S_certified"]
+            if c["S_recorded"]
+            and not c["S_certified"]
             and c[x]["certified_3_steps"]
-            and not c[x]["dissipation_violation"]
+            and not c[x]["c3_fail"]
         ]
         ratios = [
-            c[x]["wall_step1"] / c["S_wall"]
+            c[x]["solver_wall_step1"] / c["S_solver_wall"]
             for c in rows
-            if c["S_certified"] and c[x]["certified_3_steps"] and c["S_wall"] > 0
+            if c["S_certified"] and c[x]["certified_step1"] and (c["S_solver_wall"] or 0) > 0
         ]
-        rel = [c[x]["error_vs_S"] / c["margin_s_S"] for c in with_margin if c["margin_s_S"]]
+        rel = [
+            c[x]["error_vs_S"] / c["margin_s_S"]
+            for c in usable
+            if c[x]["error_vs_S"] is not None and c["margin_s_S"]
+        ]
         verdicts[x] = {
             "substitution": verdict,
             "c1_not_certified": [_cfg(c) for c in c1],
-            "c2_configs_with_margin": len(with_margin),
-            "c2_not_accurate": [_cfg(c) for c in c2],
-            "c3_violations": [_cfg(c) for c in c3],
-            "stress_certified": sum(1 for c in stress if c[x]["certified_3_steps"]),
+            "c2_fail": [_cfg(c) for c in c2_fail],
+            "c2_near_ties": [_cfg(c) for c in usable if c[x]["near_tie"]],
+            "c3_fail": [_cfg(c) for c in c3],
+            "stress_certified_3_steps": sum(1 for c in stress if c[x]["certified_3_steps"]),
             "stress_rescued": [_cfg(c) for c in rescued],
+            "stress_rescued_with_indeterminate_dissipation": [
+                _cfg(c) for c in rescued if c[x]["dissipation"].get("indeterminate")
+            ],
             "median_wall_ratio_vs_S": float(np.median(ratios)) if ratios else None,
             "median_error_over_margin": float(np.median(rel)) if rel else None,
         }
     return verdicts
 
 
+def _band(p: float) -> str:
+    if FIRST_BAND[0] <= p < FIRST_BAND[1]:
+        return "first"
+    if SECOND_BAND[0] <= p <= SECOND_BAND[1]:
+        return "second"
+    return "neither"
+
+
 def order_cells(records: Records) -> list[dict[str, Any]]:
-    """Self-convergence defects s_Y(h) and slopes per primary cell, with the S gate."""
+    """Self-convergence defects s_Y(h), adjacent exponents and classes per primary cell."""
     cells = []
     for g in PRIMARY_GAMMAS:
         for a in ALPHAS:
@@ -451,11 +632,22 @@ def order_cells(records: Records) -> list[dict[str, Any]]:
                         )
                         for h in ORDER_HS
                     ]
-                    resolved = [v for v in vals if v is not None and v >= TV_FLOOR]
-                    p = slope(list(ORDER_HS), resolved) if len(resolved) == len(vals) else None
-                    cell[y] = {"s": vals, "slope": p}
-                p_s = cell["implicit"]["slope"]
-                cell["gate"] = p_s is not None and CONTROL_BAND[0] <= p_s <= CONTROL_BAND[1]
+                    entry: dict[str, Any] = {"s": vals, "adjacent": None, "slope": None}
+                    if all(v is not None and v >= TV_FLOOR for v in vals):
+                        v = np.asarray(vals, dtype=float)
+                        entry["adjacent"] = [
+                            float(np.log2(v[0] / v[1])),
+                            float(np.log2(v[1] / v[2])),
+                        ]
+                        entry["slope"] = float(
+                            np.polyfit(np.log(np.asarray(ORDER_HS)), np.log(v), 1)[0]
+                        )
+                        bands = {_band(p) for p in entry["adjacent"]}
+                        entry["class"] = bands.pop() if len(bands) == 1 else "neither"
+                    else:
+                        entry["class"] = "unresolved"
+                    cell[y] = entry
+                cell["gate"] = cell["implicit"]["class"] == "first"
                 cells.append(cell)
     return cells
 
@@ -464,24 +656,18 @@ def order_verdicts(cells: list[dict[str, Any]]) -> dict[str, Any]:
     gated = [c for c in cells if c["gate"]]
     out: dict[str, Any] = {"cells": len(cells), "gated": len(gated)}
     for x in SPLITS:
+        counts = Counter(c[x]["class"] for c in gated)
         slopes = [c[x]["slope"] for c in gated if c[x]["slope"] is not None]
-        if len(gated) < MIN_GATED_FRACTION * len(cells) or not slopes:
-            out[x] = {"verdict": "not_identifiable", "slopes": slopes}
-            continue
-        second = sum(1 for p in slopes if p >= ORDER_THRESHOLD)
-        first = len(slopes) - second
-        if second > first:
-            verdict = "second_order_like"
-        elif first > second:
-            verdict = "first_order_like"
-        else:
-            verdict = "tied"
+        verdict = "not_identifiable"
+        if len(gated) >= MIN_FRACTION * len(cells):
+            for cls, name in (("first", "first_order_like"), ("second", "second_order_like")):
+                if counts[cls] > len(gated) / 2:
+                    verdict = name
         out[x] = {
             "verdict": verdict,
+            "classes": dict(counts),
             "slopes": slopes,
-            "median_slope": float(np.median(slopes)),
-            "n_second": second,
-            "n_first": first,
+            "median_slope": float(np.median(slopes)) if slopes else None,
         }
     return out
 
@@ -498,14 +684,36 @@ def analyse(records: Records) -> dict[str, Any]:
     }
 
 
+def analyse_file(path: Path) -> dict[str, Any]:
+    """``analyse`` on the observations of a records file, with completeness and provenance."""
+    attempts = load_attempts(path)
+    records = primary_records(attempts)
+    missing = sorted(expected_keys() - set(records))
+    summary = analyse(records)
+    summary["provenance"] = {
+        "records_file": str(path),
+        "records_sha256": hashlib.sha256(path.read_bytes()).hexdigest() if path.exists() else None,
+        "run_key": RUN_KEY,
+        "complete": not missing,
+        "missing_jobs": missing,
+        "jobs_with_several_records": sorted(k for k, v in attempts.items() if len(v) > 1),
+        "job_errors": sorted(k for k, r in records.items() if r.get("status") == "job_error"),
+    }
+    if missing:  # no final verdict on an incomplete set
+        summary["provisional_verdicts"] = summary.pop("verdicts")
+        summary["provisional_order"] = summary.pop("order")
+    return summary
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("cmd", choices=["pilot", "confirm", "analyse"])
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--go", default=None, help="reference of the PI's GO (required by confirm)")
+    ap.add_argument("--retry-infrastructure", action="store_true")
     args = ap.parse_args(argv)
-    if args.workers > MAX_WORKERS:
-        raise SystemExit(f"at most {MAX_WORKERS} workers")
+    if not 1 <= args.workers <= MAX_WORKERS:
+        raise SystemExit(f"workers must be between 1 and at most {MAX_WORKERS}")
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     if args.cmd == "pilot":
         stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
@@ -516,11 +724,12 @@ def main(argv: list[str] | None = None) -> int:
         if not args.go:
             raise SystemExit("confirm needs --go <reference of the PI's GO>")
         path = OUT_DIR / "confirm.jsonl"
-        run_jobs(confirm_jobs(args.go, set(load_records(path))), args.workers, path)
+        done = done_keys(path, args.retry_infrastructure)
+        run_jobs(confirm_jobs(args.go, done), args.workers, path)
     else:
-        summary = analyse(load_records(OUT_DIR / "confirm.jsonl"))
+        summary = analyse_file(OUT_DIR / "confirm.jsonl")
         (OUT_DIR / "summary.json").write_text(json.dumps(summary, indent=1, default=float))
-        brief = {"verdicts": summary["verdicts"], "order": summary["order"]}
+        brief = {k: v for k, v in summary.items() if k not in ("configs", "order_cells")}
         print(json.dumps(brief, default=float))
     return 0
 

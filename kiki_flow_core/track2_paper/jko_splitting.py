@@ -6,8 +6,9 @@ The smoothed T2 energy is split as F = F_A + F_B:
 
 * F_A (separable): sum_i <rho_i, V_i> + KL(rho_i || prior_i), with the exact
   entropy (0 log 0 = 0) of the smoothed energy. Its KL-prox has a closed form,
-  so its entropic JKO step is solved exactly (one certified generalised
-  Sinkhorn solve per species; the certified loop stops at its first check).
+  so its entropic JKO step needs no linearisation: the certified loop stops at
+  its first check (two certified generalised Sinkhorn solves per species, the
+  second warm-started), exact up to the solver tolerances.
 * F_B (non-separable): the J_sym coupling sum_{i,k} J_sym[i,k] <rho_i, rho_k>
   plus the smoothed Turing term, with exact gradients. Its entropic JKO step is
   solved by the certified implicit solver of ``JKOStep`` (Bregman
@@ -172,7 +173,10 @@ class SplitJKOStep:
     with the diagnostics of every sub-step; ``"warn"`` returns the state reached
     before the failing sub-step, with ``last_info["status"]`` set to the failing
     status (diagnostics only, as for ``JKOStep``). ``last_info`` records the
-    scheme, the status, the per-sub-step diagnostics and the wall time.
+    scheme, the status, the per-sub-step diagnostics and the wall time; it is
+    published when the step starts and filled as sub-steps finish, so an
+    interrupted step (e.g. a wall-clock cap) leaves the finished sub-steps in it
+    with ``status = "running"``.
     """
 
     _FIXED = ("scheme", "nonseparable", "reg", "on_failure", "apply_w2_prox", "prox_fn")
@@ -228,9 +232,11 @@ class SplitJKOStep:
             "status": "running",
             "substeps": [],
         }
+        self.last_info = info  # published now: an interruption keeps the finished sub-steps
         current = state
         for part, s in split_sequence(self.scheme, self.h):
             jko = self.substep(part, s)
+            info["active_part"] = part
             try:
                 current = jko.step(current)
             except ImplicitJKOError as exc:
@@ -241,8 +247,8 @@ class SplitJKOStep:
             info["substeps"].append({"part": part, "h_sub": s, **jko.last_info})
         else:
             info["status"] = "converged"
+            info.pop("active_part")
         info["seconds"] = time.perf_counter() - tic
-        self.last_info = info
         out = current.model_copy(update={"tau": state.tau + 1})
         if info["status"] != "converged":
             if self.on_failure == "raise":
