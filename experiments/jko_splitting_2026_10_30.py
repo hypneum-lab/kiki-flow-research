@@ -72,7 +72,7 @@ SCHEMES = ("implicit", "lie", "strang")  # "implicit" = S_h, the certified full 
 SPLITS = ("lie", "strang")
 STEP_CAP_S = 1800  # wall-clock cap per step (all sub-steps), seconds
 PILOT_SEED = 999
-PILOT_CAP_S = 600
+PILOT_CAP_S = 240  # 60 jobs x 240 s / 4 workers <= 1 h worst case
 PILOT_CELLS = [(2.0, 0.0), (10.0, 5.0), (5.0, 30.0), (2.0, 70.0), (10.0, 100.0)]
 
 # Decision constants (justified in the preregistration, section 6).
