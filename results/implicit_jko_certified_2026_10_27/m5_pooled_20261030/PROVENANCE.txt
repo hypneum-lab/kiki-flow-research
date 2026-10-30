@@ -1,0 +1,91 @@
+# M5 certify shard on macM3 — provenance
+written: 2026-10-30T12:29:53Z
+decision: PI 2026-10-30 13:22 (nice, fin de M5); go-ahead after rule tag
+rule_tag: prereg-m5-certify-20261030 object 61dd69e7ac37f357caddb0b1c539e3b16224a040 commit f2f146e618501f63b99fce1bd1396402355b6eca (docs/prereg/2026-10-30-m5-certify-reading-rule.md)
+code: 31feab68cff3af26f7334b2e44d44abc7018bf61 (main), git status porcelain lines: 0
+platform: Darwin 27.0.0 arm64, macOS 27.0.1, Apple M3 Pro, 12 cores, 18 GiB
+ES counterpart: Linux x86_64 (electron-server), venv ~/scratch/kfr-nh60/repo-certified/.venv, numpy 2.4.4 / scipy 1.17.1 / POT 0.9.6.post1 / Python 3.14.4, BLAS OpenBLAS (macM3: Accelerate)
+uv: uv 0.13.5 (46776a95d 2026-10-21 aarch64-apple-darwin), sha256 7dad6047467a9d6b081c033cb3efed9ba39a4799c698d09e6cd598f3a6a32338 (release tarball uv-aarch64-apple-darwin.tar.gz sha256 743f85035a1996ecb350659e01cd9faea9709829be09b1b4b03c73eaf3c9cd73, verified vs published .sha256; ES binary is x86_64-linux sha256 8a70db72685b7138121bfcda71fa1a00cb709ed9f1fdc4ecf1dd871e8e167e52)
+env: uv sync --frozen --extra dev --python 3.14.4 (uv-managed cpython-3.14.4-macos-aarch64-none); full freeze in env_freeze.txt
+versions: python 3.14.4 numpy 2.4.4 scipy 1.17.1 POT 0.9.6.post1 macOS-27.0.1-arm64-arm-64bit-Mach-O
+tests: tests/test_jko_implicit_nonseparable.py 23 passed (2026-10-30 ~12:27Z)
+wrapper: certify_shard.py sha256 6082dbd8cc71ab81af9bf1fbcec62d14941443b906be52a8506aaf0025bf1925 (calls drv._guarded(drv.certify_job, *cfg), no parameter changed)
+run: nice 19, 4 workers, MLX_DISABLE_COMPILE=1, caffeinate -is, nohup
+split: grid index 36 (driver order: reversed(GAMMAS) x ALPHAS x HS x SEEDS); macM3 = indices 95..36 in reverse = all 60 configs with gamma <= 30; ES = indices 0..35 (gamma 100,70,50)
+assigned configs (index tuple):
+95 (10.0, 0.0, 0.025, 501)
+94 (10.0, 0.0, 0.025, 500)
+93 (10.0, 0.0, 0.05, 501)
+92 (10.0, 0.0, 0.05, 500)
+91 (5.0, 0.0, 0.025, 501)
+90 (5.0, 0.0, 0.025, 500)
+89 (5.0, 0.0, 0.05, 501)
+88 (5.0, 0.0, 0.05, 500)
+87 (2.0, 0.0, 0.025, 501)
+86 (2.0, 0.0, 0.025, 500)
+85 (2.0, 0.0, 0.05, 501)
+84 (2.0, 0.0, 0.05, 500)
+83 (10.0, 5.0, 0.025, 501)
+82 (10.0, 5.0, 0.025, 500)
+81 (10.0, 5.0, 0.05, 501)
+80 (10.0, 5.0, 0.05, 500)
+79 (5.0, 5.0, 0.025, 501)
+78 (5.0, 5.0, 0.025, 500)
+77 (5.0, 5.0, 0.05, 501)
+76 (5.0, 5.0, 0.05, 500)
+75 (2.0, 5.0, 0.025, 501)
+74 (2.0, 5.0, 0.025, 500)
+73 (2.0, 5.0, 0.05, 501)
+72 (2.0, 5.0, 0.05, 500)
+71 (10.0, 10.0, 0.025, 501)
+70 (10.0, 10.0, 0.025, 500)
+69 (10.0, 10.0, 0.05, 501)
+68 (10.0, 10.0, 0.05, 500)
+67 (5.0, 10.0, 0.025, 501)
+66 (5.0, 10.0, 0.025, 500)
+65 (5.0, 10.0, 0.05, 501)
+64 (5.0, 10.0, 0.05, 500)
+63 (2.0, 10.0, 0.025, 501)
+62 (2.0, 10.0, 0.025, 500)
+61 (2.0, 10.0, 0.05, 501)
+60 (2.0, 10.0, 0.05, 500)
+59 (10.0, 20.0, 0.025, 501)
+58 (10.0, 20.0, 0.025, 500)
+57 (10.0, 20.0, 0.05, 501)
+56 (10.0, 20.0, 0.05, 500)
+55 (5.0, 20.0, 0.025, 501)
+54 (5.0, 20.0, 0.025, 500)
+53 (5.0, 20.0, 0.05, 501)
+52 (5.0, 20.0, 0.05, 500)
+51 (2.0, 20.0, 0.025, 501)
+50 (2.0, 20.0, 0.025, 500)
+49 (2.0, 20.0, 0.05, 501)
+48 (2.0, 20.0, 0.05, 500)
+47 (10.0, 30.0, 0.025, 501)
+46 (10.0, 30.0, 0.025, 500)
+45 (10.0, 30.0, 0.05, 501)
+44 (10.0, 30.0, 0.05, 500)
+43 (5.0, 30.0, 0.025, 501)
+42 (5.0, 30.0, 0.025, 500)
+41 (5.0, 30.0, 0.05, 501)
+40 (5.0, 30.0, 0.05, 500)
+39 (2.0, 30.0, 0.025, 501)
+38 (2.0, 30.0, 0.025, 500)
+37 (2.0, 30.0, 0.05, 501)
+36 (2.0, 30.0, 0.05, 500)
+
+## Interruption (reboot) — noted 2026-10-30T13:00:20Z
+- Run 1 (PID 42323, started 2026-10-30T12:29Z) stopped cleanly by the coordinator before the PI-requested reboot of macM3 (boot 2026-10-30 13:42:33 CET).
+- After reboot: results/certify.jsonl = 46 lines, all valid complete JSON (none truncated); all gamma <= 30. Configs in flight at the stop (e.g. idx 55, 56) have no record and are re-run from scratch.
+
+## Change of split — PI decision 2026-10-30 13:57 CET
+- electron-server certify stopped at 13:57 CET with 13 records (10 at gamma=100, 3 at gamma=70), kept in ES ~/scratch/m5-20261029/repo/results/implicit_jko_certified_2026_10_27/certify.jsonl, sha256 4f8776c630b2324559cd5a97a30856988693fc1df56956cd4f133eba16edb563 (read-only copy here: es_certify_13.jsonl, same sha256).
+- macM3 now computes ALL the rest: 96 - 13 (ES) - 46 (macM3 run 1) = 37 configs, listed in assigned_configs_v2.txt (index tuple), walked from index 56 down to 7.
+- Overlap check before launch: no config both in ES and macM3 records (wrapper refuses otherwise); the 13 ES records match the same RUN_KEY.
+- Wrapper updated (adds --exclude-jsonl only; computation unchanged): certify_shard.py sha256 f47aa3204b40d519bf5e599848e824dd372ee420999d68b727ba7665177e9f53.
+- Run 2 waits for the end of the NH-81 energy measurement (PID 1647) + 2 min.
+- Run 2 launcher: run_shard_v2.sh (sha256 a3105223bf7a8c55a61da655abc93b6a2ef1323bb76f338b2a96ffd7d70c6e8d), nohup, PID 2039 (PPID 1), started 2026-10-30T13:01:00Z in its NH-81 wait phase; absolute paths so every process command line contains "m5-macm3"; writes "[UTC] start" / "[UTC] end exit=<rc>" to logs/main.log (read by the NH-03 waiter). Note: run 1 line "end exit=0" is not meaningful ($? was masked by the date substitution; run 1 was stopped for the reboot).
+
+## Run 2 end and pooling — 2026-10-30T19:33:42Z
+- Run 2: start 2026-10-30T14:11:51Z, end 19:28:06Z exit=0, 37/37 configs written (results/certify.jsonl now 83 lines = 46 run 1 + 37 run 2).
+- Pooled with merge_certify.py (sha256 f9116a5c5a1a406854ec8904a39c2b6a59928e968535e28b9520c494da916dbb): results/certify_pooled.jsonl, sha256 17bc8c431589481e8fa4b0a3d77d4abda02a7bb8adb37afc3ee96fe13feb4f30; 96 records (ES 13, macM3 83), each config exactly once, every record tagged with its platform. Summary: results/summary_pooled.txt.
