@@ -60,6 +60,7 @@ packages = ["kiki_flow_core"]
 [tool.ruff]
 line-length = 100
 target-version = "py314"
+extend-exclude = ["results"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "N", "UP", "B", "SIM", "RET", "PL"]
