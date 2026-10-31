@@ -67,3 +67,46 @@ messages are visible only in the run logs (`UserWarning: implicit JKO step
 not certified`, electron-server `logs/m5_certify.log` and macM3
 `logs/certify_shard*.log`). They are not part of `certify.jsonl` and the
 primary verdict does not use them.
+
+## Addendum 2026-10-31: execution hosts
+
+This addendum records where the secondary re-run is executed. It changes no
+parameter, tolerance, budget or code, and neither the wrapper nor the
+`inner_error` field.
+
+- 2026-10-30, 14:45 to 15:20 CET: KXKM-AI (Linux x86_64), stopped by PI
+  decision because its CPU load slowed another campaign. One configuration
+  had completed and is kept with its platform: (5, 100, 0.025, 500).
+- From 2026-10-30, 20:48 CET: macM3 (Apple M3 Pro, macOS 27.0.1 arm64),
+  38 configurations queued, 6 workers.
+- PI decision 2026-10-31, 17:50 CET: the 10 configurations of the macM3
+  queue that had not started run on Studio (Apple M3 Ultra, 32 cores,
+  macOS 27.2 arm64). The 6 already running on macM3 finish there. On
+  macM3, only the dispatcher was stopped; the running workers were left
+  untouched.
+- Configurations (alpha, gamma, h, seed) by host:
+  - macM3, 28: (2, 100, 0.025, 500); (2, 100, 0.025, 501);
+    (5, 100, 0.05, 501); (2, 100, 0.05, 501); (10, 100, 0.05, 500);
+    (5, 100, 0.05, 500); (10, 100, 0.025, 500); (10, 100, 0.025, 501);
+    (2, 70, 0.05, 501); (10, 10, 0.05, 500); (10, 30, 0.05, 501);
+    (10, 30, 0.05, 500); (10, 30, 0.025, 501); (5, 30, 0.025, 500);
+    (10, 20, 0.05, 500); (5, 20, 0.025, 501); (5, 30, 0.05, 501);
+    (2, 30, 0.05, 501); (10, 50, 0.025, 500); (10, 50, 0.05, 500);
+    (5, 30, 0.025, 501); (10, 50, 0.05, 501); (10, 50, 0.025, 501);
+    (5, 50, 0.05, 500); (2, 50, 0.025, 500); (2, 50, 0.05, 501);
+    (5, 50, 0.025, 501); (5, 50, 0.05, 501).
+  - Studio, 10: (10, 70, 0.05, 500); (10, 70, 0.025, 501);
+    (5, 70, 0.05, 501); (10, 70, 0.05, 501); (10, 70, 0.025, 500);
+    (5, 70, 0.05, 500); (10, 100, 0.05, 501); (2, 70, 0.025, 500);
+    (5, 100, 0.025, 501); (5, 70, 0.025, 501).
+- Studio environment: the uv binary and the uv-managed CPython 3.14.4 were
+  copied from macM3 (no download), with a clean clone at `31feab6` and
+  `uv sync --frozen --extra dev --python 3.14.4`. The installed packages
+  match macM3 except for the path of the editable install.
+- Studio gate before launch (2026-10-31, 17:52 to 17:54 CET), the same as
+  on macM3. It passed:
+  - the 46 certified-path tests pass;
+  - with the default budgets, the wrapper reproduces the macM3 records
+    (10, 10, 0.05, 500) (44 fields) and (10, 10, 0.05, 501) (66 fields)
+    bit for bit, and matches the driver run without the wrapper;
+  - `inner_error` is kept in full.
