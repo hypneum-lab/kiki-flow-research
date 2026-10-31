@@ -130,8 +130,20 @@ def host_info() -> dict[str, Any]:
         "pot": ot.__version__,
         "threads": {k: os.environ.get(k) for k in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS")},
         "cuda_visible_devices": os.environ.get("CUDA_VISIBLE_DEVICES"),
-        "nice": os.nice(0),
+        "nice": _niceness(),
     }
+
+
+def _niceness() -> int | None:
+    """Scheduling priority of this process, or None when it cannot be read.
+
+    ``os.nice(0)`` raises PermissionError on macOS at the lowest priority; the
+    priority is metadata only and must never fail a job.
+    """
+    try:
+        return os.getpriority(os.PRIO_PROCESS, 0)
+    except OSError:
+        return None
 
 
 class StepTimeoutError(RuntimeError):

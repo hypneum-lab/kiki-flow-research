@@ -86,6 +86,16 @@ def test_confirm_needs_a_go_and_workers_are_capped(driver: Any) -> None:
         driver.main(["pilot", "--workers", "0"])
 
 
+def test_host_info_never_raises_on_priority_errors(driver: Any, monkeypatch: Any) -> None:
+    def denied(*args: Any) -> int:
+        raise PermissionError(1, "Operation not permitted")
+
+    monkeypatch.setattr(driver.os, "nice", denied)  # the call that failed on macM3
+    assert isinstance(driver.host_info()["nice"], int)  # read without os.nice
+    monkeypatch.setattr(driver.os, "getpriority", denied)
+    assert driver.host_info()["nice"] is None
+
+
 def test_wall_cap_interrupts_in_a_worker_and_the_next_job_runs(driver: Any) -> None:
     with pytest.raises(driver.StepTimeoutError), driver.wall_cap(1):
         time.sleep(3)
