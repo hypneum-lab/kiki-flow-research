@@ -18,7 +18,7 @@ authors:
     given-names: Clément
     orcid: "https://orcid.org/0000-0002-8414-185X"
     email: clement@saillant.cc
-    affiliation: "L'Electron Rare, Grandris, France"
+    affiliation: "Hypneum Lab (L'Électron Rare), Grandris, France"
 repository-code: "https://github.com/hypneum-lab/kiki-flow-research"
 url: "https://github.com/hypneum-lab/kiki-flow-research"
 license: MIT
@@ -58,7 +58,7 @@ preferred-citation:
       given-names: Clément
       orcid: "https://orcid.org/0000-0002-8414-185X"
       email: clement@saillant.cc
-      affiliation: "L'Electron Rare, Grandris, France"
+      affiliation: "Hypneum Lab (L'Électron Rare), Grandris, France"
   year: 2026
   url: "https://github.com/hypneum-lab/dream-of-kiki"
   notes: "Paper 1 draft v0.2, single author. MIT code + CC-BY-4.0 docs. OSF pre-registration DOI 10.17605/OSF.IO/Q6JYN. Not submitted to arXiv as of 2026-10-25. For this repository's own paper draft and erratum see README.md (Citation) and ERRATUM.md."

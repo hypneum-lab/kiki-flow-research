@@ -308,7 +308,7 @@ to arXiv.
 
 ## License
 
-MIT. See [`LICENSE`](./LICENSE).
+MIT (code) + CC-BY-4.0 (docs). See [`LICENSE`](./LICENSE).
 
 ## Acknowledgments
 
