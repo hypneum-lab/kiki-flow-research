@@ -49,5 +49,8 @@ those of `09ec144`.
 - All 576 jobs are relaunched, on macM3, 4 workers, nice 19, with the same
   `--go` reference, at the commit of this correction.
 - The code identity of the confirmatory records is therefore the correction
-  commit, not `09ec144`; the diff between the two is this note, the
-  `host_info()` change, its test, and the earlier host-deviation note.
+  commit, not `09ec144`. The diff between the two is: this note, the
+  `host_info()` change and its test, the earlier host-deviation note, and the
+  merge of `main` into the branch (PRs #54 and #55: CI runner on macos-15 and a
+  ruff exclusion of `results/` in `pyproject.toml`), which touch no computed
+  path.
