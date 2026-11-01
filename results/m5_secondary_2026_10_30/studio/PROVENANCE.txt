@@ -1,0 +1,21 @@
+# M5 secondary analysis, Studio part — provenance
+written: 2026-10-31T16:55:07Z
+decision: PI 2026-10-31 17:50 CET: the 10 not-started configurations of the macM3 queue run here (macM3 keeps its 6 running ones; Lie/Strang stays on macM3)
+host: MonsieurBs-Mac-Studio.local, Apple M3 Ultra, 32 cores, macOS 27.2 arm64, user ailiance
+rule: tag prereg-m5-certify-20261030 object 61dd69e7ac37f357caddb0b1c539e3b16224a040; deviation note docs/notes/2026-10-30-m5-secondary-inner-error-deviation.md (copy here)
+code: 31feab68cff3af26f7334b2e44d44abc7018bf61 porcelain 0
+uv: uv 0.13.5 (46776a95d 2026-10-21 aarch64-apple-darwin) sha256 7dad6047467a9d6b081c033cb3efed9ba39a4799c698d09e6cd598f3a6a32338 (copied from macM3, no download); python: uv-managed cpython-3.14.4 copied from macM3 (UV_PYTHON_INSTALL_DIR=uv-python, UV_PYTHON_DOWNLOADS=never)
+env: uv sync --frozen --extra dev --python 3.14.4; python 3.14.4 numpy 2.4.4 scipy 1.17.1 POT 0.9.6.post1 macOS-27.2-arm64-arm-64bit-Mach-O; MLX_DISABLE_COMPILE=1
+budget: inner_n_iter 1000000, max_outer 2000 (secondary); tolerances = 31feab6 defaults
+gate: see logs/run.log (tests 46 passed; bit-identical to macM3 records (10,10,0.05,500) and (10,10,0.05,501) and to the uninstrumented driver; inner_error kept): PASSED 17:54
+configs: 10.0 70.0 0.05 500;10.0 70.0 0.025 501;5.0 70.0 0.05 501;10.0 70.0 0.05 501;10.0 70.0 0.025 500;5.0 70.0 0.05 500;10.0 100.0 0.05 501;2.0 70.0 0.025 500;5.0 100.0 0.025 501;5.0 70.0 0.025 501;
+files sha256:
+  f2a9015313cdc3e73bae881aa8cb9f608311152621de64725154a30ce9b23c08  code/analyze_secondary.py
+  06d52dcbc86abf6569828ecce0d1a8f21f6f33d139876f16b662260c1ad77551  code/build_queue.py
+  b789672a3b9adbc634b4e6497aa4eab74009e99fc5542a26a761cd24f37be0de  code/compare_bitexact.py
+  ae4c99124ff0e0cbd23818e766862cbe34c841e5380956b06073d13f3a23f838  code/m5sec_worker.py
+  d4904895b88253e5bef40cbdc681cd31109459af8b12216470765326e48fa38e  code/plain_certify.py
+  5e385a005a7883a273374dd49607d730b1c1d84cce798c35d0700213a3c4e341  code/run_macm3.sh
+  0d8b4f329abca9bbf7ce231b087a75691e365e409ba2b4632c3a3c8460a7e197  code/run_studio.sh
+  7dad6047467a9d6b081c033cb3efed9ba39a4799c698d09e6cd598f3a6a32338  bin/uv
+note addendum (hosts, configs by host, Studio gate): commit 4d0d13801690bb2570cd9bad55f425f94c3bf827 on notes/m5-secondary-inner-error (pushed 2026-10-31)
