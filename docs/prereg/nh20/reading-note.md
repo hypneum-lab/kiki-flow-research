@@ -1,7 +1,10 @@
-# Note de lecture — NH-20, Lie O(τ) contre Strang O(τ²) dans un splitting W₂/Fisher-Rao (v0, 2026-11-01)
+# Note de lecture — NH-20, Lie O(τ) contre Strang O(τ²) dans un splitting W₂/Fisher-Rao (v0.2, 2026-11-01)
 
-Statut : v0, tour de veille 1. Aucune préreg n'est gelée ni modifiée ; aucun
-calcul n'a été lancé pour cette note. Le contradicteur n'est pas obligatoire
+Statut : v0.2, tours de veille 1 et 2 (le tour 2 ajoute OpenReview, HAL et
+theses.fr, code et données, bioRxiv, et une seconde remontée de citations ;
+détail dans `veille-journal.md`). Aucune préreg n'est gelée ni modifiée ;
+aucun calcul n'a été lancé pour cette note. Le verrou n'est pas déclaré
+passé : seul le PI le déclare. Le contradicteur n'est pas obligatoire
 pour ce chantier (spec du verrou, §5.1). Le premier essai (campagne Lie/Strang
 du 30/10, « M12 ») est déclaré au §4 : ordre local non identifiable, exposants
 médians de S à −0,72 et −0,03 (`docs/notes/2026-11-01-jko-splitting-results.md:47-52`).
@@ -41,13 +44,36 @@ par Crossref (`works/<doi>`).
 | arXiv:1005.0998 | Clément, Maas 2010 | 1-20 (preuves §2 parcourues) | Formule de Trotter pour flots de gradient métriques : J²∘J¹ itérés convergent vers la solution EVI (Th. 1.1), sous λ-convexité de chaque partie ; reste vrai avec les semi-groupes exacts (Rem. 1.6). **Convergence sans taux.** |
 | arXiv:2410.03367 | Cancès, Monsaingeon, Natale 2024 | 1-10, 30-36 (preuves §3-4 parcourues) | Le JKO n'est que d'ordre 1 en temps (p. 2) ; schéma volumes finis point milieu non linéaire, ordre 2 constaté en temps et en espace avec deux raffinements de maillage (§5). Référence d'ordre 2 possible. |
 
-Lus en résumé seulement (abstract arXiv, marqués **[résumé moteur]** partout où
-ils sont cités) : Halmos, Hanin, arXiv:2511.14827 ; Baradat, Cherf,
-arXiv:2604.08283 ; Chu, Jacobs, arXiv:2511.10884 ; Gallouët, Natale, Todeschi,
-arXiv:2209.14622 ; Adams, Duong, dos Reis, arXiv:2105.11146 ; Bou-Rabee,
-arXiv:2608.25279 ; Carlier, Laborde, arXiv:1606.04793 ; Bernton,
-arXiv:1802.08671 ; Hraivoronska, Santambrogio, DOI 10.1093/imanum/drag053
-(titre seul) ; Strang 1968, DOI 10.1137/0705041 (métadonnées seules).
+Ajouts du tour 2 (texte intégral téléchargé le 01/11 ; « lu » = PDF ouvert,
+pages indiquées ; lecture partielle déclarée comme telle).
+
+| id résolu | auteurs, année | pages lues | ce qu'elle établit (pour NH-20) |
+|---|---|---|---|
+| arXiv:2502.12666 (= DOI 10.1137/25m1736001, SIAM J. Math. Anal. 2026) | Baradat, Hraivoronska, Santambrogio 2025 | 1-10 (intro, déf. 2.1-2.3, Th. 2.9, Rem. 2.10) | JKO entropique avec ε/τ → α ≥ 0 : la limite ajoute (α/2)Δρ (Th. 2.9, p. 9, **sur le tore** T^d) ; pour α = 0, le résultat vaut sans l'hypothèse ε\|log ε\| ≤ Cτ² de Carlier et al. (paraphrase de l'intro, p. 3, et de la Rem. 2.10, p. 9-10). Ni ordre ni taux. |
+| arXiv:2604.08283 | Baradat, Cherf 2026 | 1-4 (intro, Th. 1.3, Cor. 1.3.1, Th. 1.4) | Sous λ-convexité le long de géodésiques généralisées : W₂(JKO entropique avec ε = ατ, flot) ≤ C(√α + 1/√n), n = t/τ (Cor. 1.3.1, p. 4) ; le taux 1/√n vient de la borne classique (1.5), p. 3. |
+| arXiv:2511.14827 (v3, 03/03/2026) | Halmos, Hanin 2025 | 1-8 ; recherche de mots-clés sur les 53 p. : aucune occurrence de splitting, Strang, Trotter, composition ; preuve (annexe B) et numérique (§3) non lus | Th. 2 (p. 4) : sous A1-A5 (solutions classiques de classe C²), le JKO suit à O(η²) le flot W₂ de l'énergie modifiée J^η = J − (η/4)\|∂J\|² ; Th. 1 (p. 2-3) rappelle l'ordre 1 [AGS, Th. 4.0.4 et 11.2.1] sous λ-convexité généralisée. **Ne traite aucune composition.** |
+| arXiv:2511.10884 | Chu, Jacobs 2025 | 1-5 (intro, Th. 1.1, hypothèses) | Premier schéma W₂ d'ordre 2 **prouvé** (O(τ²) sous lissité du relevé lagrangien, Th. 1.1, p. 4), schéma trapézoïdal lagrangien qui **n'est pas un pas JKO** (p. 2) ; O(τ) sous λ-convexité seule ; affirme (paraphrase) que les schémas d'ordre supérieur antérieurs (Legendre-Turinici, Matthes-Plazotta, Gallouët-Natale-Todeschi, Cancès et al.) n'ont établi que la convergence sans taux, ou au mieux O(√τ) (p. 2 et 4). |
+| arXiv:2209.14622 (= DOI 10.1090/mcom/3951, Math. Comp. 2024) | Gallouët, Natale, Todeschi 2022 | 1-3 ; tableau 1 | BDF2 variationnel : convergence prouvée (Fokker-Planck, EVI), **ordre 2 constaté numériquement** en espace et en temps. |
+| arXiv:2105.11146 (= DOI 10.3934/dcds.2022109, DCDS 2022) | Adams, Duong, dos Reis 2021 | résumé, §1, §4 (hyp. 4.1, Th. 4.2, p. 17-18) | Splitting transport exact puis pas JKO (version entropique §4) : convergence vers une solution faible, **sans ordre** ; hypothèse 4.1 : ε\|log ε\| ≤ C h², la condition de Carlier reprise. |
+| arXiv:2105.09415 (= DOI 10.1137/21m1421283, SINUM 2022) | Liu, Wang, Wang 2021 | résumé, intro | Pendant de 2109.02792 : splitting de **Lie** variationnel pour la réaction-diffusion à bilan détaillé, troncature locale O(Δt + h²) (intro). |
+| arXiv:2401.01722 (= DOI 10.1017/s0962492923000077, Acta Numerica 2024) | Blanes, Casas, Murua 2024 | §1.1-1.3 (p. 1-11) | Une méthode composée avec son adjoint est symétrique, donc d'ordre pair ; Strang = χ*_{h/2} ∘ χ_{h/2} ; Euler implicite = adjoint d'Euler explicite ; règle du trapèze = implicite ∘ explicite sur demi-pas (§1.3, p. 8-9). Dimension finie. |
+| thèse HAL tel-03500566 (theses.fr 2021UPSLD036) | Todeschi 2021 | chap. 4 §4.6 ; chap. 5 §5.1 (p. 108-112 imprimées) | « The JKO scheme is naturally an order one discretization in time » (p. 111, original anglais) ; Crank-Nicolson variationnel insuffisant ; BDF2 modifié d'ordre 2 en pratique, sans variante splitting. |
+| thèse HAL tel-01510949 (theses.fr 2016PSLED014) | Laborde 2016 | §7.2 (p. 122-123 imprimées) | Le splitting WFR est introduit par « This is a work in preparation in collaboration with Gallouët and Monsaingeon » (p. 122, original anglais ; = arXiv:1704.04541 à notre lecture) : existence, aucun ordre. |
+| thèse HAL tel-01881166 (theses.fr 2017PSLED063) | Chizat 2017 | §6, comparaison de splitting (p. PDF 194) | Splitting alternant projection W₂ et pas de Hellinger : « we do not know how to prove the true convergence of this scheme for non linear Φ » (original anglais) ; usage purement comparatif. |
+| dépôt `zheyuanlai/affine-invariant-Gaussian-gradient-flow` (sans licence, 0 étoile, poussé 2026-08-21) | — | `README`, `src/wfr_gradient_flow/methods.py`, `reports/wfr_gradient_flow_report.tex:419-421` | Code de **splitting de Lie** W puis FR pour la VI gaussienne (demi-pas W en forme close, l. 79-100). Le rapport écrit : « First-order splitting … Lie-Trotter ; a Strang splitting … is untested ». |
+
+Lus en résumé seulement (abstract arXiv ou métadonnées, marqués
+**[résumé moteur]** partout où ils sont cités) : Bou-Rabee, arXiv:2608.25279 ;
+Carlier, Laborde, arXiv:1606.04793 ; Bernton, arXiv:1802.08671 ;
+Hraivoronska, Santambrogio, DOI 10.1093/imanum/drag053 (titre seul) ;
+Strang 1968, DOI 10.1137/0705041 (métadonnées seules) ; Matthes, Plazotta,
+arXiv:1711.02935 (= DOI 10.1051/m2an/2018045) ; Legendre, Turinici, DOI
+10.1016/J.CRMA.2017.02.001 ; Han, Esedoglu, Garikipati, arXiv:2211.07011 ;
+Malamut, Sylvestre, arXiv:2306.06940 ; Carrillo, Fagioli, Santambrogio,
+Schmidtchen, arXiv:1711.05434 (= DOI 10.1137/17M1158379) ; OpenReview
+`pmRC8xTiym` (soumission ICLR 2027, PDF refusé 403, **non vérifié**), `rPgc5brxmT`
+(NeurIPS 2024) et `QoagfaT4tZ`. Thèses en cours, titre seul : Lin (theses.fr
+s409481) et Cherf (s409961).
 
 ### 2bis. Carlier et al. 2017, théorème 3.16 : énoncé, hypothèses, vérification
 
@@ -123,6 +149,34 @@ Lecture (inférences, séparées des faits) :
    préreg M12 l. 101-111) ; les rapports Δx²/ε de 7 à 455 (1 820 pour les
    demi-pas A à h = 0,0125, préreg l. 107-108) placent M12 dans ce régime.
 
+**Mise à jour du tour 2 (Baradat, Hraivoronska, Santambrogio, arXiv:2502.12666).**
+Faits : sur le tore T^d, si ε_k/τ_k → α ∈ [0, +∞), les courbes du JKO entropique
+sont compactes et leurs limites résolvent l'EDP augmentée de (α/2)Δρ (Th. 2.9,
+p. 9) ; pour α = 0 le résultat ne demande pas ε\|log ε\| ≤ Cτ², hypothèse que
+les auteurs attribuent à Carlier et al. (intro p. 3 ; Rem. 2.10, p. 9-10). Leur
+cadre est un tore, une densité, F = V + W∗ρ + ∫f(ρ) avec leur hypothèse 2.5 ;
+le labo travaille sur ℝ, sur une grille de 16 points. Inférences, séparées :
+
+1. La condition (3.57) de Carlier est **suffisante, pas nécessaire** (au moins
+   sur le tore). La lecture 3 ci-dessus (« ε = h² : (3.57) échoue d'un facteur
+   logarithmique ») perd de sa portée : ε = h² donne ε/τ = h → 0, soit le
+   régime α = 0 de leur Th. 2.9 ; elle ne prouve pas un défaut du réglage.
+   Le réglage de l'article (ε = 0,01 fixe, donc ε/τ → ∞ quand τ → 0) reste
+   hors des deux régimes ; M5 et M12 (ε = h²) sont dans le régime α = 0 mais
+   hors de leur cadre (domaine, grille, énergie non convexe). **À recouper** :
+   un seul groupe d'auteurs (preprint + version revue, même équipe).
+2. Les conventions de ε diffèrent : Carlier et al. posent W_ε² = inf ∫c + εH(γ)
+   avec c = \|x − y\|² (éq. 2.5) ; Baradat et al. définissent D_ε² par une
+   formulation de Benamou-Brenier avec diffusion (ε/2)Δ (éq. 5-6). Un facteur 2
+   entre les deux ε est vraisemblable (noyau exp(−\|x−y\|²/ε) contre
+   exp(−\|x−y\|²/(2ε))) mais **n'est pas vérifié** : ne pas transposer α ni
+   la condition C2 sans cette conversion. Elle ne change pas la loi d'échelle
+   ε ∝ h² contre ε ∝ h.
+3. Baradat-Cherf (arXiv:2604.08283) donnent une borne d'erreur pour ε = ατ :
+   W₂ ≤ C(√α + 1/√n) (Cor. 1.3.1), sous λ-convexité le long de géodésiques
+   généralisées. C'est une borne supérieure, pas un exposant mesuré ; elle est
+   à confronter à la condition C2 (§4) avant tout usage.
+
 ## 3. Déjà publié
 
 Chaque ligne : affirmation → sources (nature) ; « à recouper » si une seule
@@ -134,34 +188,62 @@ source ou deux sources de même nature.
    DOI 10.1137/16m106666x (version revue, métadonnées) ; étendu à deux
    fonctionnelles par arXiv:1704.04541. **Recoupé** (preprint + version revue).
 2. Un splitting de Lie de flots de gradient métriques converge (formule de
-   Trotter), sans taux → Clément-Maas arXiv:1005.0998 + Gallouët-Monsaingeon
-   Th. 4. **À recouper** (deux articles, même nature ; aucun code ni thèse lu).
+   Trotter), sans taux démontré → Clément-Maas arXiv:1005.0998 +
+   Gallouët-Monsaingeon Th. 4 + Adams-Duong-dos Reis arXiv:2105.11146 (preprint
+   lu ; version revue DCDS 2022, DOI 10.3934/dcds.2022109, métadonnées).
+   **Convergence recoupée** (trois articles, dont une version revue). « Sans
+   taux » est une absence : voir la preuve d'absence au §4 et la ligne 12.
 3. Le splitting de Lie de WFR avec sous-flots exacts a une erreur O(γ) décrite
    par une EDP perturbée explicite, et l'ordre W-FR / FR-W change la vitesse de
-   convergence → Crucinio-Pathiraja arXiv:2511.18060. **À recouper** (un seul
-   preprint).
+   convergence → Crucinio-Pathiraja arXiv:2511.18060 (v3 ; aucune version
+   revue trouvée par Crossref le 01/11, aucun code annoncé dans le texte).
+   **À recouper** (un seul preprint). Appui faible, insuffisant seul : le dépôt
+   de la ligne 13 code un splitting de Lie W puis FR (VI gaussienne) et écrit
+   « First-order splitting » sans l'avoir mesuré
+   (`reports/wfr_gradient_flow_report.tex:419-421`).
 4. Avec des sous-flots exacts (ou d'ordre ≥ 2, ou appariés à leur adjoint),
    la composition symétrique est d'ordre 2 ; avec des sous-pas d'Euler
    implicite (dont le JKO est l'analogue), Strang est d'ordre 1 générique →
-   Wibisono arXiv:1802.08089 annexe B (article) + tests du labo
-   `tests/track2_paper/test_jko_splitting.py:117,130` (code, modèle linéaire)
-   + Strang 1968, DOI 10.1137/0705041 (métadonnées seules). **Recoupé**
-   (article + code), en dimension finie et en régime lisse seulement.
+   Wibisono arXiv:1802.08089 annexe B (article) + Blanes-Casas-Murua
+   arXiv:2401.01722 §1.3, p. 8-9 (synthèse, Acta Numerica 2024, DOI
+   10.1017/s0962492923000077, métadonnées : une méthode composée avec son
+   adjoint est symétrique donc d'ordre pair ; l'Euler implicite est l'adjoint
+   de l'explicite) + tests du labo `tests/track2_paper/test_jko_splitting.py:117,130`
+   (code, modèle linéaire) + Strang 1968, DOI 10.1137/0705041 (métadonnées
+   seules). **Recoupé** (deux articles + code), en dimension finie et en
+   régime lisse seulement. L'analogue W₂ de « l'adjoint du JKO » (un pas
+   explicite par transport) n'est décrit par aucune source lue hors Langevin
+   (Wibisono) : c'est la question (b) du §4.
 5. Un splitting de Strang d'ordre 2 existe pour réaction-diffusion à énergie
    commune, à condition que chaque sous-pas soit d'ordre 2 → Liu-Wang-Wang
-   arXiv:2109.02792 (preprint, numérique incluse). **À recouper** (une source ;
-   pas de version revue ni de code consulté).
-6. Le JKO est d'ordre 1 en temps → Cancès-Monsaingeon-Natale arXiv:2410.03367
-   p. 2 + Caucheteux-Bonet-Korba Prop. 6.3 (cas paramétrique) + Halmos-Hanin
-   arXiv:2511.14827 **[résumé moteur]** (écart O(η²) au flot d'une énergie
-   modifiée). **Recoupé** pour l'ordre 1 (deux articles lus), l'énergie
-   modifiée reste **à recouper**.
-7. JKO entropique : convergence vers le flot W₂ si ε\|log ε\| = O(τ²),
+   arXiv:2109.02792 (preprint, numérique incluse) + DOI 10.1137/21m1444825
+   (SIAM J. Sci. Comput. 2022, version revue, métadonnées) ; le splitting de
+   Lie du même schéma est d'ordre 1 : arXiv:2105.09415 (DOI
+   10.1137/21m1421283), troncature O(Δt + h²). **Recoupé** (preprint + version
+   revue ; une seule équipe, aucun code consulté).
+6. Le JKO est d'ordre 1 en temps, sous régularité → Cancès-Monsaingeon-Natale
+   arXiv:2410.03367 p. 2 + Caucheteux-Bonet-Korba Prop. 6.3 (cas paramétrique)
+   + Halmos-Hanin arXiv:2511.14827 Th. 1, p. 2-3 + Chu-Jacobs arXiv:2511.10884
+   p. 2-3 + thèse Todeschi, chap. 5 §5.1, p. 111. **Recoupé** (quatre articles
+   lus + une thèse). Précision de portée : O(τ) suppose de la régularité
+   (donnée initiale dans le domaine du sous-différentiel pour Chu-Jacobs p. 3 ;
+   solutions classiques pour Halmos-Hanin A2) ; sous λ-convexité seule la borne
+   classique est en √τ (Baradat-Cherf éq. 1.5, p. 3). Énergie modifiée
+   J^η = J − (η/4)\|∂J\|² à O(η²) : Halmos-Hanin Th. 2, p. 4 (preprint v3, lu
+   p. 1-8 ; aucune version revue trouvée par Crossref le 01/11) ; le cas
+   euclidien est attribué par les auteurs à des travaux antérieurs (leurs
+   réf. [3, 27], non relues). **À recouper** pour le cas W₂.
+7. JKO entropique : (a) convergence vers le flot W₂ si ε\|log ε\| = O(τ²), et
    ε = o(τ) nécessaire → Carlier et al. arXiv:1512.02783 (lu) + DOI
-   10.1137/15m1050264 (version revue, métadonnées). **Recoupé.** Avec ε = ατ,
-   diffusion supplémentaire (α/2)Δρ à la limite → article cité par
-   `paper/main.tex:119-123` et Baradat-Cherf arXiv:2604.08283 **[résumé
-   moteur]**. **À recouper.**
+   10.1137/15m1050264 (version revue, métadonnées) ; cette même condition est
+   reprise par Adams et al. hyp. 4.1. (b) Cette condition n'est pas nécessaire
+   sur le tore : ε/τ → 0 suffit → Baradat-Hraivoronska-Santambrogio
+   arXiv:2502.12666 Th. 2.9, Rem. 2.10 (lu p. 1-10) + DOI 10.1137/25m1736001
+   (version revue, métadonnées). (c) Avec ε/τ → α > 0, diffusion
+   supplémentaire (α/2)Δρ à la limite → les mêmes + Baradat-Cherf
+   arXiv:2604.08283 (lu p. 1-4) + article cité par `paper/main.tex:119-123`.
+   **Recoupé** pour (a), (b), (c) (preprint + version revue, ou deux articles
+   lus). Portée hors du tore, avec grille : **à recouper** (§2bis).
 8. Sur grille fixe, pas petit et ε petit, le JKO entropique gèle → Carlier §4
    p. 21-22 (article) + note du labo `docs/notes/2026-10-25-jko-step-identification.md`
    et données M12 (`docs/notes/2026-11-01-jko-splitting-results.md:47-52`).
@@ -170,14 +252,34 @@ source ou deux sources de même nature.
    non biaisé, taux d'optimisation de l'algorithme du gradient proximal →
    Salim-Korba-Luise arXiv:2002.03035 + Wibisono arXiv:1802.08089 (FB
    consistant pour OU, Ex. 8). **Recoupé** (deux articles lus, cadres distincts).
-10. Des schémas en temps d'ordre 2 pour les flots W₂ existent (point milieu,
-    BDF2, accéléré) → Cancès-Monsaingeon-Natale (lu) + Gallouët-Natale-Todeschi
-    arXiv:2209.14622 et Chu-Jacobs arXiv:2511.10884 **[résumé moteur]**.
-    **À recouper** pour BDF2 et accéléré.
+10. Des schémas en temps d'ordre 2 pour les flots W₂ existent. (a) Existence,
+    ordre 2 constaté numériquement : BDF2 variationnel → Gallouët-Natale-Todeschi
+    arXiv:2209.14622 (lu p. 1-3 ; version revue Math. Comp. 2024, DOI
+    10.1090/mcom/3951, métadonnées) + thèse Todeschi chap. 5 + point milieu de
+    Cancès-Monsaingeon-Natale (lu) ; Matthes-Plazotta arXiv:1711.02935 (BDF2,
+    ordre ½ prouvé) et Han-Esedoglu-Garikipati arXiv:2211.07011 **[résumé
+    moteur]**. **Recoupé** (articles + thèse). (b) Preuve rigoureuse d'ordre 2 :
+    Chu-Jacobs arXiv:2511.10884 (lu p. 1-5), schéma trapézoïdal lagrangien qui
+    n'est pas un pas JKO ; preprint seul (aucune version revue trouvée par
+    Crossref le 01/11). **À recouper.**
 11. Experts d'un mélange = particules d'un flot de Wasserstein (temps continu)
     → Hernandez et al. arXiv:2501.14660 (preprint lu + version revue DOI
     10.1007/s11005-026-02065-9, métadonnées). **Recoupé**, hors du cœur de
     NH-20.
+
+12. Les splittings « transport ou JKO + réaction ou diffusion » publiés
+    établissent l'existence ou la convergence, jamais un ordre →
+    Gallouët-Monsaingeon (lu), Gallouët-Laborde-Monsaingeon (lu), Adams et al.
+    (lu), thèse Laborde §7.2 et thèse Chizat §6 (lues) ; Carrillo et al.
+    arXiv:1711.05434, OpenReview `rPgc5brxmT` (NeurIPS 2024) et `pmRC8xTiym`
+    (soumission ICLR 2027) **[résumé moteur]**. **Recoupé** pour les sources lues
+    (articles + thèses) ; l'absence dans le reste de la littérature relève du
+    §4.
+13. Un code de référence existe pour le demi-pas W gaussien en forme close et
+    le splitting de Lie W puis FR : `zheyuanlai/affine-invariant-Gaussian-gradient-flow`,
+    `src/wfr_gradient_flow/methods.py:79-100` (sans licence : lecture seule,
+    ne pas copier). **Outil, une seule source**, pas une affirmation
+    scientifique.
 
 ## 4. Reste ouvert
 
@@ -191,17 +293,35 @@ apparie un demi-pas JKO à son adjoint explicite restaure l'ordre 2.
 Ce que la littérature lue en dit (faits) : 1602.04457 et 1704.04541 prouvent
 la convergence sans ordre ; 2511.18060 traite Lie avec sous-flots exacts,
 pas Strang ; 2109.02792 traite Strang avec sous-pas d'ordre 2 non JKO ;
-1802.08089 traite la symétrisation pour Langevin (W₂ seul, pas FR).
+1802.08089 traite la symétrisation pour Langevin (W₂ seul, pas FR). Tour 2 :
+les splittings avec pas JKO lus (Adams et al., Gallouët-Monsaingeon,
+Gallouët-Laborde-Monsaingeon) prouvent l'existence sans ordre ; 2511.14827
+donne l'énergie modifiée d'**un** pas JKO, pas celle d'une composition ;
+2511.10884 prouve un ordre 2 pour un schéma qui n'est pas un pas JKO.
 
-Preuve de l'absence (tour 1, §7 et `veille-journal.md`) : 8 requêtes arXiv
-(33 identifiants distincts), 3 requêtes Crossref (60 notices), 4 requêtes
-GitHub (3 dépôts), remontée de citations Semantic Scholar sur 7 sources
-(615 lignes, 496 identifiants distincts, `snowball-tour1.tsv`) : aucun titre ne
-combine Strang (ou « symmetric », « second order ») avec JKO ou Fisher-Rao,
-hormis Bou-Rabee arXiv:2608.25279 (Strang de Langevin cinétique, autre objet,
-**[résumé moteur]**) et Liu-Wang-Wang (sous-pas non JKO). Absence établie par
-titres et résumés, pas par lecture : **à recouper** au tour 2 (OpenReview,
-HAL, thèses Laborde et Caillet).
+Preuve de l'absence (tours 1 et 2, `veille-journal.md`). Tour 1 : 8 requêtes
+arXiv (33 identifiants distincts), 3 requêtes Crossref (60 notices), 4
+requêtes GitHub (3 dépôts), remontée de citations Semantic Scholar sur 7
+sources (615 lignes, 496 identifiants distincts, `snowball-tour1.tsv`). Tour 2 :
+14 requêtes OpenReview (621 notices brutes, 428 distinctes, titres et résumés
+filtrés), 10 requêtes HAL-thèses (19 distinctes) et 8 requêtes theses.fr (143
+distinctes), 11 requêtes de dépôts GitHub (12 distincts) et 2 recherches de
+code, 6 requêtes Hugging Face, 6 Zenodo, 4 OSF, 3 Europe PMC pour bioRxiv,
+remontée de citations sur 9 sources supplémentaires (539 identifiants
+distincts, 471 absents du tour 1, `snowball-tour2.tsv`). Résultat : aucun titre
+ni résumé ne combine Strang (ou « symmetric », « second order ») avec JKO ou
+Fisher-Rao, hormis Bou-Rabee arXiv:2608.25279 (Strang de Langevin cinétique,
+autre objet, **[résumé moteur]**) et Liu-Wang-Wang (sous-pas non JKO). Six
+thèses ouvertes sur le texte (Todeschi, Laborde, Chizat, sur les chapitres
+cités ; Caillet, Coudreuse, Séjourné par recherche de mots-clés « Strang »,
+« splitting », « second order ») ne contiennent ni Strang appliqué à un pas
+JKO ni ordre d'un splitting de flot ;
+un dépôt de code écrit « Strang … untested » (`reports/wfr_gradient_flow_report.tex:419-421`).
+Limites : l'absence reste établie surtout par titres et résumés ; la
+soumission OpenReview `pmRC8xTiym` (WFR splitting, ICLR 2027) n'a pas pu être
+ouverte (PDF en 403) ; les thèses de Lin (ordre supérieur, en cours) et de
+Cherf ne sont pas déposées ; bioRxiv n'a été interrogé que par Europe PMC.
+**À recouper** (état : résiduel).
 
 Inférences (séparées des faits) :
 
@@ -214,6 +334,23 @@ Inférences (séparées des faits) :
   numérique calibrée**, pas une découverte ; la spec la décrit déjà comme
   « seule contribution neuve de la ligne » (spec §6), à prendre dans ce sens
   étroit.
+- **Prédiction testée contre la littérature (tour 2) : « Strang avec sous-pas
+  JKO reste d'ordre 1 ».** Aucun article, thèse ni dépôt trouvé ne la démontre
+  ni ne la contredit pour W₂ ou WFR. Trois appuis de natures différentes, tous
+  indirects : (i) théorie classique de la composition en dimension finie
+  (Blanes §1.3 ; Wibisono annexe B) : seule une composition méthode + adjoint
+  est symétrique, et Euler implicite × Euler implicite ne l'est pas ;
+  (ii) mécanisme de l'énergie modifiée (Halmos-Hanin Th. 2) : si chaque
+  sous-pas JKO d'énergie J_i suit, à O(η²), le flot de J_i − (η/4)\|∂J_i\|²,
+  alors la composition suit un système perturbé de biais O(η) par rapport au
+  flot visé, et la symétrie de l'ordre des sous-pas ne l'annule pas
+  *a priori* ; (iii) tests du labo en modèle linéaire (ligne 4). Le point (ii)
+  est **une inférence de cette note** : l'article ne traite aucune composition,
+  et une compensation des biais en W₂ n'est pas exclue par une source lue. La
+  prédiction reste donc une hypothèse **à tester**, non un résultat publié, et
+  sa réfutation numérique serait une information. Elle n'est contredite par
+  Chu-Jacobs ni par Gallouët-Natale-Todeschi, qui atteignent l'ordre 2 en
+  changeant de schéma, pas en symétrisant un JKO.
 - M12 ne pouvait pas trancher : il viole les conditions C2 à C5 ci-dessous
   (ε = s², Δx²/ε de 7 à 1 820, plancher 1e-5 au-dessus de h³ à h = 0,0125,
   sous-pas JKO d'ordre 1). Son « non identifiable » est le résultat attendu par
@@ -233,8 +370,11 @@ exige simultanément :
   floute de h²/2 et deux demi-pas de h²/4 : l'écart ∝ h² entre dans s_Y avec
   l'exposant 2, quel que soit le schéma, et masque l'exposant 3 de Strang.
   Avec ε = αs, les deux variances valent αh/2 : le flou est cohérent d'un pas
-  à l'autre, l'ordre se mesure par rapport au flot modifié (diffusion
-  supplémentaire d'ordre α), et α → 0 se traite à part. Condition : soit
+  à l'autre (tour 2 : la limite en α/2 Δρ est établie pour un JKO entropique par
+  Baradat et al., Th. 2.9, mais les conventions de ε diffèrent par un facteur
+  probable de 2, §2bis point 2 : coefficients à reprendre après vérification),
+  l'ordre se mesure par rapport au flot modifié (diffusion supplémentaire
+  d'ordre α), et α → 0 se traite à part. Condition : soit
   ε = αs avec référence au même α, soit ε ≤ 0,1 c_{p+1} h_min^{p+1} (ordre de
   grandeur ; pour Strang, ε ≪ h³).
 - **C3, grille** : pas de gel ni de flou non résolu,
@@ -284,19 +424,46 @@ N = 4 096, 6 niveaux, ≈ 10³ pas au plus fin : ≲ 2 h CPU sur electron-server
 en `nice 19`, sans GPU. Heures humaines : ≈ 6 (code + tests) + 2 (lecture).
 Aucun lancement avant le passage du verrou.
 
-## 6. Trois tests du verrou (état à ce tour)
+**Ajouts du tour 2 (pas de changement de bras ni de critère).** (i) Le demi-pas
+W gaussien en forme close existe dans un dépôt sans licence
+(`methods.py:79-100`) : à relire pour vérifier nos formules, pas à copier.
+(ii) La conversion de ε entre Carlier et Baradat et al. (§2bis point 2) devient
+une ligne du plan de vérification, vérifiable en forme close sur le cas
+gaussien. (iii) Le bras « symétrique-adjoint » reste le seul dont le résultat
+est réellement incertain ; sa justification théorique en W₂/FR n'est dans
+aucune source lue (ligne 4 du §3, question (b) du §4).
 
-- **Saturation : non atteinte.** Le tour 1 a apporté cinq entrées qui changent
-  la note (2511.18060, 2109.02792, 1802.08089, 2511.14827, 2604.08283). Il faut
-  au moins un tour complet sans nouvelle entrée retenue ; prochain tour :
-  citations amont/aval de 2511.18060, 2109.02792 et 1802.08089.
-- **Recoupement : partiel.** Lignes 2, 3, 5, 7 (seconde moitié) et 10 du §3,
-  ainsi que la preuve d'absence du §4, sont « à recouper ». La condition C2 est
-  une inférence non testée.
-- **Couverture : 4 canaux sur 6.** Interrogés : arXiv, Crossref-journaux,
-  thèses (par les DOI ABES de Crossref seulement, pas de HAL direct), code
-  (GitHub). Restent : OpenReview, bioRxiv (pour la forme ; faible pertinence
-  attendue), HAL en direct, Zenodo et Hugging Face pour les données.
+## 6. Trois tests du verrou (état à ce tour, v0.2)
+
+- **Saturation : seuil chiffré franchi, critère du plan non atteint.**
+  Remontée de citations du tour 2 : 9 graines (2511.18060, 2109.02792,
+  1802.08089, 1005.0998, 2410.03367, puis 2502.12666, 2604.08283, 2511.14827,
+  2511.10884), 539 identifiants distincts, dont **471 absents du tour 1**
+  (`snowball-tour2.tsv`) ; pertinents, titre lu : **14** ; 14 / 471 =
+  **3,0 %**, soit moins de 5 %. En revanche le tour 2 a retenu des entrées
+  qui changent une phrase de la note (2502.12666 pour le §2bis et la ligne 7 ;
+  la lecture de 2511.10884 et de Blanes pour les lignes 4 et 10) : ce n'est
+  pas un « tour complet sans nouvelle entrée retenue ». Restent à lire, sur
+  les 14 pertinents, 12 (dont 5 prioritaires : Matthes-Plazotta, Han et al.,
+  Legendre-Turinici, Carrillo et al. 2018, Malamut-Sylvestre). Une entrée
+  pertinente (2502.12666) est venue de la liste de références d'un article,
+  pas de la remontée de citations : la remontée ne suffit pas seule.
+- **Recoupement : partiel, 7 → 5.** Affirmations « à recouper » du §3 et
+  du §4 avant le tour 2 : lignes 2, 3, 5, 6 (énergie modifiée), 7 (seconde
+  moitié), 10 (BDF2, accéléré) et la preuve d'absence, soit 7. Après : ligne 3
+  (Crucinio-Pathiraja, un seul preprint), ligne 6 (énergie modifiée en W₂),
+  ligne 7 (portée hors tore, avec grille), ligne 10 (b) (preuve d'ordre 2, un
+  seul preprint) et la preuve d'absence (résiduel), soit **5**. Levées par le
+  tour 2 : lignes 2, 5, 7 (a-c) et 10 (a). La condition C2 est toujours une
+  inférence non testée, avec une conversion de convention de ε à vérifier.
+- **Couverture : 6 canaux sur 6 interrogés, avec réserves.** arXiv et
+  Crossref-journaux (tour 1), thèses (tour 1 par ABES-Crossref ; tour 2 HAL et
+  theses.fr en direct), code et données (GitHub au tour 1 ; GitHub, Hugging
+  Face, Zenodo, OSF au tour 2), OpenReview (tour 2), bioRxiv (tour 2). Réserves :
+  OpenReview, une soumission ICLR 2027 pertinente (`pmRC8xTiym`) n'a pu être
+  lue (PDF 403) ; bioRxiv interrogé via Europe PMC faute de filtre par
+  mots-clés dans l'API `details` (zéro retenu, requête témoin à 66 notices) ;
+  deux thèses en cours (Lin, Cherf) non déposées.
 
 ## 7. Journal de lecture
 
@@ -321,3 +488,17 @@ Aucun lancement avant le passage du verrou.
 | 2026-11-01 | arXiv:1802.08089 Wibisono | p. 1-8, annexe B |
 | 2026-11-01 | arXiv:1005.0998 Clément-Maas | p. 1-4 (Th. 1.1, remarques), §2-3 parcourus |
 | 2026-11-01 | arXiv:2410.03367 Cancès-Monsaingeon-Natale | p. 1-3, §5 (p. 31-36) |
+| 2026-11-01 (tour 2) | arXiv:2511.14827 Halmos-Hanin | p. 1-8 (intro, déf. 1-2, Th. 1-2, §1.2-1.4) ; recherche de mots-clés sur les 53 p. ; preuve (annexe B) et §3 numérique non lus |
+| 2026-11-01 (tour 2) | arXiv:2502.12666 Baradat-Hraivoronska-Santambrogio | p. 1-10 (intro, §2.1-2.3, Th. 2.9, Rem. 2.10) ; §3-4 (preuve) non lus |
+| 2026-11-01 (tour 2) | arXiv:2604.08283 Baradat-Cherf | p. 1-4 (intro, Th. 1.3, Cor. 1.3.1, Th. 1.4) ; preuves non lues |
+| 2026-11-01 (tour 2) | arXiv:2511.10884 Chu-Jacobs | p. 1-5 (intro, Th. 1.1, hypothèses) ; §3-7 non lus |
+| 2026-11-01 (tour 2) | arXiv:2209.14622 Gallouët-Natale-Todeschi | p. 1-3, tableau 1 ; reste non lu |
+| 2026-11-01 (tour 2) | arXiv:2105.11146 Adams-Duong-dos Reis | résumé, §1, §4 (hyp. 4.1, Th. 4.2) ; §3 et annexes non lus |
+| 2026-11-01 (tour 2) | arXiv:2105.09415 Liu-Wang-Wang | résumé, intro ; reste non lu |
+| 2026-11-01 (tour 2) | arXiv:2401.01722 Blanes-Casas-Murua | §1.1-1.3 (p. 1-11) ; recherche de mots-clés sur les 160 p. |
+| 2026-11-01 (tour 2) | thèse HAL tel-03500566 Todeschi | chap. 4 §4.6, chap. 5 §5.1 (p. 108-112) ; recherche de mots-clés (splitting, Strang, second order) |
+| 2026-11-01 (tour 2) | thèse HAL tel-01510949 Laborde | §7.2 début (p. 122-123) ; recherche de mots-clés |
+| 2026-11-01 (tour 2) | thèse HAL tel-01881166 Chizat | §6, passage « Splitting scheme » ; recherche de mots-clés |
+| 2026-11-01 (tour 2) | thèses HAL tel-05262724 Caillet, tel-05798816 Coudreuse, tel-05018660 Séjourné | recherche de mots-clés seulement (aucun Strang ni splitting de flot) ; résumés lus |
+| 2026-11-01 (tour 2) | dépôt `zheyuanlai/affine-invariant-Gaussian-gradient-flow` | `README`, `methods.py` (175 l.), `reports/wfr_gradient_flow_report.tex` (438 l., l. 419-421) |
+| 2026-11-01 (tour 2) | OpenReview `pmRC8xTiym`, `rPgc5brxmT`, `QoagfaT4tZ`, `cJk5TcGdd1` | résumés seulement (PDF `pmRC8xTiym` refusé, 403) |
