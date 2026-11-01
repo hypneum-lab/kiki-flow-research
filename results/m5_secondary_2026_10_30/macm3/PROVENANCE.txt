@@ -1,0 +1,41 @@
+# M5 secondary analysis on macM3 — provenance
+written: 2026-10-30T14:24:43Z
+host change: started on KXKM-AI 2026-10-30 14:45 CET (PI decision 14:05); moved to macM3 by PI decision 2026-10-30 15:19 CET because the KXKM CPU load slowed E1-small (confirmatory, other session: cells 177 s -> 245-403 s from 14:39). KXKM launcher 173284 and its 10 workers were stopped at 15:20 by the coordinator with PI agreement; nothing is relaunched on KXKM. 1 configuration had completed on KXKM and is imported, not recomputed (imported_kxkm/secondary.jsonl, platform Linux x86_64 kxkm-ai, arithmetic aligned on electron-server); the 10 in-flight ones are lost and rerun here.
+rule: tag prereg-m5-certify-20261030 object 61dd69e7ac37f357caddb0b1c539e3b16224a040 commit f2f146e618501f63b99fce1bd1396402355b6eca, section Secondary analysis
+code: 31feab68cff3af26f7334b2e44d44abc7018bf61 porcelain lines: 0 (clone https://github.com/hypneum-lab/kiki-flow-research.git)
+budget: inner_n_iter 200000->1000000, max_outer 500->2000 (JKOStep constructor); tolerances = 31feab6 defaults; residual history recorded by m5sec_worker.py (pure instrumentation, outside the repo)
+uv: uv 0.13.5 (46776a95d 2026-10-21 aarch64-apple-darwin) sha256 7dad6047467a9d6b081c033cb3efed9ba39a4799c698d09e6cd598f3a6a32338 (same binary as the M5 grid on this host)
+env: uv sync --frozen --extra dev --python 3.14.4; python 3.14.4 numpy 2.4.4 scipy 1.17.1 POT 0.9.6.post1 macOS-27.0.1-arm64-arm-64bit-Mach-O; MLX_DISABLE_COMPILE=1 (as the grid)
+start conditions (code/run_macm3.sh): M5 grid main.log end line after its 12:57Z restart + no grid process, AND NH-03 deferred confirm wait.log terminal line + no NH-03 process; two consecutive checks 5 min apart
+gates before launch: certified-path tests; wrapper with default budgets bit-identical to macM3 records (10,10,0.05,500) and (10,10,0.05,501) and to the uninstrumented driver; otherwise NOT launched
+run: at most 6 workers, nice 19, caffeinate -is, nohup (Lie/Strang confirmatory planned alongside with 4 workers)
+KXKM validation history: imported_kxkm/PROVENANCE.txt (bit-exact repro of ES lines (10,100,0.025,501) and (2,100,0.05,500), guard dry test 10/10)
+files sha256:
+  f2a9015313cdc3e73bae881aa8cb9f608311152621de64725154a30ce9b23c08  code/analyze_secondary.py
+  06d52dcbc86abf6569828ecce0d1a8f21f6f33d139876f16b662260c1ad77551  code/build_queue.py
+  b789672a3b9adbc634b4e6497aa4eab74009e99fc5542a26a761cd24f37be0de  code/compare_bitexact.py
+  e336d09de4483d7c853b3b28cc83f083e08d6685f489d7de3ff8a716fe60e56d  code/m5sec_worker.py
+  d4904895b88253e5bef40cbdc681cd31109459af8b12216470765326e48fa38e  code/plain_certify.py
+  b0c35803b7e8a683e5c6f62be21ddac868c42ec5be45676ef97334269d86cfd9  code/run_macm3.sh
+
+## Deviation 2026-10-30 (PI decision 20:35 CET): inner_error kept
+note: docs/notes/2026-10-30-m5-secondary-inner-error-deviation.md, branch notes/m5-secondary-inner-error, commit 225a564a71c8653030a2b2d9a0dcae256c8b2217 (pushed to GitHub before launch); copy in this directory
+change: wrapper only (outside repo) keeps the full inner_error string of JKOStep.last_info per step; no parameter, tolerance, budget or tagged code changed
+trigger: first trigger (pid 11979, started 15:24) stopped by its owner at 20:40 before any launch (grid done, NH-03 still running), relaunched with the new wrapper; the worker hash is now taken at launch time
+gate added: the (10,10,0.05,500) default-budget validation record must carry the full inner_error
+files sha256 (after deviation):
+  f2a9015313cdc3e73bae881aa8cb9f608311152621de64725154a30ce9b23c08  code/analyze_secondary.py
+  06d52dcbc86abf6569828ecce0d1a8f21f6f33d139876f16b662260c1ad77551  code/build_queue.py
+  b789672a3b9adbc634b4e6497aa4eab74009e99fc5542a26a761cd24f37be0de  code/compare_bitexact.py
+  ae4c99124ff0e0cbd23818e766862cbe34c841e5380956b06073d13f3a23f838  code/m5sec_worker.py
+  d4904895b88253e5bef40cbdc681cd31109459af8b12216470765326e48fa38e  code/plain_certify.py
+  5e385a005a7883a273374dd49607d730b1c1d84cce798c35d0700213a3c4e341  code/run_macm3.sh
+
+## Host split 2026-10-31 (PI decision 17:50 CET): unstarted configs moved to Studio
+state at 17:49: 38 queued, 22 rows written, 6 running on macM3, 10 not started (no worker log): the last 10 lines of state/queue.txt
+dispatcher stop 17:50 by its owner: caffeinate -is -w per running python worker (15850 16167 19115 19298 24578 25362), then SIGKILL to trigger 15630 and to xargs 15835 only (no SIGSTOP: an orphaned process group with a stopped member gets SIGHUP+SIGCONT on XNU); running workers untouched, their sh reparented to launchd; Lie/Strang untouched
+macM3 (Apple M3 Pro, macOS 27.0.1 arm64) runs: the 28 first lines of state/queue.txt (22 done + 6 running at 17:50)
+Studio (Apple M3 Ultra, 32 cores, macOS 27.2 arm64, user ailiance, ~/scratch/m5-secondary) runs: 10.0 70.0 0.05 500;10.0 70.0 0.025 501;5.0 70.0 0.05 501;10.0 70.0 0.05 501;10.0 70.0 0.025 500;5.0 70.0 0.05 500;10.0 100.0 0.05 501;2.0 70.0 0.025 500;5.0 100.0 0.025 501;5.0 70.0 0.025 501;
+Studio environment: same uv binary (sha256 7dad6047...2338, copied from macM3), same uv-managed cpython-3.14.4 (copied), clone 31feab6 porcelain 0, uv sync --frozen --extra dev --python 3.14.4 (freeze identical to macM3 except the editable path), same scripts (sha256 above) + run_studio.sh
+Studio gate 17:52-17:54: tests 46 passed; default-budget wrapper bit-identical to macM3 records (10,10,0.05,500) 44 fields and (10,10,0.05,501) 66 fields, and to the uninstrumented driver; inner_error kept in full (519 chars): PASSED; 10 workers launched 17:54, nice 19, caffeinate -is, nohup, output results/secondary_studio.jsonl
+note addendum (hosts, configs by host, Studio gate): commit 4d0d13801690bb2570cd9bad55f425f94c3bf827 on notes/m5-secondary-inner-error (pushed 2026-10-31)

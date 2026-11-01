@@ -1,0 +1,23 @@
+# M5 secondary analysis on KXKM — provenance
+written: 2026-10-30T13:46:07Z
+decision: PI 2026-10-30 14:05 CET (CPU KXKM, up to 26 workers, nice 19, no GPU, NH-81 pause guard)
+rule: tag prereg-m5-certify-20261030 object 61dd69e7ac37f357caddb0b1c539e3b16224a040 commit f2f146e618501f63b99fce1bd1396402355b6eca, section Secondary analysis
+code: 31feab68cff3af26f7334b2e44d44abc7018bf61 porcelain lines: 0 (clone https://github.com/hypneum-lab/kiki-flow-research.git)
+budget: inner_n_iter 200000->1000000, max_outer 500->2000 via JKOStep constructor; all tolerances = 31feab6 defaults
+uv: uv 0.13.5 (x86_64-unknown-linux-gnu), sha256 8a70db72685b7138121bfcda71fa1a00cb709ed9f1fdc4ecf1dd871e8e167e52 (= ES binary); tarball uv-x86_64-unknown-linux-gnu.tar.gz sha256 f68d291c75783122dad58ab77def0e13f3233f358731db5d6d7e8715603b928f verified vs published .sha256
+env: uv sync --frozen --extra dev --python 3.14.4; python 3.14.4 numpy 2.4.4 scipy 1.17.1 POT 0.9.6.post1 Linux-6.17.0-1032-oem-x86_64-with-glibc2.39
+arith env (align on ES Xeon X5680): NPY_DISABLE_CPU_FEATURES="X86_V3 X86_V4 AVX512_ICL AVX512_SPR" OPENBLAS_CORETYPE=NEHALEM GLIBC_TUNABLES=glibc.cpu.hwcaps=-AVX,-AVX2,-FMA,-FMA4,-BMI1,-BMI2,-AVX_Fast_Unaligned_Load,-F16C OMP/OPENBLAS threads 1, CUDA_VISIBLE_DEVICES empty
+tests: tests/test_jko_implicit_nonseparable.py test_implicit_validation_driver.py test_wasserstein_ops.py test_jko_entropic_step.py: 46 passed (mlx not in uv.lock and libmlx.so absent on Linux: test-only stub teststub/mlx outside repo, PYTHONPATH for pytest only; run path imports no mlx)
+validation: instrumented(default budgets) vs uninstrumented driver, same host: bit-identical (10,10,0.05,501) 66 fields, (10,10,0.05,500) 44 fields
+validation: instrumented(default budgets, ES arith) vs ES certify.jsonl: bit-identical (10,100,0.025,501) 22 fields [final worker], (2,100,0.05,500) 66 fields 3 converged steps [worker before platform-field edit]
+guard dry test: logs/guard_dryrun.txt ALL_PASS 10/10
+files sha256:
+  06d52dcbc86abf6569828ecce0d1a8f21f6f33d139876f16b662260c1ad77551  code/build_queue.py
+  b789672a3b9adbc634b4e6497aa4eab74009e99fc5542a26a761cd24f37be0de  code/compare_bitexact.py
+  e336d09de4483d7c853b3b28cc83f083e08d6685f489d7de3ff8a716fe60e56d  code/m5sec_worker.py
+  d4904895b88253e5bef40cbdc681cd31109459af8b12216470765326e48fa38e  code/plain_certify.py
+  b6dd68fbf39d47e7eab8b74df0fc592f5545fbdfdbc7903be3e6290df331cc0e  code/env.sh
+  6032850ded9663eddf183c5c10e368cddd59b4bb639192a247e0d9edb5547f11  code/refresh_queue.sh
+  9c06e69b39b08ff052c2820b8c54aeecde968fb8bbef4ccd48aaac6e57e12689  code/test_guard.sh
+  b6dd68fbf39d47e7eab8b74df0fc592f5545fbdfdbc7903be3e6290df331cc0e  code/env.sh
+  9db70866c727403c2eb9cf104787ea6c7a4e866f50302278f1c3e584b1b4acfd  /ai/saisail/gpu-swap/launchers/m5-secondary.sh
