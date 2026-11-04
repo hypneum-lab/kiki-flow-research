@@ -29,6 +29,8 @@
   year={2020}
 }
 
+% Not resolvable by API on 2026-11-04 (OpenReview returned HTTP 403);
+% unverified.
 @misc{lecun2022,
   title={A Path Towards Autonomous Machine Intelligence Version 0.9.2},
   author={LeCun, Yann},
@@ -67,27 +69,37 @@
   year={2022}
 }
 
+% Authors corrected 2026-11-04 (Crossref 10.3758/BF03195598).
 @article{newboucard2004lexique,
   title={Lexique 2: A new French lexical database},
-  author={New, Boris and Pallier, Christophe and Ferrand, Ludovic and Matos, Rafael},
+  author={New, Boris and Pallier, Christophe and Brysbaert, Marc and Ferrand, Ludovic},
   journal={Behavior Research Methods, Instruments, \& Computers},
   volume={36},
   number={3},
   pages={516--524},
-  year={2004}
+  year={2004},
+  doi={10.3758/BF03195598}
 }
 
+% Concept DOI resolved 2026-11-04 (DataCite; latest version v3.7.2).
 @misc{honnibal2020spacy,
   title={spaCy: Industrial-strength Natural Language Processing in Python},
   author={Honnibal, Matthew and Montani, Ines and Van Landeghem, Sofie and Boyd, Adriane},
-  year={2020}
+  year={2020},
+  publisher={Zenodo},
+  doi={10.5281/zenodo.1212303}
 }
 
-@misc{phonemizer,
-  title={phonemizer: Simple text to phones converter for multiple languages},
+% Published version resolved 2026-11-04 (Crossref 10.21105/joss.03958).
+@article{phonemizer,
+  title={Phonemizer: Text to Phones Transcription for Multiple Languages in {Python}},
   author={Bernard, Mathieu and Titeux, Hadrien},
-  howpublished={\url{https://github.com/bootphon/phonemizer}},
-  year={2021}
+  journal={Journal of Open Source Software},
+  volume={6},
+  number={68},
+  pages={3958},
+  year={2021},
+  doi={10.21105/joss.03958}
 }
 
 @book{levelt1989speaking,
@@ -95,4 +107,91 @@
   author={Levelt, Willem J M},
   publisher={MIT Press},
   year={1989}
+}
+
+% --- Added 2026-11-04: entries for citations that had none (rendered
+% as "?"), plus replacements for two misattributed uses. Metadata from
+% Crossref, arXiv and DataCite APIs. ---
+
+@article{parr2019,
+  title={Neuronal message passing using Mean-field, {B}ethe, and Marginal approximations},
+  author={Parr, Thomas and Markovic, Dimitrije and Kiebel, Stefan J. and Friston, Karl J.},
+  journal={Scientific Reports},
+  volume={9},
+  number={1},
+  pages={1889},
+  year={2019},
+  doi={10.1038/s41598-018-38246-3}
+}
+
+@article{new2007subtitles,
+  title={The use of film subtitles to estimate word frequencies},
+  author={New, Boris and Brysbaert, Marc and V{\'e}ronis, Jean and Pallier, Christophe},
+  journal={Applied Psycholinguistics},
+  volume={28},
+  number={4},
+  pages={661--677},
+  year={2007},
+  doi={10.1017/S014271640707035X}
+}
+
+@incollection{baddeley1974,
+  title={Working Memory},
+  author={Baddeley, Alan D. and Hitch, Graham},
+  booktitle={Psychology of Learning and Motivation},
+  pages={47--89},
+  year={1974},
+  doi={10.1016/S0079-7421(08)60452-1}
+}
+
+@inproceedings{reimers2019sbert,
+  title={Sentence-{BERT}: Sentence Embeddings using {S}iamese {BERT}-Networks},
+  author={Reimers, Nils and Gurevych, Iryna},
+  booktitle={Proceedings of EMNLP-IJCNLP 2019},
+  year={2019},
+  note={arXiv:1908.10084}
+}
+
+@inproceedings{rezende2015variational,
+  title={Variational Inference with Normalizing Flows},
+  author={Rezende, Danilo Jimenez and Mohamed, Shakir},
+  booktitle={Proceedings of the 32nd International Conference on Machine Learning (ICML)},
+  year={2015},
+  note={arXiv:1505.05770}
+}
+
+@inproceedings{vandenoord2017neural,
+  title={Neural Discrete Representation Learning},
+  author={van den Oord, Aaron and Vinyals, Oriol and Kavukcuoglu, Koray},
+  booktitle={Advances in Neural Information Processing Systems 30 (NeurIPS)},
+  year={2017},
+  note={arXiv:1711.00937}
+}
+
+@inproceedings{chen2018neural,
+  title={Neural Ordinary Differential Equations},
+  author={Chen, Ricky T. Q. and Rubanova, Yulia and Bettencourt, Jesse and Duvenaud, David},
+  booktitle={Advances in Neural Information Processing Systems 31 (NeurIPS)},
+  year={2018},
+  note={arXiv:1806.07366}
+}
+
+% Concept DOI resolved 2026-11-04 (DataCite; latest version v1.10.0).
+@misc{saillant2026nervewml,
+  title={nerve-wml: Substrate-Agnostic Nerve Protocol},
+  author={Saillant, Cl{\'e}ment},
+  year={2026},
+  publisher={Zenodo},
+  doi={10.5281/zenodo.19656342}
+}
+
+% Resolved 2026-11-04 (DataCite): Zenodo record of the companion
+% paper, version paper-v0.13-draft.
+@misc{saillant2026kikiflow,
+  title={kiki-flow-research: A {W}asserstein Gradient Flow Engine for {LLM} Consolidation},
+  author={Saillant, Cl{\'e}ment},
+  year={2026},
+  publisher={Zenodo},
+  note={Version paper-v0.13-draft},
+  doi={10.5281/zenodo.23636477}
 }
