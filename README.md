@@ -10,6 +10,18 @@ Upstream numerical engine of the *dreamOfkiki* research program, part of
 [![CI](https://github.com/hypneum-lab/kiki-flow-research/actions/workflows/ci.yml/badge.svg)](https://github.com/hypneum-lab/kiki-flow-research/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
+> [!WARNING]
+> **Superseded draft (notice of 2026-11-04).** The quantitative results
+> of the paper draft (`paper/main.tex`, `paper/main.pdf`, and the Zenodo
+> records up to `paper-v0.13-draft`) are superseded by
+> [`ERRATUM.md`](ERRATUM.md), which requalifies them without deleting any
+> number: the "rigorous path" (legacy split) is not a JKO step of F
+> (§12); the positive excess over Gibbs with a strong Turing term
+> (γ ≥ 20) is not interpretable (§14, which lists what it leaves
+> unchanged); the recomputation with the certified implicit step decided
+> by the PI (§16) has not been run. The table under "Quantitative
+> results" predates §14–§16. Read `ERRATUM.md` before citing any number.
+
 ---
 
 ## What is this?
@@ -292,7 +304,10 @@ an older v0.5 snapshot, **superseded** since the 2026-10-24 erratum: it
 still carries the withdrawn fast-vs-rigorous agreement, the old Fig. 1
 and the old ε-sweep. Use `paper/main.pdf`; the bundle must be
 regenerated from `paper/main.tex` before any submission. Not submitted
-to arXiv.
+to arXiv. Since 2026-11-04 the draft carries a "superseded" banner: the
+Zenodo records of `paper-v0.12-draft` and `paper-v0.13-draft` predate
+`ERRATUM.md` §9–§16 and §11–§16 respectively, so cite the draft only
+together with `ERRATUM.md`.
 
 ```bibtex
 @unpublished{kiki-flow-2026,
@@ -302,7 +317,7 @@ to arXiv.
   year   = 2026,
   doi    = {10.5281/zenodo.23636477},
   url    = {https://github.com/hypneum-lab/kiki-flow-research},
-  note   = {Draft; code, data, and figures released under MIT at tag paper-v0.13-draft; see ERRATUM.md}
+  note   = {Draft, superseded by ERRATUM.md (sections 12, 14, 16); code, data, and figures released under MIT at tag paper-v0.13-draft}
 }
 ```
 

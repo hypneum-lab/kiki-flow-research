@@ -13,6 +13,33 @@
 \begin{document}
 \maketitle
 
+% Status banner added 2026-11-04 (deep review of 2026-11-01, finding B10).
+% The body below is left unchanged; ERRATUM.md is the reference record.
+\begin{center}
+\fbox{\parbox{0.94\linewidth}{\small
+\textbf{Superseded draft --- read ERRATUM.md first (status of 2026-11-04).}
+The results of this draft are superseded by \texttt{ERRATUM.md} in the
+repository (\url{https://github.com/hypneum-lab/kiki-flow-research/blob/main/ERRATUM.md}),
+which requalifies its numbers without deleting any.
+(i)~The ``rigorous path'' of Section~\ref{sec:exp} (the ``full JKO
+scheme'', legacy split) is not a JKO step of the free energy $F$: it is
+an explicit Euclidean step of $F$ followed by an entropic JKO step of a
+different functional (ERRATUM~\S12).
+(ii)~The small positive excess over the Gibbs equilibrium reported with a
+strong Turing term ($\gamma \ge 20$), in the abstract and in
+Section~\ref{sec:aggregate}, was produced by a non-dissipative slow step and is declared
+not interpretable (ERRATUM~\S14, which also lists the statements it leaves
+unchanged).
+(iii)~The rigorous-path numbers below come from the legacy split
+(ERRATUM~\S12) or from the explicit entropic step (ERRATUM~\S13--\S14);
+the PI decided to recompute the specialisation sweep and the paper-scale
+run with the certified implicit step (ERRATUM~\S16), and that
+recomputation has not been run.
+Zenodo records up to \texttt{paper-v0.13-draft} (2026-10-25) predate
+ERRATUM~\S11--\S16. Do not cite the quantitative results of this draft
+without the ERRATUM.}}
+\end{center}
+
 \begin{abstract}
 We introduce a family of reaction-diffusion models for the four-species
 Levelt--Baddeley account of language production, formulated as a Wasserstein
@@ -421,6 +448,7 @@ the pre-correction
 values remain in \texttt{paper/fast\_vs\_rigorous\_kl.json}.
 
 \subsection{Aggregate final-state statistics}
+\label{sec:aggregate}
 Over the five seeds of the fast path with the default flat
 potentials, the peak amplitude of the final $\rho$ stays within
 $0.0002$ of the uniform value $1/64 \approx 0.01563$ across all four
