@@ -127,10 +127,13 @@ and W-Flow \cite{han2026wflow} trains a static one-step generator to
 compress a Wasserstein gradient flow whose energy is a Sinkhorn
 divergence; both are close in spirit to Track 3, which distills Track 2
 trajectories into a fast surrogate. Within an LLM pipeline, JKO-RAG
-\cite{segal2026jkorag} frames retrieval reranking as a $W_2$ free-energy
-JKO step and reports that the $W_2$ geometry damps the mass transport
-induced by query paraphrase, an independent use of a JKO step as a
-stability regularizer for LLM routing-type decisions.
+\cite{segal2026jkorag} reranks retrieved passages with a few (3 to 5)
+JKO steps on a $W_2$ free energy and reports that the $W_2$ geometry
+damps the mass transport induced by query paraphrase; its reported
+gain is stability under paraphrase rather than ranking quality (its
+ablation scores the $W_2$ proximal step below a KL one on nDCG@10),
+an independent use of JKO steps as a stability regularizer for LLM
+retrieval decisions.
 For the cross-diffusion systems that motivate the Turing coupling
 term, \cite{dus2026crossdiffusion} review the existence theory of
 Wasserstein gradient flows built from JKO schemes. In the searches
