@@ -252,9 +252,12 @@ difference between the two conditions.
 \subsection{Empirical \texorpdfstring{$\lambda$}{lambda}-monotonicity}
 \label{sec:lambda-mono}
 
-Following \cite{conger2025monotone}, the multi-species flow is
-$\lambda$-monotone at rate $\lambda > 0$ if, for any two trajectories
-$\rho(t), \rho'(t)$ from distinct initial conditions,
+In \cite{conger2025monotone}, $\lambda$-monotonicity at rate
+$\lambda > 0$ is a condition on the velocity fields, required for
+every pair of measures in a geodesically convex set (Definition~1.1,
+p.~2 of arXiv v2). One of its consequences (proof of Theorem~3.2,
+p.~16) is that any two trajectories $\rho(t), \rho'(t)$ from distinct
+initial conditions satisfy
 \begin{equation}
   \frac{d}{dt} \sum_i W_2^2(\rho_i(t), \rho_i'(t))
     \;\le\; -2\lambda \sum_i W_2^2(\rho_i(t), \rho_i'(t)).
@@ -272,11 +275,13 @@ inherent to regularized $W_2^2$. We obtain
   \label{eq:lambda-estimate}
 \end{equation}
 all three trajectories monotone-decreasing over $50$ slow
-steps~{\small\% from paper/lambda\_monotonicity.json}. This places the
-flow inside the regime of Theorem~3.4
-of~\cite{conger2025monotone}, implying exponential contraction to a
-unique multi-species Nash equilibrium under the product Wasserstein-2
-metric.
+steps~{\small\% from paper/lambda\_monotonicity.json}. This decay
+is compatible with $\lambda$-monotonicity but does not establish it:
+the trajectory inequality~\eqref{eq:lambda-mono} is a consequence of
+the condition on velocity fields, not the condition itself, and a fit
+of $\hat\lambda$ on three trajectories does not establish that
+condition, nor the contraction and uniqueness results that
+\cite{conger2025monotone} derive from it.
 
 \subsection{Baddeley phono loop and multi-scale dynamics}
 \label{sec:phonoloop}
@@ -584,7 +589,7 @@ Figure~\ref{fig:fdecay} plots $F[\rho^\tau]$ along seed~0's
 trajectory. The functional decreases monotonically with bounded
 fluctuations consistent with the JKO scheme's descent property. To
 quantify the contraction rate of the \emph{pair} dynamics that
-Section~\ref{sec:lambda-mono} calls $\lambda$-monotonicity, we ran
+Section~\ref{sec:lambda-mono} relates to $\lambda$-monotonicity, we ran
 \texttt{experiments/check\_lambda\_monotonicity.py} on three
 independent initial-condition pairs
 (seed bases $\{42, 43, 44\}$ vs
@@ -598,10 +603,11 @@ fit yields
   \qquad (\sigma / \bar{\hat\lambda} = 5.6\%),
 \end{equation*}
 with all three trajectories monotone-decreasing over the full
-$50$~steps~{\small\% from paper/lambda\_monotonicity.json}. This
-is the quantitative backing for the
-Conger--Hoffmann--Mazumdar--Ratliff~\cite{conger2025monotone} regime
-claim of Section~\ref{sec:lambda-mono}.
+$50$~steps~{\small\% from paper/lambda\_monotonicity.json}. As
+discussed in Section~\ref{sec:lambda-mono}, this trajectory fit is
+compatible with, but does not establish, $\lambda$-monotonicity in
+the sense of
+Conger--Hoffmann--Mazumdar--Ratliff~\cite{conger2025monotone}.
 
 \begin{figure}[h]
   \centering
@@ -881,7 +887,7 @@ This does not render the Levelt--Baddeley coupling cosmetic: the
 topology carries the causal production direction of the dynamics
 rather than the stationary entropy, and a decoupled baseline reaches
 the same final entropy only along a qualitatively different
-trajectory. The $\lambda$-monotonicity rate $\hat\lambda \approx
+trajectory. The fitted pair-contraction rate $\hat\lambda \approx
 67.8$ of \S\ref{sec:lambda-mono} quantifies the transient contraction
 that the full coupling provides; a fully decoupled system matches
 the stationary statistics but not the dynamic ones. The architectural
