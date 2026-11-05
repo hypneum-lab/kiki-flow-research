@@ -280,6 +280,20 @@ source ou deux sources de même nature.
     `src/wfr_gradient_flow/methods.py:79-100` (sans licence : lecture seule,
     ne pas copier). **Outil, une seule source**, pas une affirmation
     scientifique.
+14. Un découpage « partie conservative / partie dissipative » d'un pas JKO
+    est déjà publié, avec un ordre 1 observé pour le découpage de Lie →
+    Lee-Wang-Li arXiv:2603.23901 (v1, lu sec. 1-3 et conclusion) : l'équation
+    est écrite avec J antisymétrique et D symétrique semi-définie positive
+    (éq. 8, p. 4) ; seule D dissipe l'énergie libre (prop. 1, p. 5) ; le
+    schéma non découpé équivaut à un découpage de Lie, pas de Vlasov puis pas
+    JKO de Fokker-Planck (sec. 3.3.1, p. 12) ; l'erreur décroît en O(Δt) en
+    1D et 3D (fig. 1, p. 16). Aucune composition de Strang (aucune occurrence
+    de « Strang » dans le texte). Même cadre JKO découpé, sous convexité,
+    avec des vitesses d'optimisation et non un ordre de discrétisation :
+    Salim-Korba-Luise arXiv:2002.03035 (schéma avant-arrière, éq. 17-18,
+    p. 6). **Recoupé** pour l'existence d'un découpage de Lie « transport puis
+    JKO » (deux articles lus) ; l'ordre 1 observé repose sur un seul preprint
+    (**à recouper**).
 
 ## 4. Reste ouvert
 
@@ -298,6 +312,13 @@ les splittings avec pas JKO lus (Adams et al., Gallouët-Monsaingeon,
 Gallouët-Laborde-Monsaingeon) prouvent l'existence sans ordre ; 2511.14827
 donne l'énergie modifiée d'**un** pas JKO, pas celle d'une composition ;
 2511.10884 prouve un ordre 2 pour un schéma qui n'est pas un pas JKO.
+
+Après arXiv:2603.23901 et arXiv:2002.03035, la décomposition d'un pas JKO en
+partie antisymétrique hors énergie et partie symétrique dans le pas, ainsi
+que le découpage de Lie correspondant et son ordre 1 observé, ne sont pas
+nouveaux. La nouveauté revendiquée par NH-20 se limite à la composition de
+Strang de sous-pas JKO (et à l'identifiabilité de son ordre sur grille fixe),
+qu'aucune de ces deux sources ne traite.
 
 Preuve de l'absence (tours 1 et 2, `veille-journal.md`). Tour 1 : 8 requêtes
 arXiv (33 identifiants distincts), 3 requêtes Crossref (60 notices), 4
