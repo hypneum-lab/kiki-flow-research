@@ -304,9 +304,18 @@ representation and is structurally distinct from the linear drift
 $b^{\mathrm{asym}}$ of~\eqref{eq:drift-asym}. Together
 $b = b^{\mathrm{asym}} + b^{\mathrm{phono}}$ is the
 \emph{hierarchical non-conservative drift} carrying the causal
-production direction of the Levelt--Baddeley architecture; the
-operator-splitting scheme of \cite{gallouet2017splitting} integrates it
-exactly between JKO steps.
+production direction of the Levelt--Baddeley architecture. It is
+applied by a separate operator-splitting step between JKO steps. We do
+not claim a convergence result for this step: the JKO splitting scheme
+of Gallou\"et and Monsaingeon~\cite{gallouet2017splitting} is restricted
+to pure gradient flows of a single energy (p.~3 and Remark~4.1, p.~14,
+of arXiv:1602.04457v3), and its compactness assumption excludes the
+Boltzmann entropy (p.~21), so it covers neither the non-conservative
+drift $b$ nor the KL term of~\eqref{eq:freeenergy}.\footnote{A
+later preprint of the same group, Gallou\"et, Laborde and Monsaingeon,
+\emph{An unbalanced Optimal Transport splitting scheme for general
+advection-reaction-diffusion problems}~\cite{gallouet2017unbalanced},
+is a lead for this case; we have not read it and do not rely on it.}
 
 \section{Implementation}
 \label{sec:impl}
