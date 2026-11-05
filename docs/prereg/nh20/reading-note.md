@@ -32,7 +32,7 @@ par Crossref (`works/<doi>`).
 | id résolu | auteurs, année | pages lues | ce qu'elle établit (pour NH-20) |
 |---|---|---|---|
 | arXiv:1602.04457 (= DOI 10.1137/16m106666x, SIAM J. Math. Anal. 49:1100-1130) | Gallouët, Monsaingeon 2016 (revu 2017) | 1-30 | Schéma « JKO splitting » : un pas JKO de Monge-Kantorovich (W₂, masse conservée) puis un pas JKO de Fisher-Rao, même énergie F dans les deux (éq. 4.4-4.5, p. 13) ; les auteurs le lisent comme un splitting d'opérateurs (p. 13). Convergence vers une solution faible sous hypothèses de compacité forte (Th. 4, p. 17-18), vérifiées pour les énergies internes sous (H) (§5, p. 20-29). **Aucun ordre ni taux**, pas de version symétrique, pas de numérique. (H) exclut l'entropie de Boltzmann, non convexe pour FR (p. 21). |
-| arXiv:1704.04541 (= DOI 10.1051/cocv/2018001, ESAIM COCV 25:8, 2019) | Gallouët, Laborde, Monsaingeon 2017 | 1-27 | Même alternance W₂ puis FR avec deux fonctionnelles distinctes (éq. 3.4) ; existence de solutions faibles pour réaction-diffusion-advection, systèmes proies-prédateurs, Hele-Shaw (Th. 3.2, 4.2, 5.1) ; numérique ALG2-JKO + Newton pointwise pour FR (§4). **Aucun ordre ni taux.** C'est le « Laborde 2017 WFR/JKO splitting » du brief. |
+| arXiv:1704.04541 (= DOI 10.1051/cocv/2018001, ESAIM COCV 25:8, 2019) | Gallouët, Laborde, Monsaingeon 2017 | 1-27 | Même alternance W₂ puis FR avec deux fonctionnelles distinctes (éq. 3.4) ; existence de solutions faibles pour réaction-diffusion-advection, systèmes proies-prédateurs, Hele-Shaw (Th. 3.2, 4.2, 5.1) ; numérique ALG2-JKO + Newton pointwise pour FR (§4). **Aucun ordre ni taux.** C'est le « Laborde 2017 WFR/JKO splitting » du brief. Vérifié au PDF v1 (lu en entier le 2026-11-05) : éq. 3.4 p. 5 ; Th. 3.2 p. 5 (sous-suite, sans taux), 4.2 p. 12, 5.1 p. 17 ; numérique §4.3 p. 14 et §5.3 p. 21 (outils annoncés p. 2) ; les seules estimations en h comparent les deux interpolations du schéma entre elles, pas le schéma à la solution (prop. 3.6 p. 7, éq. 3.23 p. 10) ; l'énergie du pas FR ne peut pas être l'entropie de Boltzmann (p. 4) ; aucune occurrence de « Strang ». |
 | arXiv:1506.00126 (= DOI 10.1515/9783110430417-013, chapitre De Gruyter, 2017) | Laborde 2015 (publié 2017) | 1-21 | Systèmes multi-espèces avec interactions croisées non proportionnelles : pas des flots de gradient ; schéma JKO **semi-implicite** (mesure gelée dans Vᵢ[ρ]), existence et unicité (Th. 2.3). Pas de splitting au sens Lie/Strang, pas d'ordre. C'est le « Laborde 2017 » de la revue de fond (cadre de J^asym). |
 | arXiv:1512.02783 (= DOI 10.1137/15m1050264, SIAM J. Math. Anal. 49:1385-1418) | Carlier, Duval, Peyré, Schmitzer 2015 (revu 2017) | 1-28 (preuves de Γ-convergence §2.3-2.4 et estimations a priori §3.4-3.5 parcourues, énoncés lus) | Γ-convergence de l'OT entropique (Th. 2.7) ; convergence du JKO entropique vers l'EDP si ε\|log ε\| = O(τ²) (Th. 3.16, p. 17) ; ε = o(τ) nécessaire (p. 10) ; §4 : sur grille fixe, pour τ et ε très petits, le schéma « gèle » (p. 21-22). Énoncé recopié et vérifié au §2bis. |
 | arXiv:2501.14660 (= DOI 10.1007/s11005-026-02065-9, Lett. Math. Phys. 116:42) | Hernandez, Pastorello, De Palma 2025 (revu 2026) | 1-23 | Propagation du chaos pour un MoE entraîné par flot de gradient continu : E W₂²(μᴺ, μ_t) ≤ C N^(−2/d), d > 4 (Th. 1.1). **Temps continu** : ni JKO, ni discrétisation, ni splitting. Ne concerne NH-20 que par l'image « experts = particules ». |
@@ -186,7 +186,9 @@ source ou deux sources de même nature.
    vers une solution faible de l'équation de réaction-advection-diffusion du
    flot WFR (KFR) → Gallouët-Monsaingeon arXiv:1602.04457 (preprint lu) +
    DOI 10.1137/16m106666x (version revue, métadonnées) ; étendu à deux
-   fonctionnelles par arXiv:1704.04541. **Recoupé** (preprint + version revue).
+   fonctionnelles par arXiv:1704.04541 (éq. 3.1 p. 4, schéma 3.4 et Th. 3.2
+   p. 5 ; énergie de réaction de type milieux poreux, entropie exclue, p. 4 ;
+   lu en entier le 2026-11-05). **Recoupé** (preprint + version revue).
 2. Un splitting de Lie de flots de gradient métriques converge (formule de
    Trotter), sans taux démontré → Clément-Maas arXiv:1005.0998 +
    Gallouët-Monsaingeon Th. 4 + Adams-Duong-dos Reis arXiv:2105.11146 (preprint
@@ -269,7 +271,9 @@ source ou deux sources de même nature.
 
 12. Les splittings « transport ou JKO + réaction ou diffusion » publiés
     établissent l'existence ou la convergence, jamais un ordre →
-    Gallouët-Monsaingeon (lu), Gallouët-Laborde-Monsaingeon (lu), Adams et al.
+    Gallouët-Monsaingeon (lu), Gallouët-Laborde-Monsaingeon (lu en entier le
+    2026-11-05 : Th. 3.2 p. 5, convergence le long d'une sous-suite sans taux ;
+    « we do not focus on optimal results », p. 2), Adams et al.
     (lu), thèse Laborde §7.2 et thèse Chizat §6 (lues) ; Carrillo et al.
     arXiv:1711.05434, OpenReview `rPgc5brxmT` (NeurIPS 2024) et `pmRC8xTiym`
     (soumission ICLR 2027) **[résumé moteur]**. **Recoupé** pour les sources lues
@@ -499,7 +503,8 @@ aucune source lue (ligne 4 du §3, question (b) du §4).
 | 2026-11-01 | veilles du 01/11 : `veille-2026-11-01.md` thèse 3 ; `revue-de-fond-2026-11-01.md` R3 | l. 107-138, 322, 338, 409-424 ; l. 169-219, 555-567, 624-629, 698-700 |
 | 2026-11-01 | arXiv:1512.02783 Carlier et al. | p. 1-28 ; §3.1 et Th. 3.16 lus mot à mot ; §2.3-2.4, 3.4-3.5 parcourus |
 | 2026-11-01 | arXiv:1602.04457 Gallouët-Monsaingeon | p. 1-30 ; §1-4 lus, §5 parcouru (énoncés lus) |
-| 2026-11-01 | arXiv:1704.04541 Gallouët-Laborde-Monsaingeon | p. 1-27 ; §1-3 et §4 numérique lus, §5-6 parcourus |
+| 2026-11-01 | arXiv:1704.04541 Gallouët-Laborde-Monsaingeon | p. 1-27 ; §1-3 et §4 numérique lus, §5-6 parcourus ; relu en entier le 2026-11-05 (ligne suivante) |
+| 2026-11-05 | arXiv:1704.04541 Gallouët-Laborde-Monsaingeon (v1, PDF arXiv, sha256 a949d35264ca…) | p. 1-27 en entier (§1-6, preuves suivies sans être refaites) ; note de bibliothèque `references/notes/arxiv-1704.04541.md` (branche `docs/biblio-2026-11-02`) |
 | 2026-11-01 | arXiv:1506.00126 Laborde | p. 1-21 ; §1-3 lus, §4-7 parcourus |
 | 2026-11-01 | arXiv:2501.14660 Hernandez et al. | p. 1-23 ; §1-2, 5 lus, §3-4 parcourus |
 | 2026-11-01 | arXiv:2605.31369 Caucheteux et al. | p. 1-17, annexe A ; annexes C, G parcourues |
