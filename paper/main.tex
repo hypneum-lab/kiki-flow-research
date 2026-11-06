@@ -127,10 +127,13 @@ and W-Flow \cite{han2026wflow} trains a static one-step generator to
 compress a Wasserstein gradient flow whose energy is a Sinkhorn
 divergence; both are close in spirit to Track 3, which distills Track 2
 trajectories into a fast surrogate. Within an LLM pipeline, JKO-RAG
-\cite{segal2026jkorag} frames retrieval reranking as a $W_2$ free-energy
-JKO step and reports that the $W_2$ geometry damps the mass transport
-induced by query paraphrase, an independent use of a JKO step as a
-stability regularizer for LLM routing-type decisions.
+\cite{segal2026jkorag} reranks retrieved passages with a few (3 to 5)
+JKO steps on a $W_2$ free energy and reports that the $W_2$ geometry
+damps the mass transport induced by query paraphrase; its reported
+gain is stability under paraphrase rather than ranking quality (its
+ablation scores the $W_2$ proximal step below a KL one on nDCG@10),
+an independent use of JKO steps as a stability regularizer for LLM
+retrieval decisions.
 For the cross-diffusion systems that motivate the Turing coupling
 term, \cite{dus2026crossdiffusion} review the existence theory of
 Wasserstein gradient flows built from JKO schemes. In the searches
@@ -157,6 +160,10 @@ them, whereas \cite{zhang2026silent} confine replay to the degrees of
 freedom left unused by the current input and so dispense with a
 separate offline phase. Our nightly offline consolidation (Track 1) is
 closer to the former; neither is compared against in this paper.
+In layered Hopfield networks, modules specialise on the components
+of a mixture (pattern disentanglement) when an anti-Hebbian
+inter-module coupling is imposed
+\cite{agliari2026networks,agliari2026modularrbm}.
 
 \paragraph{Neuromorphic and mean-field inference.}
 The reaction-diffusion coupling we inherit from Levelt--Baddeley is
@@ -245,9 +252,12 @@ difference between the two conditions.
 \subsection{Empirical \texorpdfstring{$\lambda$}{lambda}-monotonicity}
 \label{sec:lambda-mono}
 
-Following \cite{conger2025monotone}, the multi-species flow is
-$\lambda$-monotone at rate $\lambda > 0$ if, for any two trajectories
-$\rho(t), \rho'(t)$ from distinct initial conditions,
+In \cite{conger2025monotone}, $\lambda$-monotonicity at rate
+$\lambda > 0$ is a condition on the velocity fields, required for
+every pair of measures in a geodesically convex set (Definition~1.1,
+p.~2 of arXiv v2). One of its consequences (proof of Theorem~3.2,
+p.~16) is that any two trajectories $\rho(t), \rho'(t)$ from distinct
+initial conditions satisfy
 \begin{equation}
   \frac{d}{dt} \sum_i W_2^2(\rho_i(t), \rho_i'(t))
     \;\le\; -2\lambda \sum_i W_2^2(\rho_i(t), \rho_i'(t)).
@@ -265,11 +275,13 @@ inherent to regularized $W_2^2$. We obtain
   \label{eq:lambda-estimate}
 \end{equation}
 all three trajectories monotone-decreasing over $50$ slow
-steps~{\small\% from paper/lambda\_monotonicity.json}. This places the
-flow inside the regime of Theorem~3.4
-of~\cite{conger2025monotone}, implying exponential contraction to a
-unique multi-species Nash equilibrium under the product Wasserstein-2
-metric.
+steps~{\small\% from paper/lambda\_monotonicity.json}. This decay
+is compatible with $\lambda$-monotonicity but does not establish it:
+the trajectory inequality~\eqref{eq:lambda-mono} is a consequence of
+the condition on velocity fields, not the condition itself, and a fit
+of $\hat\lambda$ on three trajectories does not establish that
+condition, nor the contraction and uniqueness results that
+\cite{conger2025monotone} derive from it.
 
 \subsection{Baddeley phono loop and multi-scale dynamics}
 \label{sec:phonoloop}
@@ -292,9 +304,18 @@ representation and is structurally distinct from the linear drift
 $b^{\mathrm{asym}}$ of~\eqref{eq:drift-asym}. Together
 $b = b^{\mathrm{asym}} + b^{\mathrm{phono}}$ is the
 \emph{hierarchical non-conservative drift} carrying the causal
-production direction of the Levelt--Baddeley architecture; the
-operator-splitting scheme of \cite{gallouet2017splitting} integrates it
-exactly between JKO steps.
+production direction of the Levelt--Baddeley architecture. It is
+applied by a separate operator-splitting step between JKO steps. We do
+not claim a convergence result for this step: the JKO splitting scheme
+of Gallou\"et and Monsaingeon~\cite{gallouet2017splitting} is restricted
+to pure gradient flows of a single energy (p.~3 and Remark~4.1, p.~14,
+of arXiv:1602.04457v3), and its compactness assumption excludes the
+Boltzmann entropy (p.~21), so it covers neither the non-conservative
+drift $b$ nor the KL term of~\eqref{eq:freeenergy}.\footnote{A
+later preprint of the same group, Gallou\"et, Laborde and Monsaingeon,
+\emph{An unbalanced Optimal Transport splitting scheme for general
+advection-reaction-diffusion problems}~\cite{gallouet2017unbalanced},
+is a lead for this case; we have not read it and do not rely on it.}
 
 \section{Implementation}
 \label{sec:impl}
@@ -577,7 +598,7 @@ Figure~\ref{fig:fdecay} plots $F[\rho^\tau]$ along seed~0's
 trajectory. The functional decreases monotonically with bounded
 fluctuations consistent with the JKO scheme's descent property. To
 quantify the contraction rate of the \emph{pair} dynamics that
-Section~\ref{sec:lambda-mono} calls $\lambda$-monotonicity, we ran
+Section~\ref{sec:lambda-mono} relates to $\lambda$-monotonicity, we ran
 \texttt{experiments/check\_lambda\_monotonicity.py} on three
 independent initial-condition pairs
 (seed bases $\{42, 43, 44\}$ vs
@@ -591,10 +612,11 @@ fit yields
   \qquad (\sigma / \bar{\hat\lambda} = 5.6\%),
 \end{equation*}
 with all three trajectories monotone-decreasing over the full
-$50$~steps~{\small\% from paper/lambda\_monotonicity.json}. This
-is the quantitative backing for the
-Conger--Hoffmann--Mazumdar--Ratliff~\cite{conger2025monotone} regime
-claim of Section~\ref{sec:lambda-mono}.
+$50$~steps~{\small\% from paper/lambda\_monotonicity.json}. As
+discussed in Section~\ref{sec:lambda-mono}, this trajectory fit is
+compatible with, but does not establish, $\lambda$-monotonicity in
+the sense of
+Conger--Hoffmann--Mazumdar--Ratliff~\cite{conger2025monotone}.
 
 \begin{figure}[h]
   \centering
@@ -874,7 +896,7 @@ This does not render the Levelt--Baddeley coupling cosmetic: the
 topology carries the causal production direction of the dynamics
 rather than the stationary entropy, and a decoupled baseline reaches
 the same final entropy only along a qualitatively different
-trajectory. The $\lambda$-monotonicity rate $\hat\lambda \approx
+trajectory. The fitted pair-contraction rate $\hat\lambda \approx
 67.8$ of \S\ref{sec:lambda-mono} quantifies the transient contraction
 that the full coupling provides; a fully decoupled system matches
 the stationary statistics but not the dynamic ones. The architectural
@@ -883,6 +905,9 @@ produces specialization'' to ``it sets the transient geometry along
 which specialization emerges'', a distinction we argue is
 empirically meaningful and deserves its own quantitative treatment
 separate from the steady-state reporting in \S\ref{sec:exp}.
+See also \cite{agliari2026networks,agliari2026modularrbm}, where
+specialisation of modules arises from an imposed competitive
+(anti-Hebbian) inter-module coupling.
 
 \paragraph{Asymmetric drift: opt-in splitting.}
 Eq.~\eqref{eq:drift-asym} defines $b^{\mathrm{asym}} =
