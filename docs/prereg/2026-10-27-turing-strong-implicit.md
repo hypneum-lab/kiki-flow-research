@@ -13,6 +13,8 @@
   `experiments/turing_strong_excess_2026_10_26.py`.
 - **Host:** electron-server only, `nice 19`, at most 4 workers.
 
+**L2 deposit (annotation added 2026-11-08):** restricted Zenodo record [10.5281/zenodo.24054064](https://doi.org/10.5281/zenodo.24054064) (Hypneum Lab lot of 2026-11-08, file `prereg-turing-strong-implicit-20261027.zip`, SHA-256 `8dc1f684fb3e0cee3fafceb347ddedfa8a53d3ed40b732540e369da89fc86c24`) gives the freeze tag `prereg-turing-strong-implicit-20261027` (commit `eee124fac1873104cfaf0d43a962239bc7222332`, `swh:1:rev:eee124fac1873104cfaf0d43a962239bc7222332`) a verifiable deposit date, level L2 of PROJECT-MANAGEMENT section 4. The deposit holds this file as it was at the tag; anything dated after the tag in this live file is not in the deposit. Restored on the default branch on 2026-11-08 from the tag; the document was previously only on branch `exp/implicit-recompute`.
+
 ## 1. What has been seen (declared)
 
 **PR #48 (seeds 100–109).** The 2026-10-26 L1 test on the same grid
