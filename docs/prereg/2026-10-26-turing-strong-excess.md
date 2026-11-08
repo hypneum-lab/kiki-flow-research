@@ -10,6 +10,8 @@
   `tests/test_turing_strong_excess_2026_10_26.py`.
 - **Host:** electron-server only, `nice 19`.
 
+**L2 deposit (annotation added 2026-11-08):** restricted Zenodo record [10.5281/zenodo.24054064](https://doi.org/10.5281/zenodo.24054064) (Hypneum Lab lot of 2026-11-08, file `prereg-turing-strong-20261026.zip`, SHA-256 `e32c01f3c64cea4f57e6213b00971806a5e6e46ddb4aba6f97451dc0e62689e0`) gives the freeze tag `prereg-turing-strong-20261026` (commit `681c966a0b6820d3216a119fc2dd32bf369891d6`, `swh:1:rev:681c966a0b6820d3216a119fc2dd32bf369891d6`) a verifiable deposit date, level L2 of PROJECT-MANAGEMENT section 4. The deposit holds this file as it was at the tag; anything dated after the tag in this live file is not in the deposit.
+
 ## 1. Background and the observation being tested
 
 On 2026-10-25 the PI made the excess over the Gibbs equilibrium of the

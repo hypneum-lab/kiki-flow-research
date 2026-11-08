@@ -16,6 +16,8 @@
   after an independent review (Annex A) before the tag. The pilot had run to
   completion when the revision was written; Annex A lists what of it was seen.
 
+**L2 deposit (annotation added 2026-11-08):** restricted Zenodo record [10.5281/zenodo.24054064](https://doi.org/10.5281/zenodo.24054064) (Hypneum Lab lot of 2026-11-08, file `prereg-jko-splitting-20261030.zip`, SHA-256 `09264eb2d7cfc67f0ae3904aa50dbacf7fe7e05657793f4da5232da2c2788524`) gives the freeze tag `prereg-jko-splitting-20261030` (commit `09ec14466b44f41061f9d49194053050f4cdb6bf`, `swh:1:rev:09ec14466b44f41061f9d49194053050f4cdb6bf`) a verifiable deposit date, level L2 of PROJECT-MANAGEMENT section 4. The deposit holds this file as it was at the tag; anything dated after the tag in this live file is not in the deposit.
+
 ## 1. Background
 
 The certified implicit JKO step (#51, merged in `31feab6`) solves

@@ -3,6 +3,8 @@
 Status: FIXED before any `certify` result at gamma <= 30 exists.
 Decided by the PI on 2026-10-30 (13:30 CET).
 
+**L2 deposit (annotation added 2026-11-08):** restricted Zenodo record [10.5281/zenodo.24054064](https://doi.org/10.5281/zenodo.24054064) (Hypneum Lab lot of 2026-11-08, file `prereg-m5-certify-20261030.zip`, SHA-256 `fa6a09bfcfc510976cfa0d5bbc0c7466adef5396d45779ef65d58c8ed0cac789`) gives the freeze tag `prereg-m5-certify-20261030` (commit `f2f146e618501f63b99fce1bd1396402355b6eca`, `swh:1:rev:f2f146e618501f63b99fce1bd1396402355b6eca`) a verifiable deposit date, level L2 of PROJECT-MANAGEMENT section 4. The deposit holds this file as it was at the tag; anything dated after the tag in this live file is not in the deposit.
+
 ## Context
 
 M5 validates the certified implicit JKO step merged in #51
