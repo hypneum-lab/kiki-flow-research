@@ -52,14 +52,17 @@ def _support(grid: int = GRID) -> np.ndarray:
 class PotentialEntropyF(FreeEnergy):
     """F = <V, rho> + theta sum rho log rho with its exact KL-prox."""
 
+    implicit_ready = True  # exact KL-prox (kl_prox_log override)
+
     def __init__(self, potential: np.ndarray, theta: float) -> None:
         self.potential = potential
         self.theta = theta
 
     def value(self, state: FlowState) -> float:
         rho = next(iter(state.rho.values()))
-        safe = np.clip(rho, 1e-12, None)
-        return float(np.dot(rho, self.potential) + self.theta * np.sum(safe * np.log(safe)))
+        # exact entropy (0 log 0 = 0), the function the closed-form prox minimises
+        ent = np.where(rho > 0, rho * np.log(np.where(rho > 0, rho, 1.0)), 0.0)
+        return float(np.dot(rho, self.potential) + self.theta * np.sum(ent))
 
     def kl_prox_log(self, state: FlowState, species_name: str):  # type: ignore[no-untyped-def]
         potential, theta = self.potential, self.theta
@@ -122,7 +125,13 @@ def test_t2_kl_prox_log_minimises_kl_plus_tau_f() -> None:
     rng = np.random.default_rng(2)
     potentials = {n: rng.standard_normal(GRID) for n in names}
     prior = {n: rng.dirichlet(np.full(GRID, 2.0)) for n in names}
-    f = T2FreeEnergy(species=species, potentials=potentials, prior=prior, turing_strength=0.0)
+    f = T2FreeEnergy(
+        species=species,
+        potentials=potentials,
+        prior=prior,
+        turing_strength=0.0,
+        turing_smoothing=None,
+    )
     state = FlowState(
         rho={n: rng.dirichlet(np.full(GRID, 2.0)) for n in names},
         P_theta=np.zeros(4),
@@ -159,8 +168,20 @@ def test_t2_nonseparable_grad_includes_turing_term() -> None:
         tau=0,
         metadata={"track_id": "T2"},
     )
-    off = T2FreeEnergy(species=species, potentials=potentials, prior=prior, turing_strength=0.0)
-    on = T2FreeEnergy(species=species, potentials=potentials, prior=prior, turing_strength=0.1)
+    off = T2FreeEnergy(
+        species=species,
+        potentials=potentials,
+        prior=prior,
+        turing_strength=0.0,
+        turing_smoothing=None,
+    )
+    on = T2FreeEnergy(
+        species=species,
+        potentials=potentials,
+        prior=prior,
+        turing_strength=0.1,
+        turing_smoothing=None,
+    )
     g_off = off.nonseparable_grad(state, names[0])
     g_on = on.nonseparable_grad(state, names[0])
     assert np.abs(g_on - g_off).max() > 0.0
@@ -263,7 +284,13 @@ def test_entropic_step_on_t2_energy_keeps_invariants_for_all_species() -> None:
     support = np.linspace(-2, 2, GRID).reshape(-1, 1)
     potentials = {n: np.zeros(GRID) for n in names}
     prior = {n: np.full(GRID, 1.0 / GRID) for n in names}
-    f = T2FreeEnergy(species=species, potentials=potentials, prior=prior, turing_strength=0.1)
+    f = T2FreeEnergy(
+        species=species,
+        potentials=potentials,
+        prior=prior,
+        turing_strength=0.1,
+        turing_smoothing=None,
+    )
     rng = np.random.default_rng(4)
     state = FlowState(
         rho={n: rng.dirichlet(np.full(GRID, 0.5)) for n in names},
@@ -273,7 +300,13 @@ def test_entropic_step_on_t2_energy_keeps_invariants_for_all_species() -> None:
         metadata={"track_id": "T2"},
     )
     solver = FullJKOSolver(
-        f_functional=f, h=0.05, support=support, epsilon=0.01, max_iter=200, scheme="jko_entropic"
+        f_functional=f,
+        h=0.05,
+        support=support,
+        epsilon=0.01,
+        max_iter=200,
+        scheme="jko_entropic",
+        nonseparable="explicit",  # unsmoothed Turing term: explicit path (ERRATUM 16)
     )
     out = solver.step(state)
     assert_invariants(out)

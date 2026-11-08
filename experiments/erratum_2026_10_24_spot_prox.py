@@ -87,6 +87,7 @@ def run_t2(kind: str, seed: int = 0) -> tuple[dict[str, np.ndarray], float]:
         potentials={n: np.zeros(GRID) for n in names},
         prior={n: np.full(GRID, 1.0 / GRID) for n in names},
         turing_strength=0.1,
+        turing_smoothing=None,
     )
     if kind == "fast":
         jko = JKOStep(f_functional=f_func, h=0.05, support=support, n_inner=10)

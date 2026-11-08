@@ -224,9 +224,13 @@ from kiki_flow_core.track2_paper.paper_run import run_paper
 run_paper(seeds=[0,1,2,3,4], out_dir=Path('paper'), make_all_figures=True)
 "
 
-# Rigorous path (~ 12.5 min on M1 Max CPU with the corrected solver; the
-# historical 84 min timed the defective prox). Write to a new directory:
-# paper_rigorous/ holds the historical artefacts and is not overwritten.
+# Rigorous path. With the current defaults (certified implicit entropic JKO
+# step, ERRATUM.md section 16) a step costs from seconds (gamma <= 1) to minutes
+# (stiff cases); the ~12.5 min timing on M1 Max CPU is for the legacy split with
+# the corrected prox (pass scheme="legacy_split", reinject=False to reproduce
+# it); the historical 84 min timed the defective prox. Write to a new
+# directory: paper_rigorous/ holds the historical artefacts and is not
+# overwritten.
 PYTHONPATH=. uv run python -c "
 from pathlib import Path
 from kiki_flow_core.track2_paper.paper_run import run_paper

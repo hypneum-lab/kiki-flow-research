@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 
 from kiki_flow_core.master_equation import FreeEnergy, JKOStep, NonSeparable, Scheme
@@ -33,10 +35,13 @@ class FullJKOSolver(JKOStep):
     explicitly to reproduce results produced before 2026-10-25).
     ``epsilon=None`` (default) resolves to ``h ** 2`` under ``jko_entropic``
     and to the historical ``0.01`` under ``legacy_split``.
-    ``nonseparable`` ("implicit" by default since 2026-10-27, or "explicit"
-    to reproduce earlier results) is forwarded to ``JKOStep`` (entropic
-    scheme only, ERRATUM.md sections 14-15), and so is
-    ``prox_tol`` (Sinkhorn early stop; 0 runs all ``max_iter`` iterations).
+    ``nonseparable`` ("implicit" by default, or "explicit" to reproduce
+    earlier results) is forwarded to ``JKOStep`` (entropic scheme only,
+    ERRATUM.md sections 14-16), and so are ``prox_tol`` (Sinkhorn early stop
+    of the explicit path; 0 runs all ``max_iter`` iterations) and
+    ``implicit_options`` (keyword settings of the certified implicit solver:
+    ``kkt_tol``, ``max_outer``, ``l0``, ``l_max``, ``sigma``, ``inner_n_iter``,
+    ``inner_tol``, ``inner_marginal_tol``, ``on_failure``).
     """
 
     def __init__(
@@ -50,6 +55,7 @@ class FullJKOSolver(JKOStep):
         scheme: Scheme = "jko_entropic",
         nonseparable: NonSeparable = "implicit",
         prox_tol: float = 0.0,
+        implicit_options: dict[str, Any] | None = None,
     ) -> None:
         epsilon = resolve_epsilon(epsilon, h, scheme)
         super().__init__(
@@ -63,6 +69,7 @@ class FullJKOSolver(JKOStep):
             scheme=scheme,
             nonseparable=nonseparable,
             prox_tol=prox_tol,
+            **(implicit_options or {}),
         )
         self.epsilon = epsilon
         self.max_iter = max_iter
@@ -92,6 +99,7 @@ class MLXFullJKOSolver(JKOStep):
         scheme: Scheme = "jko_entropic",
         nonseparable: NonSeparable = "implicit",
         prox_tol: float = 0.0,
+        implicit_options: dict[str, Any] | None = None,
     ) -> None:
         epsilon = resolve_epsilon(epsilon, h, scheme)
         super().__init__(
@@ -106,6 +114,7 @@ class MLXFullJKOSolver(JKOStep):
             scheme=scheme,
             nonseparable=nonseparable,
             prox_tol=prox_tol,
+            **(implicit_options or {}),
         )
         self.epsilon = epsilon
         self.max_iter = max_iter

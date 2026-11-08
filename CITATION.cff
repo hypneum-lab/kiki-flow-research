@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite both this repository and the parent research program's pre-registration (OSF DOI 10.17605/OSF.IO/Q6JYN)."
+message: "If you use this software, please cite both this repository and the parent research program's pre-registration (OSF DOI 10.17605/OSF.IO/Q6JYN). Notice (2026-11-04): the quantitative results of the paper draft (paper/main.tex, Zenodo records up to paper-v0.13-draft) are superseded by ERRATUM.md, which requalifies them (sections 12, 14 and 16); do not cite them without it."
 title: "kiki-flow-research: A Wasserstein Gradient Flow Engine for LLM Consolidation"
 abstract: >
   kiki-flow-research is the upstream Wasserstein-gradient-flow engine
@@ -12,12 +12,13 @@ abstract: >
   decomposition spanning phonological, lexical, syntactic, and
   semantic levels.
 type: software
-version: paper-v0.13-draft
+version: "paper-v0.13-draft, superseded notice of 2026-11-04 (untagged)"
 authors:
   - family-names: Saillant
     given-names: Clément
+    orcid: "https://orcid.org/0000-0002-8414-185X"
     email: clement@saillant.cc
-    affiliation: "L'Electron Rare, Grandris, France"
+    affiliation: "Hypneum Lab (L'Électron Rare), Grandris, France"
 repository-code: "https://github.com/hypneum-lab/kiki-flow-research"
 url: "https://github.com/hypneum-lab/kiki-flow-research"
 license: MIT
@@ -35,10 +36,10 @@ identifiers:
     description: "Zenodo concept DOI (resolves to latest version)"
   - type: doi
     value: 10.5281/zenodo.23636477
-    description: "Zenodo paper-v0.13-draft version DOI (2026-10-25; erratum update: solver epsilon and max_iter fixes)"
+    description: "Zenodo paper-v0.13-draft version DOI (2026-10-25; erratum update: solver epsilon and max_iter fixes). Superseded: predates ERRATUM.md sections 11-16 (rigorous path not a JKO step of F; gamma >= 20 excess not interpretable; certified recomputation pending)"
   - type: doi
     value: 10.5281/zenodo.23619954
-    description: "Zenodo paper-v0.12-draft version DOI (2026-10-24; erratum: corrected W2 prox reruns)"
+    description: "Zenodo paper-v0.12-draft version DOI (2026-10-24; erratum: corrected W2 prox reruns). Superseded: predates ERRATUM.md sections 9-16"
   - type: doi
     value: 10.5281/zenodo.19666756
     description: "Zenodo paper-v0.8-draft version DOI (2026-04-20; contains claims withdrawn by ERRATUM.md)"
@@ -48,15 +49,16 @@ identifiers:
   - type: url
     value: "https://osf.io/v7a2j"
     description: "Parent research program OSF project"
-date-released: 2026-10-25
+date-released: 2026-11-04
 preferred-citation:
   type: unpublished
   title: "dreamOfkiki: A Substrate-Agnostic Formal Framework for Dream-Based Knowledge Consolidation in Artificial Cognitive Systems"
   authors:
     - family-names: Saillant
       given-names: Clément
+      orcid: "https://orcid.org/0000-0002-8414-185X"
       email: clement@saillant.cc
-      affiliation: "L'Electron Rare, Grandris, France"
+      affiliation: "Hypneum Lab (L'Électron Rare), Grandris, France"
   year: 2026
   url: "https://github.com/hypneum-lab/dream-of-kiki"
   notes: "Paper 1 draft v0.2, single author. MIT code + CC-BY-4.0 docs. OSF pre-registration DOI 10.17605/OSF.IO/Q6JYN. Not submitted to arXiv as of 2026-10-25. For this repository's own paper draft and erratum see README.md (Citation) and ERRATUM.md."

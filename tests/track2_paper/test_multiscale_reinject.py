@@ -26,7 +26,13 @@ def _problem() -> tuple[CanonicalSpecies, np.ndarray, T2FreeEnergy]:
     names = species.species_names()
     potentials = {n: np.zeros(GRID) for n in names}
     prior = {n: np.full(GRID, 1.0 / GRID) for n in names}
-    f = T2FreeEnergy(species=species, potentials=potentials, prior=prior, turing_strength=0.0)
+    f = T2FreeEnergy(
+        species=species,
+        potentials=potentials,
+        prior=prior,
+        turing_strength=0.0,
+        turing_smoothing=None,
+    )
     support = np.linspace(-2, 2, GRID).reshape(-1, 1)
     return species, support, f
 

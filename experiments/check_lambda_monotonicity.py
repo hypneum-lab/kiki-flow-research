@@ -293,6 +293,7 @@ def run(
         potentials=potentials,
         prior=prior,
         turing_strength=0.1,
+        turing_smoothing=None,
     )
     # Plain JKO (projected-gradient only, no W2 prox) — cheap, same fixed points
     # under T2FreeEnergy and sufficient for observing contraction. ``n_inner=1``

@@ -70,7 +70,11 @@ def problem(alpha: float, gamma: float) -> T2FreeEnergy:
     }
     prior = {n: np.full(GRID, 1.0 / GRID) for n in names}
     return T2FreeEnergy(
-        species=species, potentials=potentials, prior=prior, turing_strength=gamma * 0.1
+        species=species,
+        potentials=potentials,
+        prior=prior,
+        turing_strength=gamma * 0.1,
+        turing_smoothing=None,
     )
 
 

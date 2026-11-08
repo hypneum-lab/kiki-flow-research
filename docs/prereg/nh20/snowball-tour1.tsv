@@ -1,0 +1,616 @@
+direction	id	annee	titre	premier_auteur	source_api	graine
+amont	CorpusId:126136959	2016	Systèmes de particules en interaction, approche par flot de gradient dans l'espace de Wasserstein	M. Laborde	s2	arXiv:1602.04457
+amont	CorpusId:126404580	2016	From unbalanced optimal transport to the Camassa-Holm equation	Thomas O. Gallouët	s2	arXiv:1602.04457
+amont	DOI:10.1051/PROC/201654001	2016	An augmented Lagrangian approach to Wasserstein gradient flows and applications	J. Benamou	s2	arXiv:1602.04457
+amont	DOI:10.1137/15M1010087	2015	Entropic Approximation of Wasserstein Gradient Flows	G. Peyré	s2	arXiv:1602.04457
+amont	CorpusId:124181096	2015	Optimal Transport for Applied Mathematicians: Calculus of Variations, PDEs, and Modeling	F. Santambrogio	s2	arXiv:1602.04457
+amont	arXiv:1509.00068	2015	Optimal Transport in Competition with Reaction: The Hellinger-Kantorovich Distance and Geodesic Curves	M. Liero	s2	arXiv:1602.04457
+amont	arXiv:1508.07941	2015	Optimal Entropy-Transport problems and a new Hellinger–Kantorovich distance between positive measures	M. Liero	s2	arXiv:1602.04457
+amont	arXiv:1508.05216	2015	Unbalanced Optimal Transport: Geometry and Kantorovich Formulation	Lénaïc Chizat	s2	arXiv:1602.04457
+amont	arXiv:1505.07746	2015	A new optimal transport distance on the space of finite Radon measures	S. Kondratyev	s2	arXiv:1602.04457
+amont	DOI:10.1016/j.aml.2014.10.008	2015	Weak solutions to a fractional Fokker-Planck equation via splitting and Wasserstein gradient flow	Malcolm Bowles	s2	arXiv:1602.04457
+amont	arXiv:1503.06389	2015	BV Estimates in Optimal Transportation and Applications	G. De Philippis	s2	arXiv:1602.04457
+amont	arXiv:1408.4536	2014	Discretization of functionals involving the Monge–Ampère operator	J. Benamou	s2	arXiv:1602.04457
+amont	arXiv:1301.2612	2013	The Hele–Shaw Asymptotics for Mechanical Models of Tumor Growth	B. Perthame	s2	arXiv:1602.04457
+amont	DOI:10.1098/rsta.2012.0346	2012	Gradient structures and geodesic convexity for reaction–diffusion systems	M. Liero	s2	arXiv:1602.04457
+amont	arXiv:1206.3219	2012	Generalized Wasserstein Distance and its Application to Transport Equations with Source	B. Piccoli	s2	arXiv:1602.04457
+amont	arXiv:1203.3573	2012	The Parabolic-Parabolic Keller-Segel System with Critical Diffusion as a Gradient Flow in ℝ d , d ≥ 3	A. Blanchet	s2	arXiv:1602.04457
+amont	DOI:10.1111/j.1467-8659.2011.02032.x	2011	A Multiscale Approach to Optimal Transport	Q. Mérigot	s2	arXiv:1602.04457
+amont	arXiv:1506.06430	2010	An Interpolating Distance Between Optimal Transport and Fisher–Rao Metrics	Lénaïc Chizat	s2	arXiv:1602.04457
+amont	arXiv:0901.0540	2009	A Family of Nonlinear Fourth Order Equations of Gradient Flow Type	D. Matthes	s2	arXiv:1602.04457
+amont	DOI:10.1007/978-3-540-71050-9	2008	Optimal Transport: Old and New	C. Villani	s2	arXiv:1602.04457
+amont	DOI:10.3934/DCDSB.2009.11.153	2008	The Janossy effect and hybrid variational principles	D. Kinderlehrer	s2	arXiv:1602.04457
+amont	DOI:10.1051/COCV:2005022	2005	A variational model for urban planning with traffic congestion	G. Carlier	s2	arXiv:1602.04457
+amont	arXiv:math/0508209	2005	Transport and concentration problems with interaction effects	F. Santambrogio	s2	arXiv:1602.04457
+amont	DOI:10.1090/gsm/058	2003	Topics in Optimal Transportation	C. Villani	s2	arXiv:1602.04457
+amont	DOI:10.1081/PDE-100002243	2001	THE GEOMETRY OF DISSIPATIVE EVOLUTION EQUATIONS: THE POROUS MEDIUM EQUATION	F. Otto	s2	arXiv:1602.04457
+amont	DOI:10.1051/M2AN:1999166	1999	Approximation of Parabolic Equations Using the Wasserstein Metric	D. Kinderlehrer	s2	arXiv:1602.04457
+amont	DOI:10.1007/S002050050073	1998	Dynamics of Labyrinthine Pattern Formation in Magnetic Fluids: A Mean‐Field Theory	F. Otto	s2	arXiv:1602.04457
+amont	DOI:10.1006/AIMA.1997.1634	1997	A Convexity Principle for Interacting Gases	R. McCann	s2	arXiv:1602.04457
+amont	DOI:10.1007/BF02392620	1996	The geometry of optimal transportation	W. Gangbo	s2	arXiv:1602.04457
+amont	DOI:10.1002/CPA.3160440402	1991	Polar Factorization and Monotone Rearrangement of Vector-Valued Functions	Y. Brenier	s2	arXiv:1602.04457
+amont	DOI:10.1515/CRLL.1909.136.210	1909	Neue Begründung der Theorie quadratischer Formen von unendlichvielen Veränderlichen.	E. Hellinger	s2	arXiv:1602.04457
+amont	-	2016	A splitting scheme for very degenerate advection-reaction-diffusion equations		s2	arXiv:1602.04457
+amont	DOI:10.1007/978-3-642-32160-3_1	2013	A User’s Guide to Optimal Transport	L. Ambrosio	s2	arXiv:1602.04457
+amont	-	2007	Measure theory, volume 1 & 2		s2	arXiv:1602.04457
+amont	-	2007	Compact sets in the space L p ( 0 , T ; B )		s2	arXiv:1602.04457
+amont	CorpusId:62824717	2005	Gradient Flows: In Metric Spaces and in the Space of Probability Measures	L. Ambrosio	s2	arXiv:1602.04457
+amont	DOI:10.1007/s002110050002	2000	A computational fluid mechanics solution to the Monge-Kantorovich mass transfer problem	J. Benamou	s2	arXiv:1602.04457
+amont	CorpusId:118499431	2000	Functions of Bounded Variation and Free Discontinuity Problems	L. Ambrosio	s2	arXiv:1602.04457
+amont	DOI:10.1137/S0036141096303359	1996	THE VARIATIONAL FORMULATION OF THE FOKKER-PLANCK EQUATION	R. Jordan	s2	arXiv:1602.04457
+amont	-	1993	New problems on minimizing movements		s2	arXiv:1602.04457
+amont	DOI:10.2307/1969123	1948	On Equivalence of Infinite Product Measures	S. Kakutani	s2	arXiv:1602.04457
+amont	CorpusId:17376431		Mathematical Modelling and Numerical Analysis a Hybrid Variational Principle for the Keller-segel System in R 2	A. Blanchet	s2	arXiv:1602.04457
+amont	-		E-mail: thomas.gallouet@ulg.ac.be Léonard Monsaingeon		s2	arXiv:1602.04457
+amont	-		E-mail: thomas.gallouet@polytechnique.edu Léonard Monsaingeon: CAMGSD Instituto Superior Técnico		s2	arXiv:1602.04457
+aval	arXiv:2610.10278	2026	Neural Sampling with Reweighted Normalizing Flows via the Wasserstein--Fisher--Rao JKO Scheme	Chen-Guang Duan	s2	arXiv:1602.04457
+aval	arXiv:2609.30220	2026	Riemannian Gradient Descent for Gaussian Mixture Models with unknown diagonal covariances	Romane Giard	s2	arXiv:1602.04457
+aval	arXiv:2609.18118	2026	Preservation of Log-Concavity and Convergence of Wasserstein-Fisher-Rao Gradient Flows	F. R. Crucinio	s2	arXiv:1602.04457
+aval	DOI:10.1098/rsos.260620	2026	A constrained Wasserstein gradient flow for aggregation–diffusion dynamics with application to economic adjustment	S. Halkiewicz	s2	arXiv:1602.04457
+aval	arXiv:2604.20301	2026	Properties and limitations of geometric tempering for gradient flow dynamics	F. R. Crucinio	s2	arXiv:1602.04457
+aval	arXiv:2604.13341	2026	Newton's Algorithm as a Gradient Flow: A Geometric Framework for Recursive Mixture Estimation	Bernardo Flores	s2	arXiv:1602.04457
+aval	arXiv:2602.15094	2026	On propagation of chaos for the Fisher-Rao gradient flow in entropic mean-field optimization	Petra Lazić	s2	arXiv:1602.04457
+aval	arXiv:2511.18060	2025	An operator splitting analysis of Wasserstein-Fisher-Rao gradient flows	F. R. Crucinio	s2	arXiv:1602.04457
+aval	arXiv:2507.04330	2025	A note on the unique properties of the Kullback-Leibler divergence for sampling via gradient flows	F. R. Crucinio	s2	arXiv:1602.04457
+aval	arXiv:2506.05905	2025	Sequential Monte Carlo approximations of Wasserstein-Fisher-Rao gradient flows	F. R. Crucinio	s2	arXiv:1602.04457
+aval	arXiv:2505.13197	2025	Inferring stochastic dynamics with growth from cross-sectional data	Stephen Zhang	s2	arXiv:1602.04457
+aval	arXiv:2502.10600	2025	Weighted quantization using MMD: From mean field to mean shift via gradient flows	Ayoub Belhadji	s2	arXiv:1602.04457
+aval	arXiv:2501.17049	2025	Hellinger-Kantorovich Gradient Flows: Global Exponential Decay of Entropy Functionals	Alexander Mielke	s2	arXiv:1602.04457
+aval	arXiv:2412.20385	2024	A Particle Algorithm for Mean-Field Variational Inference	Qiang Du	s2	arXiv:1602.04457
+aval	arXiv:2411.07331	2024	A total variation flow scheme for ergodic mean field games	D. Kalise	s2	arXiv:1602.04457
+aval	arXiv:2411.00214	2024	Inclusive KL Gradient Flows: Otto-Wasserstein, Fisher-Rao-Gaussian, and Local-Estimator Dynamics	Jia-Jie Zhu	s2	arXiv:1602.04457
+aval	arXiv:2410.20622	2024	Kernel Approximation of Fisher-Rao Gradient Flows	Jia-Jie Zhu	s2	arXiv:1602.04457
+aval	DOI:10.1093/imaiai/iaae018	2024	On adversarial robustness and the use of Wasserstein ascent-descent dynamics to enforce it	Camilo Andrés García Trillos	s2	arXiv:1602.04457
+aval	arXiv:2407.00649	2024	Particle Semi-Implicit Variational Inference	Jen Ning Lim	s2	arXiv:1602.04457
+aval	arXiv:2406.00288	2024	Neural Optimal Transport with Lagrangian Costs	Aram-Alexandre Pooladian	s2	arXiv:1602.04457
+aval	arXiv:2405.17075	2024	Interaction-Force Transport Gradient Flows	E. Gladin	s2	arXiv:1602.04457
+aval	arXiv:2405.15834	2024	A Fisher-Rao gradient flow for entropic mean-field min-max games	Razvan-Andrei Lascu	s2	arXiv:1602.04457
+aval	arXiv:2401.08188	2024	Bounded weak solutions for Keller-Segel equations with generalized diffusion and logistic source via an unbalanced optimal transport splitting scheme	Kyungkeun Kang	s2	arXiv:1602.04457
+aval	arXiv:2312.16429	2023	GAD-PVI: A General Accelerated Dynamic-Weight Particle-Based Variational Inference Framework	Fangyikang Wang	s2	arXiv:1602.04457
+aval	arXiv:2311.13159	2023	Multi-Objective Optimization via Wasserstein-Fisher-Rao Gradient Flow	Yinuo Ren	s2	arXiv:1602.04457
+aval	arXiv:2311.00894	2023	Minimizing Convex Functionals over Space of Probability Measures via KL Divergence Gradient Flow	Rentian Yao	s2	arXiv:1602.04457
+aval	arXiv:2310.16705	2023	Wasserstein Gradient Flow over Variational Parameter Space for Variational Inference	D. Nguyen	s2	arXiv:1602.04457
+aval	arXiv:2310.02951	2023	A Fisher–Rao Gradient Flow for Entropy-Regularised Markov Decision Processes in Polish Spaces	B. Kerimkulov	s2	arXiv:1602.04457
+aval	arXiv:2309.07351	2023	Wasserstein Consensus ADMM	Iman Nodozi	s2	arXiv:1602.04457
+aval	arXiv:2306.06287	2023	Generalized optimal transport and mean field control problems for reaction-diffusion systems with high-order finite element computation	Guo-Sheng Fu	s2	arXiv:1602.04457
+aval	arXiv:2305.10411	2023	Wasserstein Gradient Flows for Optimizing Gaussian Mixture Policies	Hanna Ziesche	s2	arXiv:1602.04457
+aval	arXiv:2303.08950	2023	High order spatial discretization for variational time implicit schemes: Wasserstein gradient flows and reaction-diffusion systems	Guo-Sheng Fu	s2	arXiv:1602.04457
+aval	arXiv:2302.12229	2023	An Explicit Expansion of the Kullback-Leibler Divergence along its Fisher-Rao Gradient Flow	Carles Domingo-Enrich	s2	arXiv:1602.04457
+aval	arXiv:2301.03662	2023	On adversarial robustness and the use of Wasserstein ascent-descent dynamics to enforce it	Camilo A. Garcia Trillos	s2	arXiv:1602.04457
+aval	arXiv:2301.01766	2023	Learning Gaussian Mixtures Using the Wasserstein-Fisher-Rao Gradient Flow	Yuling Yan	s2	arXiv:1602.04457
+aval	arXiv:2211.00450	2022	Birth–death dynamics for sampling: global convergence, approximations and their asymptotics	Yu-Long Lu	s2	arXiv:1602.04457
+aval	arXiv:2208.14299	2022	Fine Properties of Geodesics and Geodesic \documentclass[12pt]{minimal} \usepackage{amsmath} \usepackage{wasysym} \usepackage{amsfonts} \usepackage{amssymb} \usepackage{amsbsy} \usepackage{mathrsfs} \usepackage{upgreek} \setlength{\oddsidemargin}{-69pt} \begin{document}$$\lambda $$\end{document}λ-Co	M. Liero	s2	arXiv:1602.04457
+aval	arXiv:2207.09815	2022	Evolutionary variational inequalities on the Hellinger-Kantorovich and spherical Hellinger-Kantorovich spaces	Vaios Laschos	s2	arXiv:1602.04457
+aval	arXiv:2206.02774	2022	Polyak–Łojasiewicz inequality on the space of measures and convergence of mean-field birth-death processes	Lin-Shan Liu	s2	arXiv:1602.04457
+aval	DOI:10.3390/e24050721	2022	Some Recent Advances in Energetic Variational Approaches	Yiwei Wang	s2	arXiv:1602.04457
+aval	arXiv:2112.00945	2021	DPVI: A Dynamic-Weight Particle-Based Variational Inference Framework	Chao Zhang	s2	arXiv:1602.04457
+aval	arXiv:2110.10972	2021	Efficient Gradient Flows in Sliced-Wasserstein Space	Clément Bonet	s2	arXiv:1602.04457
+aval	arXiv:2109.02792	2021	A second-order accurate, operator splitting scheme for reaction-diffusion systems in an energetic variational formulation	Chun Liu	s2	arXiv:1602.04457
+aval	arXiv:2107.11501	2021	Computational mean-field information dynamics associated with reaction-diffusion equations	Wuchen Li	s2	arXiv:1602.04457
+aval	DOI:10.1007/s00028-021-00702-5	2021	A multi-step Lagrangian scheme for spatially inhomogeneous evolutionary games	Stefano Almi	s2	arXiv:1602.04457
+aval	arXiv:2011.05845	2020	On a general matrix-valued unbalanced optimal transport problem	Bo-Wen Li	s2	arXiv:1602.04457
+aval	arXiv:2005.07479	2020	An alternate Lagrangian scheme for spatially inhomogeneous evolutionary games.	Stefano Almi	s2	arXiv:1602.04457
+aval	arXiv:2002.07724	2020	A new transportation distance with bulk/interface interactions and flux penalization	Léonard Monsaingeon	s2	arXiv:1602.04457
+aval	arXiv:2002.06277	2020	A mean-field analysis of two-player zero-sum games	Carles Domingo-Enrich	s2	arXiv:1602.04457
+aval	arXiv:2002.04496	2020	A minimizing Movement approach to a class of scalar reaction–diffusion equations	F. Fleißner	s2	arXiv:1602.04457
+aval	arXiv:1910.12958	2019	Sinkhorn Divergences for Unbalanced Optimal Transport	Thibault Séjourné	s2	arXiv:1602.04457
+aval	arXiv:1907.10300	2019	Sparse optimization on measures with over-parameterized gradient descent	Lénaïc Chizat	s2	arXiv:1602.04457
+aval	arXiv:1905.09863	2019	Accelerating Langevin Sampling with Birth-death	Yu-Long Lu	s2	arXiv:1602.04457
+aval	arXiv:1904.04112	2019	Convex Sobolev inequalities related to unbalanced optimal transport	S. Kondratyev	s2	arXiv:1602.04457
+aval	arXiv:1902.01843	2019	Global convergence of neuron birth-death dynamics	Grant M. Rotskoff	s2	arXiv:1602.04457
+aval	arXiv:1809.03430	2018	Spherical Hellinger-Kantorovich Gradient Flows	S. Kondratyev	s2	arXiv:1602.04457
+aval	arXiv:1806.10461	2018	Gradient and GENERIC Systems in the Space of Fluxes, Applied to Reacting Particle Systems	D. R. Michiel Renger	s2	arXiv:1602.04457
+aval	arXiv:1806.00120	2018	A mesoscopic model of biological transportation networks	M. Burger	s2	arXiv:1602.04457
+aval	arXiv:1803.00567	2018	Computational Optimal Transport	G. Peyré	s2	arXiv:1602.04457
+aval	arXiv:1712.06124	2017	A tumor growth model of Hele-Shaw type as a gradient flow	Simone Di Marino	s2	arXiv:1602.04457
+aval	CorpusId:125146528	2017	Transport optimal de mesures positives : modèles, méthodes numériques, applications	Lénaïc Chizat	s2	arXiv:1602.04457
+aval	arXiv:1706.08957	2017	Nonlinear Fokker-Planck equations with reaction as gradient flows of the free energy	S. Kondratyev	s2	arXiv:1602.04457
+aval	DOI:10.1090/mcom/3303	2017	Scaling algorithms for unbalanced optimal transport problems	Lénaïc Chizat	s2	arXiv:1602.04457
+aval	arXiv:1704.04541	2017	An unbalanced optimal transport splitting scheme for general advection-reaction-diffusion problems	Thomas O. Gallouët	s2	arXiv:1602.04457
+aval	DOI:10.70675/5ca4e714zf1c1z4f17za507z56a8e3bb0960	2016	Interacting particles systems, Wasserstein gradient flow approach	M. Laborde	s2	arXiv:1602.04457
+aval	arXiv:1609.04006	2016	The Camassa-Holm equation as an incompressible Euler equation: a geometric point of view	Thomas O. Gallouët	s2	arXiv:1602.04457
+aval	arXiv:1609.03890	2016	{Euclidean, metric, and Wasserstein} gradient flows: an overview	F. Santambrogio	s2	arXiv:1602.04457
+aval	CorpusId:126404580	2016	From unbalanced optimal transport to the Camassa-Holm equation	Thomas O. Gallouët	s2	arXiv:1602.04457
+aval	arXiv:1607.05816	2016	Scaling Algorithms for Unbalanced Transport Problems	Lénaïc Chizat	s2	arXiv:1602.04457
+aval	arXiv:1603.06431	2016	A fitness-driven cross-diffusion system from polulation dynamics as a gradient flow	S. Kondratyev	s2	arXiv:1602.04457
+aval	arXiv:1603.06493	2016	A new multicomponent Poincaré–Beckner inequality	S. Kondratyev	s2	arXiv:1602.04457
+aval	CorpusId:259075623	2023	ENTROPIC MEAN-FIELD MIN-MAX PROBLEMS VIA BEST RESPONSE AND FISHER-RAO FLOWS	Razvan-Andrei Lascu	s2	arXiv:1602.04457
+aval	CorpusId:249394528	2022	J un 2 02 2 POLYAK-LOJASIEWICZ INEQUALITY ON THE SPACE OF MEASURES AND CONVERGENCE OF MEAN-FIELD BIRTH-DEATH PROCESSES	Lin-Shan Liu	s2	arXiv:1602.04457
+aval	DOI:10.70675/f395dbd2z6531z4abazb4dcz6f7826c9f9c8	2019	Unbalanced Optimal Transport : Models, Numerical Methods, Applications	L'enaic Chizat	s2	arXiv:1602.04457
+aval	CorpusId:270640757		Eﬀicient Gradient Flows in Sliced-Wasserstein Space	Clément Bonet	s2	arXiv:1602.04457
+amont	arXiv:1610.06519	2016	Stabilized Sparse Scaling Algorithms for Entropy Regularized Transport Problems	Bernhard Schmitzer	s2	arXiv:1512.02783
+amont	arXiv:1607.05816	2016	Scaling Algorithms for Unbalanced Transport Problems	Lénaïc Chizat	s2	arXiv:1512.02783
+amont	DOI:10.1007/s00211-015-0781-y	2015	Discretization of functionals involving the Monge–Ampère operator	J. Benamou	s2	arXiv:1512.02783
+amont	DOI:10.1137/15M1010087	2015	Entropic Approximation of Wasserstein Gradient Flows	G. Peyré	s2	arXiv:1512.02783
+amont	arXiv:1506.00126	2015	On some non linear evolution systems which are perturbations of Wasserstein gradient flows	M. Laborde	s2	arXiv:1512.02783
+amont	arXiv:1412.5154	2014	Iterative Bregman Projections for Regularized Transportation Problems	J. Benamou	s2	arXiv:1512.02783
+amont	arXiv:1408.4536	2014	Discretization of functionals involving the Monge–Ampère operator	J. Benamou	s2	arXiv:1512.02783
+amont	arXiv:1402.4252	2014	A Finite-Volume Method for Nonlinear Nonlocal Equations with a Gradient Flow Structure	J. Carrillo	s2	arXiv:1512.02783
+amont	DOI:10.1007/978-3-319-01982-6	2013	Local Minimization, Variational Evolution and Γ-Convergence	Andrea Braides	s2	arXiv:1512.02783
+amont	arXiv:1308.0215	2013	A survey of the Schr\"odinger problem and some of its connections with optimal transport	Christian Léonard	s2	arXiv:1512.02783
+amont	arXiv:1306.0895	2013	Sinkhorn Distances: Lightspeed Computation of Optimal Transport	Marco Cuturi	s2	arXiv:1512.02783
+amont	DOI:10.1007/S10440-012-9783-2	2013	One-Dimensional Numerical Algorithms for Gradient Flows in the p-Wasserstein Spaces	M. Agueh	s2	arXiv:1512.02783
+amont	DOI:10.1016/j.jcp.2012.11.014	2013	Monge-Ampére based moving mesh methods for numerical weather prediction, with applications to the Eady problem	C. Budd	s2	arXiv:1512.02783
+amont	arXiv:1301.0747	2013	Convergence of a variational Lagrangian scheme for a nonlinear drift diffusion equation	D. Matthes	s2	arXiv:1512.02783
+amont	arXiv:1208.0789	2012	Curves of steepest descent are entropy solutions for a class of degenerate convection–diffusion equations	M. Di Francesco	s2	arXiv:1512.02783
+amont	arXiv:1206.6571	2012	Optimal Transport and Cournot-Nash Equilibria	A. Blanchet	s2	arXiv:1512.02783
+amont	DOI:10.1137/100805741	2011	Barycenters in the Wasserstein Space	M. Agueh	s2	arXiv:1512.02783
+amont	arXiv:1011.2564	2010	From the Schr\"odinger problem to the Monge-Kantorovich problem	Christian Léonard	s2	arXiv:1512.02783
+amont	arXiv:1002.0686	2010	A MACROSCOPIC CROWD MOTION MODEL OF GRADIENT FLOW TYPE	B. Maury	s2	arXiv:1512.02783
+amont	DOI:10.1214/08-AIHP306	2010	The heat equation on manifolds as a gradient flow in the Wasserstein space	Matthias Erbar	s2	arXiv:1512.02783
+amont	DOI:10.1137/080739574	2009	Numerical Simulation of Diffusive and Aggregation Phenomena in Nonlinear Continuity Equations by Evolving Diffeomorphisms	J. Carrillo	s2	arXiv:1512.02783
+amont	DOI:10.1007/S00205-008-0186-5	2009	The Wasserstein Gradient Flow of the Fisher Information and the Quantum Drift-diffusion Equation	U. Gianazza	s2	arXiv:1512.02783
+amont	arXiv:2102.12811	2009	Matching with Trade-Offs: Revealed Preferences Over Competing Characteristics	Alfred Galichon	s2	arXiv:1512.02783
+amont	arXiv:0807.3573	2008	VARIATIONAL PARTICLE SCHEMES FOR THE POROUS MEDIUM EQUATION AND FOR THE SYSTEM OF ISENTROPIC EULER EQUATIONS	Michael Westdickenberg	s2	arXiv:1512.02783
+amont	DOI:10.1137/070683337	2008	Convergence of the Mass-Transport Steepest Descent Scheme for the Subcritical Patlak-Keller-Segel Model	A. Blanchet	s2	arXiv:1512.02783
+amont	DOI:10.1093/ACPROF:OSO/9780198569039.001.0001	2006	The Porous Medium Equation: Mathematical Theory	J. Vázquez	s2	arXiv:1512.02783
+amont	DOI:10.1090/gsm/058	2003	Topics in Optimal Transportation	C. Villani	s2	arXiv:1512.02783
+amont	arXiv:math/0309410	2002	Existence of solutions to degenerate parabolic equations via the Monge-Kantorovich theory	M. Agueh	s2	arXiv:1512.02783
+amont	DOI:10.1017/S0024609301309281	2001	FUNCTIONS OF BOUNDED VARIATION AND FREE DISCONTINUITY PROBLEMS (Oxford Mathematical Monographs)	Ronald F. Gariepy	s2	arXiv:1512.02783
+amont	DOI:10.1081/PDE-100002243	2001	THE GEOMETRY OF DISSIPATIVE EVOLUTION EQUATIONS: THE POROUS MEDIUM EQUATION	F. Otto	s2	arXiv:1512.02783
+amont	DOI:10.1080/02331930008844513	2000	Dykstras algorithm with bregman projections: A convergence proof	Heinz H. Bauschke	s2	arXiv:1512.02783
+amont	DOI:10.1051/M2AN:1999166	1999	Approximation of Parabolic Equations Using the Wasserstein Metric	D. Kinderlehrer	s2	arXiv:1512.02783
+amont	DOI:10.1007/BF01582220	1994	Asymptotic analysis of the exponential penalty trajectory in linear programming	R. Cominetti	s2	arXiv:1512.02783
+amont	DOI:10.1080/01621459.1983.10477029	1983	An Algorithm for Restricted Least Squares Regression	Richard L. Dykstra	s2	arXiv:1512.02783
+amont	DOI:10.1090/S0002-9939-1974-0357434-8	1974	Diagonal equivalence to matrices with prescribed row and column sums. II	Richard Sinkhorn	s2	arXiv:1512.02783
+amont	DOI:10.2140/PJM.1967.21.343	1967	Concerning nonnegative matrices and doubly stochastic matrices	Richard Sinkhorn	s2	arXiv:1512.02783
+amont	DOI:10.1214/AOMS/1177703591	1964	A Relationship Between Arbitrary Positive Matrices and Doubly Stochastic Matrices	Richard Sinkhorn	s2	arXiv:1512.02783
+amont	DOI:10.1214/AOMS/1177731829	1940	On a Least Squares Adjustment of a Sampled Frequency Table When the Expected Marginal Totals are Known	W. Deming	s2	arXiv:1512.02783
+amont	-	2015	Convolutional Wasserstein distances: Eﬃcient optimal transportation on geometric domains		s2	arXiv:1512.02783
+amont	CorpusId:44036106	2012	Regularised Regression and Density Estimation based on Optimal Transport	Marzena Franek	s2	arXiv:1512.02783
+amont	CorpusId:7425205	2011	Communications in Mathematical Physics From a Large-Deviations Principle to the Wasserstein Gradient Flow : A New Micro-Macro Passage	Stefan Adams	s2	arXiv:1512.02783
+amont	DOI:10.3934/KRM.2010.3.59	2010	A mixed finite element method for nonlinear diffusion equations	M. Burger	s2	arXiv:1512.02783
+amont	CorpusId:236051339	2006	Progress in Nonlinear Differential Equations and their Applications		s2	arXiv:1512.02783
+amont	CorpusId:62824717	2005	Gradient Flows: In Metric Spaces and in the Space of Probability Measures	L. Ambrosio	s2	arXiv:1512.02783
+amont	CorpusId:59022924	2003	Tightness, integral equicontinuity and compactness for evolution problems in Banach spaces	R. Rossi	s2	arXiv:1512.02783
+amont	CorpusId:118499431	2000	Functions of Bounded Variation and Free Discontinuity Problems	L. Ambrosio	s2	arXiv:1512.02783
+amont	DOI:10.68381/jca06018	1999	Dykstra's Algorithm as the Nonlinear Extension of Bregman's Optimization Method	L. Bregman	s2	arXiv:1512.02783
+amont	CorpusId:117753063	1998	The Dykstra algorithm with Bregman projec-tions	Y. Censor	s2	arXiv:1512.02783
+amont	DOI:10.1137/S0040585X97976301	1998	Closedness of Sum Spaces andthe Generalized Schrödinger Problem	L. Rüschendorf	s2	arXiv:1512.02783
+amont	DOI:10.1137/S0036141096303359	1996	THE VARIATIONAL FORMULATION OF THE FOKKER-PLANCK EQUATION	R. Jordan	s2	arXiv:1512.02783
+amont	DOI:10.1137/1.9781611970791	1994	Interior-point polynomial algorithms in convex programming	Y. Nesterov	s2	arXiv:1512.02783
+amont	DOI:10.1007/978-1-4612-0327-8	1993	An Introduction to-convergence	G. Dal Maso	s2	arXiv:1512.02783
+amont	DOI:10.1016/0041-5553(67)90040-7	1967	The relaxation method of finding the common point of convex sets and its application to the solution of problems in convex programming	L. Bregman	s2	arXiv:1512.02783
+amont	DOI:10.1093/comjnl/6.4.304	1964	Assignment Problems	J. S. Clowes	s2	arXiv:1512.02783
+amont	-	1931	Über die Umkehrung der Naturgesetze		s2	arXiv:1512.02783
+aval	arXiv:2610.10257	2026	First-order $\Gamma$-expansion for entropic optimal transport with non-degenerate costs	Luca Nenna	s2	arXiv:1512.02783
+aval	arXiv:2610.02007	2026	Approximation and computation of the geodesic Sinkhorn distance	Hugo Lavenant	s2	arXiv:1512.02783
+aval	DOI:10.1007/s41884-026-00222-6	2026	ODE for entropic optimal transport: interpolating between Kullback–Leibler and Wasserstein geometries	J. Hiew	s2	arXiv:1512.02783
+aval	arXiv:2609.14651	2026	Convergence of the Sinkhorn Riemannian metric for finitely supported measures	Gilles Mordant	s2	arXiv:1512.02783
+aval	arXiv:2609.11918	2026	General Quantification of Covariate and Concept Shifts	Hong-Bo Chen	s2	arXiv:1512.02783
+aval	arXiv:2608.03249	2026	One Knob to Rule Them All: A Unified Optimal Transport View of Cold-Start Active Learning	Ning Zhu	s2	arXiv:1512.02783
+aval	arXiv:2607.18191	2026	Sharp Asymptotics for Regularized Optimal Transport	Carlos Cardoso-Perelló	s2	arXiv:1512.02783
+aval	arXiv:2607.18184	2026	anyakrakusuma: A Python Library for Entropic Schrödinger Bridges on Idealized Geometries	S. Herho	s2	arXiv:1512.02783
+aval	arXiv:2607.17235	2026	A Dynamical Approximation Scheme on the Stiefel manifold for Wasserstein Gradient Flows	Isabella Carla Gonnella	s2	arXiv:1512.02783
+aval	arXiv:2607.16881	2026	Entropic optimal transport need not select a zero-temperature limit	Maja Gwóźdź	s2	arXiv:1512.02783
+aval	arXiv:2607.00655	2026	The Schr\"odinger problem on metric graphs	Juliane Krautz	s2	arXiv:1512.02783
+aval	DOI:10.1016/j.jmps.2026.106785	2026	Optimal Transport in Probabilistic Quasi-Brittle Fracture	Ved Prakash	s2	arXiv:1512.02783
+aval	arXiv:2606.25265	2026	Variational Inference via Entropic Transport Descent	Vincent Pacelli	s2	arXiv:1512.02783
+aval	arXiv:2605.28134	2026	Convergence of empirical subgradients for optimal transport-based objectives	Le Tam	s2	arXiv:1512.02783
+aval	CorpusId:291115952	2026	Learning Concave Bid Shading Strategies in Online Auctions via Measure-valued Proximal Optimization	Iman Nodozi	s2	arXiv:1512.02783
+aval	arXiv:2604.20827	2026	Failure of ambient closed-set large-deviation upper bounds in entropic optimal transport	Maja Gwóźdź	s2	arXiv:1512.02783
+aval	arXiv:2604.19910	2026	A Proximal Primal-Dual Approach to Generalized JKO Schemes for Doubly Nonlinear Parabolic Equations	L. Bricen͂o-Arias	s2	arXiv:1512.02783
+aval	arXiv:2604.19981	2026	Debiasing optimal transport: classical and entropic	Pierre-Cyril Aubin-Frankowski	s2	arXiv:1512.02783
+aval	arXiv:2604.08283	2026	A convergence rate for the entropic JKO scheme	Aymeric Baradat	s2	arXiv:1512.02783
+aval	arXiv:2603.27535	2026	Extension of coupling via the Projection of Optimal Transport	Jakwang Kim	s2	arXiv:1512.02783
+aval	arXiv:2602.08118	2026	Schr\"odinger bridge with transport relaxation	Yifan Jiang	s2	arXiv:1512.02783
+aval	arXiv:2602.01427	2026	Robust Generalization with Adaptive Optimal Transport Priors for Decision-Focused Learning	Hai-Xiang Sun	s2	arXiv:1512.02783
+aval	arXiv:2601.05290	2026	Multi-Period Martingale Optimal Transport: Classical Theory, Neural Acceleration, and Financial Applications	B. SriSairamGautam	s2	arXiv:1512.02783
+aval	arXiv:2512.19457	2025	Spectral Shrinkage of Gaussian Entropic Optimal Transport	Yun Ho	s2	arXiv:1512.02783
+aval	arXiv:2512.05282	2025	Entropic selection for optimal transport on the line with distance cost	Armand Ley	s2	arXiv:1512.02783
+aval	arXiv:2511.19075	2025	Structured Matching via Cost-Regularized Unbalanced Optimal Transport	E. Pardini	s2	arXiv:1512.02783
+aval	DOI:10.1515/cmam-2024-0138	2025	Finite Volume Methods for Two-Dimensional Nonlocal Partial Differential Equation with a Gradient Flow Structure	Wenli Cai	s2	arXiv:1512.02783
+aval	arXiv:2511.16211	2025	Weak optimal transport with moment constraints: constraint qualification, dual attainment and entropic regularization	Guillaume Carlier	s2	arXiv:1512.02783
+aval	arXiv:2511.14278	2025	Gradient Flows of Potential Energies in the Geometry of Sinkhorn Divergences	Mathis Hardion	s2	arXiv:1512.02783
+aval	arXiv:2509.10693	2025	Learning Concave Bid Shading Strategies in Online Auctions via Measure-Valued Proximal Optimization	Iman Nodozi	s2	arXiv:1512.02783
+aval	arXiv:2509.02205	2025	From Nash to Cournot--Nash equilibria via $\Gamma$-convergence	João Miguel Machado	s2	arXiv:1512.02783
+aval	arXiv:2507.16415	2025	Entropic approximations of the semigeostrophic shallow water equations	J. Benamou	s2	arXiv:1512.02783
+aval	arXiv:2507.07917	2025	Convergence rates for regularized unbalanced optimal transport: the discrete case	Luca Nenna	s2	arXiv:1512.02783
+aval	arXiv:2508.08476	2025	Sparse Partial Optimal Transport via Quadratic Regularization	Khang Tran	s2	arXiv:1512.02783
+aval	arXiv:2506.24021	2025	Minimally dissipative multi-bit logical operations	J. Klinger	s2	arXiv:1512.02783
+aval	arXiv:2506.18884	2025	A synthetic approach to comparison principles for variational problems, with applications to optimal transport	Flavien L'eger	s2	arXiv:1512.02783
+aval	arXiv:2506.12829	2025	General and Estimable Learning Bound Unifying Covariate and Concept Shifts	Hong-Bo Chen	s2	arXiv:1512.02783
+aval	arXiv:2506.09302	2025	$C^{1,\alpha}$-regularity for Schr\"odinger potentials of Shannon-entropy regularized Optimal Transport	Sumiya Baasandorj	s2	arXiv:1512.02783
+aval	arXiv:2505.23517	2025	Inexact JKO and proximal-gradient algorithms in the Wasserstein space	Simone Di Marino	s2	arXiv:1512.02783
+aval	arXiv:2505.00559	2025	Evolution variational inequalities with general costs	Pierre-Cyril Aubin-Frankowski	s2	arXiv:1512.02783
+aval	arXiv:2504.13513	2025	Convergence of the fully discrete JKO scheme	Anastasiia Hraivoronska	s2	arXiv:1512.02783
+aval	arXiv:2503.11843	2025	Entropic Optimal Transport Problem with Convex Functional Cost	A. Kazeykina	s2	arXiv:1512.02783
+aval	DOI:10.1080/03610926.2025.2455943	2025	Statistical Wasserstein distance with rank regularization and spiked structure	J. Lin	s2	arXiv:1512.02783
+aval	arXiv:2502.20264	2025	Exponential Convergence of General Iterative Proportional Fitting Procedures	Stephan Eckstein	s2	arXiv:1512.02783
+aval	arXiv:2502.16370	2025	Entropic Selection Principle for Monge's Optimal Transport	Shrey Aryan	s2	arXiv:1512.02783
+aval	arXiv:2502.12666	2025	Using Sinkhorn in the JKO Scheme Adds Linear Diffusion	Aymeric Baradat	s2	arXiv:1512.02783
+aval	arXiv:2502.07397	2025	Linear Bandits beyond Inner Product Spaces, the case of Bandit Optimal Transport	Lorenzo Croissant	s2	arXiv:1512.02783
+aval	arXiv:2502.00084	2025	A uniform rate of convergence for the entropic potentials in the quadratic Euclidean setting	Pablo López-Rivera	s2	arXiv:1512.02783
+aval	arXiv:2501.11382	2025	Global Regularity Estimates for Optimal Transport via Entropic Regularisation	N. Gozlan	s2	arXiv:1512.02783
+aval	arXiv:2501.03906	2025	A regularized transportation cost stemming from entropic approximation	Camilla Brizzi	s2	arXiv:1512.02783
+aval	arXiv:2412.06636	2024	Free-Gate: Planning, Control and Policy Composition via Free Energy Gating	Francesca Rossi	s2	arXiv:1512.02783
+aval	arXiv:2411.12430	2024	An Eulerian Approach to Regularized JKO Scheme with Low-Rank Tensor Decompositions for Bayesian Inversion	Vitalii Aksenov	s2	arXiv:1512.02783
+aval	arXiv:2411.07947	2024	Approximation rates of entropic maps in semidiscrete optimal transport	Ritwik Sadhu	s2	arXiv:1512.02783
+aval	arXiv:2410.14029	2024	Auditing and Enforcing Conditional Fairness via Optimal Transport	Mohsen Ghassemi	s2	arXiv:1512.02783
+aval	arXiv:2410.03353	2024	Sparsity of Quadratically Regularized Optimal Transport: Scalar Case	Alberto González-Sanz	s2	arXiv:1512.02783
+aval	arXiv:2408.04088	2024	Quantitative Convergence of Quadratically Regularized Linear Programs	Alberto González-Sanz	s2	arXiv:1512.02783
+aval	arXiv:2408.02701	2024	Randomized Transport Plans via Hierarchical Fully Probabilistic Design	Y. SarahBoufelja	s2	arXiv:1512.02783
+aval	arXiv:2407.01718	2024	Entropic Optimal Transport Eigenmaps for Nonlinear Alignment and Joint Embedding of High-Dimensional Datasets	Boris Landa	s2	arXiv:1512.02783
+aval	arXiv:2406.11537	2024	From entropic transport to martingale transport, and applications to model calibration	J. Benamou	s2	arXiv:1512.02783
+aval	arXiv:2405.09400	2024	Flow updates for domain decomposition of entropic optimal transport	I. Medina	s2	arXiv:1512.02783
+aval	arXiv:2404.19133	2024	Parameterized Wasserstein Gradient Flow	Yi-Jie Jin	s2	arXiv:1512.02783
+aval	arXiv:2404.02855	2024	Tight stability bounds for entropic Brenier maps	Vincent Divol	s2	arXiv:1512.02783
+aval	arXiv:2403.10405	2024	Action functional as an early warning indicator in the space of probability measures via Schrödinger bridge	Peng Zhang	s2	arXiv:1512.02783
+aval	arXiv:2402.15322	2024	Optimal Transport on the Lie Group of Roto-translations	Daan L. J. Bon	s2	arXiv:1512.02783
+aval	arXiv:2402.05443	2024	Scalable Wasserstein Gradient Flow for Generative Modeling through Unbalanced Optimal Transport	Jaemoo Choi	s2	arXiv:1512.02783
+aval	arXiv:2402.05100	2024	Large deviations for dynamical Schrödinger problems	Kengo Kato	s2	arXiv:1512.02783
+aval	arXiv:2311.04041	2023	Hilbert’s projective metric for functions of bounded growth and exponential convergence of Sinkhorn’s algorithm	Stephan Eckstein	s2	arXiv:1512.02783
+aval	DOI:10.1051/proc/202374158	2023	Machine learning and optimal transport: some statistical and algorithmic tools	Elsa Cazelles	s2	arXiv:1512.02783
+aval	arXiv:2310.11987	2023	A framework for treating model uncertainty in the asset liability management problem	G. Papayiannis	s2	arXiv:1512.02783
+aval	DOI:10.1016/j.patcog.2023.110080	2023	A linear transportation Lp distance for pattern recognition	O. M. Crook	s2	arXiv:1512.02783
+aval	arXiv:2309.07351	2023	Wasserstein Consensus ADMM	Iman Nodozi	s2	arXiv:1512.02783
+aval	arXiv:2307.14442	2023	Neural Schrödinger Bridge With Sinkhorn Losses: Application to Data-Driven Minimum Effort Control of Colloidal Self-Assembly	Iman Nodozi	s2	arXiv:1512.02783
+aval	arXiv:2307.03023	2023	Convergence rate of entropy-regularized multi-marginal optimal transport costs	Luca Nenna	s2	arXiv:1512.02783
+aval	arXiv:2306.13618	2023	Unbalanced Optimal Transport and Maximum Mean Discrepancies: Interconnections and Rapid Evaluation	Rajmadan Lakshmanan	s2	arXiv:1512.02783
+aval	arXiv:2305.02410	2023	Entropic regularisation of unbalanced optimal transportation problems	Maciej Buze	s2	arXiv:1512.02783
+aval	arXiv:2304.06549	2023	Non-asymptotic convergence bounds for Sinkhorn iterates and their gradients: a coupling approach	Giacomo Greco	s2	arXiv:1512.02783
+aval	arXiv:2304.06616	2023	Convergence rate of Tsallis entropic regularized optimal transport	T. Suguro	s2	arXiv:1512.02783
+aval	arXiv:2302.11896	2023	Entropic Approximation of ∞\documentclass[12pt]{minimal} \usepackage{amsmath} \usepackage{wasysym} \usepackage{amsfonts} \usepackage{amssymb} \usepackage{amsbsy} \usepackage{mathrsfs} \usepackage{upgreek} \setlength{\oddsidemargin}{-69pt} \begin{document}$$\infty $$\end{document}-Optimal Transport P	Camilla Brizzi	s2	arXiv:1512.02783
+aval	arXiv:2302.00963	2023	Carathéodory theory and a priori estimates for continuity inclusions in the space of probability measures	Benoît Bonnet-Weill	s2	arXiv:1512.02783
+aval	arXiv:2301.11302	2023	Minimax estimation of discontinuous optimal transport maps: The semi-discrete case	Aram-Alexandre Pooladian	s2	arXiv:1512.02783
+aval	arXiv:2212.12848	2022	Gromov–Wasserstein distances: Entropic regularization, duality and sample complexity	Zheng-Xin Zhang	s2	arXiv:1512.02783
+aval	arXiv:2212.00367	2022	Stability and sample complexity of divergence regularized optimal transport	E. Bayraktar	s2	arXiv:1512.02783
+aval	arXiv:2211.13954	2022	Particle-based Variational Inference with Preconditioned Functional Gradient Flow	Hanze Dong	s2	arXiv:1512.02783
+aval	arXiv:2211.10742	2022	Moment-SoS methods for optimal transport problems	Olga Mula	s2	arXiv:1512.02783
+aval	arXiv:2210.13879	2022	Proximal Mean Field Learning in Shallow Neural Networks	Alexis M. H. Teter	s2	arXiv:1512.02783
+aval	arXiv:2210.07785	2022	Classical Density Functional Theory: Representability and Universal Bounds	M. Jex	s2	arXiv:1512.02783
+aval	arXiv:2209.14622	2022	From geodesic extrapolation to a variational BDF2 scheme for Wasserstein gradient flows	Thomas O. Gallouët	s2	arXiv:1512.02783
+aval	arXiv:2209.12197	2022	First-Order Conditions for Optimization in the Wasserstein Space	Nicolas Lanzetti	s2	arXiv:1512.02783
+aval	arXiv:2209.06469	2022	Learning Deep Optimal Embeddings with Sinkhorn Divergences	S. Roy	s2	arXiv:1512.02783
+aval	arXiv:2208.14762	2022	An external dual charge approach to the optimal transport with Coulomb cost	Rodrigue Lelotte	s2	arXiv:1512.02783
+aval	arXiv:2208.14391	2022	Convergence Rates for Regularized Optimal Transport via Quantization	S. Eckstein	s2	arXiv:1512.02783
+aval	arXiv:2207.08683	2022	Limit Theorems for Entropic Optimal Transport Maps and the Sinkhorn Divergence	Ziv Goldfeld	s2	arXiv:1512.02783
+aval	arXiv:2207.02977	2022	Convergence of the Sinkhorn algorithm when the Schrödinger problem has no solution	Aymeric Baradat	s2	arXiv:1512.02783
+aval	arXiv:2207.00862	2022	Static hedging of freight rate risk in the shipping market under model uncertainty	G. Papayiannis	s2	arXiv:1512.02783
+aval	arXiv:2207.00333	2022	A framework for stereo vision via optimal transport	Mattia Galeotti	s2	arXiv:1512.02783
+aval	DOI:10.1016/j.cam.2022.114588	2022	A GPM-based algorithm for solving regularized Wasserstein barycenter problems in some spaces of probability measures	S. Kum	s2	arXiv:1512.02783
+aval	arXiv:2206.03347	2022	Convergence rate of general entropic optimal transport costs	G. Carlier	s2	arXiv:1512.02783
+aval	arXiv:2205.08826	2022	Regularization for Wasserstein distributionally robust optimization	Waïss Azizian	s2	arXiv:1512.02783
+aval	arXiv:2204.04901	2022	Entropic transfer operators	O. Junge	s2	arXiv:1512.02783
+aval	arXiv:2203.05005	2022	Computational methods for adapted optimal transport	S. Eckstein	s2	arXiv:1512.02783
+aval	arXiv:2202.11737	2022	Renormalization group flow as optimal transport	Jordan S. Cotler	s2	arXiv:1512.02783
+aval	arXiv:2202.08930	2022	A Distributed Algorithm for Measure-valued Optimization with Additive Objective	Iman Nodozi	s2	arXiv:1512.02783
+aval	arXiv:2201.06859	2022	Grand-Canonical Optimal Transport	Simone Di Marino	s2	arXiv:1512.02783
+aval	DOI:10.1002/int.22795	2021	Approximate continuous optimal transport with copulas	Jin-Jin Chi	s2	arXiv:1512.02783
+aval	arXiv:2112.03581	2021	Kantorovich–Rubinstein Distance and Barycenter for Finitely Supported Measures: Foundations and Algorithms	F. Heinemann	s2	arXiv:1512.02783
+aval	arXiv:2112.02424	2021	Variational Wasserstein gradient flow	JiaoJiao Fan	s2	arXiv:1512.02783
+aval	arXiv:2111.00047	2021	Robust and efficient change point detection using novel multivariate rank-energy GoF test	Shoaib Bin Masud	s2	arXiv:1512.02783
+aval	arXiv:2110.10972	2021	Efficient Gradient Flows in Sliced-Wasserstein Space	Clément Bonet	s2	arXiv:1512.02783
+aval	arXiv:2109.12004	2021	Entropic estimation of optimal transport maps	Aram-Alexandre Pooladian	s2	arXiv:1512.02783
+aval	arXiv:2108.10593	2021	Uniform Approximation of Continuous Couplings	U. Bindini	s2	arXiv:1512.02783
+aval	arXiv:2108.08129	2021	Quantitative Uniform Stability of the Iterative Proportional Fitting Procedure	George Deligiannidis	s2	arXiv:1512.02783
+aval	arXiv:2107.11858	2021	Estimation of stationary optimal transport plans	Kevin O'Connor	s2	arXiv:1512.02783
+aval	arXiv:2107.09218	2021	Conditional Wasserstein Barycenters and Interpolation/Extrapolation of Distributions	Jia-Ning Fan	s2	arXiv:1512.02783
+aval	arXiv:2106.11862	2021	Asymptotics for Semidiscrete Entropic Optimal Transport	Jason M. Altschuler	s2	arXiv:1512.02783
+aval	arXiv:2106.08084	2021	Asymptotic analysis of domain decomposition for optimal transport	M. Bonafini	s2	arXiv:1512.02783
+aval	arXiv:2106.03670	2021	Stability of entropic optimal transport and Schrödinger bridges	Promit Ghosal	s2	arXiv:1512.02783
+aval	arXiv:2105.14337	2021	Optimal transport with f-divergence regularization and generalized Sinkhorn algorithm	Dávid Terjék	s2	arXiv:1512.02783
+aval	arXiv:2105.11146	2021	Operator-splitting schemes for degenerate, non-local, conservative-dissipative systems	Daniel Adams	s2	arXiv:1512.02783
+aval	arXiv:2104.11720	2021	Entropic optimal transport: convergence of potentials	Marcel Nutz	s2	arXiv:1512.02783
+aval	arXiv:2104.04372	2021	Entropic regularisation of non-gradient systems	Daniel Adams	s2	arXiv:1512.02783
+aval	arXiv:2103.08811	2021	Soft and subspace robust multivariate rank tests based on entropy regularized optimal transport	Shoaib Bin Masud	s2	arXiv:1512.02783
+aval	arXiv:2102.07336	2021	Relaxation of optimal transport problem via strictly convex functions	Asuka Takatsu	s2	arXiv:1512.02783
+aval	arXiv:2102.04397	2021	Entropic optimal transport: Geometry and large deviations	Espen Bernton	s2	arXiv:1512.02783
+aval	arXiv:2102.03091	2021	Constrained overdamped Langevin dynamics for symmetric multimarginal optimal transportation	A. Alfonsi	s2	arXiv:1512.02783
+aval	DOI:10.1007/s10440-021-00391-9	2021	Gradient Flow Formulations of Discrete and Continuous Evolutionary Models: A Unifying Perspective	Fabio A. C. C. Chalub	s2	arXiv:1512.02783
+aval	DOI:10.1007/s00526-020-01871-w	2021	The Schrödinger problem on the non-commutative Fisher-Rao space	Léonard Monsaingeon	s2	arXiv:1512.02783
+aval	DOI:10.1137/20M1339982	2021	Stochastic Control Liaisons: Richard Sinkhorn Meets Gaspard Monge on a Schrödinger Bridge	Yongxin Chen	s2	arXiv:1512.02783
+aval	DOI:10.1137/20m1388577	2021	Modes of Homogeneous Gradient Flows	Ido Cohen	s2	arXiv:1512.02783
+aval	arXiv:2012.12005	2020	The dynamical Schrödinger problem in abstract metric spaces	Léonard Monsaingeon	s2	arXiv:1512.02783
+aval	arXiv:2012.10701	2020	Entropic-Wasserstein Barycenters: PDE Characterization, Regularity, and CLT	G. Carlier	s2	arXiv:1512.02783
+aval	arXiv:2011.08151	2020	The back-and-forth method for Wasserstein gradient flows	M. Jacobs	s2	arXiv:1512.02783
+aval	arXiv:2009.11262	2020	A Linear Transportation Lp Distance for Pattern Recognition	O. M. Crook	s2	arXiv:1512.02783
+aval	CorpusId:229041951	2020	Examples of Hidden Convexity in Nonlinear PDEs	Y. Brenier	s2	arXiv:1512.02783
+aval	arXiv:2008.13076	2020	A diffusion-driven Characteristic Mapping method for particle management	Xi-Yuan Yin	s2	arXiv:1512.02783
+aval	DOI:10.1007/s12351-020-00589-z	2020	An LP-based, strongly-polynomial 2-approximation algorithm for sparse Wasserstein barycenters	Steffen Borgwardt	s2	arXiv:1512.02783
+aval	arXiv:2007.09042	2020	The Schrödinger problem on the non-commutative Fisher-Rao space	Léonard Monsaingeon	s2	arXiv:1512.02783
+aval	arXiv:2007.00976	2020	Optimal Transport losses and Sinkhorn algorithm with general convex regularization	Simone Di Marino	s2	arXiv:1512.02783
+aval	arXiv:2006.16085	2020	Transfer Operators from Optimal Transport Plans for Coherent Set Detection	P. Koltai	s2	arXiv:1512.02783
+aval	arXiv:2006.12528	2020	A proximal-gradient algorithm for crystal surface evolution	Katy Craig	s2	arXiv:1512.02783
+aval	arXiv:2006.12022	2020	Sensitivity analysis of Wasserstein distributionally robust optimization problems	Daniel Bartl	s2	arXiv:1512.02783
+aval	CorpusId:219724205	2020	Penalization of barycenters for φ-exponential distributions	S. Kum	s2	arXiv:1512.02783
+aval	arXiv:2006.08743	2020	A GPM-based algorithm for solving regularized Wasserstein barycenter problems in some spaces of probability measures	S. Kum	s2	arXiv:1512.02783
+aval	arXiv:2005.10963	2020	Stochastic control liasons: Richard Sinkhorn meets Gaspard Monge on a Schroedinger bridge	Yongxin Chen	s2	arXiv:1512.02783
+aval	arXiv:2004.11574	2020	Orlicz Space Regularization of Continuous Optimal Transport Problems	D. Lorenz	s2	arXiv:1512.02783
+aval	arXiv:2002.01189	2020	From Optimal Transport to Discrepancy	S. Neumayer	s2	arXiv:1512.02783
+aval	arXiv:2001.10986	2020	Domain decomposition for entropy regularized optimal transport	M. Bonafini	s2	arXiv:1512.02783
+aval	CorpusId:220962393	2019	Clustering measure-valued data with Wasserstein barycenters	G. Domazakis	s2	arXiv:1512.02783
+aval	arXiv:1911.06850	2019	An Optimal Transport Approach for the Schrödinger Bridge Problem and Convergence of Sinkhorn Algorithm	Simone Di Marino	s2	arXiv:1512.02783
+aval	arXiv:1910.12958	2019	Sinkhorn Divergences for Unbalanced Optimal Transport	Thibault Séjourné	s2	arXiv:1512.02783
+aval	arXiv:1910.09843	2019	Discretization of flux-limited gradient flows: Γ-convergence and numerical schemes	D. Matthes	s2	arXiv:1512.02783
+aval	arXiv:1910.07568	2019	On the computational complexity of finding a sparse Wasserstein barycenter	Steffen Borgwardt	s2	arXiv:1512.02783
+aval	arXiv:1909.06082	2019	Orlicz-space regularization for optimal transport and algorithms for quadratic regularization	D. Lorenz	s2	arXiv:1512.02783
+aval	arXiv:1908.11533	2019	A Newton algorithm for semi-discrete optimal transport with storage fees and quantitative convergence of cells	M. Bansil	s2	arXiv:1512.02783
+aval	DOI:10.1007/s00205-019-01446-w	2019	Small Noise Limit and Convexity for Generalized Incompressible Flows, Schrödinger Problems, and Optimal Transport	Aymeric Baradat	s2	arXiv:1512.02783
+aval	arXiv:1907.08417	2019	Statistical data analysis in the Wasserstein space	Jérémie Bigot	s2	arXiv:1512.02783
+aval	arXiv:1907.07900	2019	Multi-marginal entropy-transport with repulsive cost	Augusto Gerolin	s2	arXiv:1512.02783
+aval	arXiv:1907.02152	2019	Fisher information regularization schemes for Wasserstein gradient flows	Wuchen Li	s2	arXiv:1512.02783
+aval	arXiv:1907.01681	2019	Gradient Flow Formulations of Discrete and Continuous Evolutionary Models: A Unifying Perspective	Fabio A. C. C. Chalub	s2	arXiv:1512.02783
+aval	arXiv:1906.01333	2019	Entropic regularization of continuous optimal transport problems	Christian Clason	s2	arXiv:1512.02783
+aval	arXiv:1905.03329	2019	Learning Embeddings into Entropic Wasserstein Spaces	Charlie Frogner	s2	arXiv:1512.02783
+aval	CorpusId:57761088	2019	Understanding the Topology and the Geometry of the Persistence Diagram Space via Optimal Partial Transport	Vincent Divol	s2	arXiv:1512.02783
+aval	arXiv:1904.06053	2019	A proof of the Caffarelli contraction theorem via entropic regularization	M. Fathi	s2	arXiv:1512.02783
+aval	DOI:10.70675/7d827484za613z4414zbdc0z8bfdf4deace1	2019	Entropy-Regularized Optimal Transport for Machine Learning. (Régularisation Entropique du Transport Optimal pour le Machine Learning)	A. Genevay	s2	arXiv:1512.02783
+aval	arXiv:1903.01112	2019	Quadratically Regularized Optimal Transport	D. Lorenz	s2	arXiv:1512.02783
+aval	arXiv:1902.04999	2019	Wasserstein Barycenter Model Ensembling	Pierre L. Dognin	s2	arXiv:1512.02783
+aval	arXiv:1901.08081	2019	Primal Dual Methods for Wasserstein Gradient Flows	J. Carrillo	s2	arXiv:1512.02783
+aval	arXiv:1812.11104	2018	Entropic approximation for multi-dimensional martingale optimal transport	Hadrien De March	s2	arXiv:1512.02783
+aval	arXiv:1811.05207	2018	A Differential Approach to the Multi-Marginal Schrödinger System	G. Carlier	s2	arXiv:1512.02783
+aval	arXiv:1810.12036	2018	Small Noise Limit and Convexity for Generalized Incompressible Flows, Schrödinger Problems, and Optimal Transport	Aymeric Baradat	s2	arXiv:1512.02783
+aval	arXiv:1810.03634	2018	Aggregation-Diffusion Equations: Dynamics, Asymptotics, and Singular Limits	J. Carrillo	s2	arXiv:1512.02783
+aval	arXiv:1810.02733	2018	Sample Complexity of Sinkhorn Divergences	A. Genevay	s2	arXiv:1512.02783
+aval	arXiv:1810.00118	2018	Multilevel Optimal Transport: A Fast Approximation of Wasserstein-1 Distances	Jialin Liu	s2	arXiv:1512.02783
+aval	DOI:10.70675/af61c1a8z7f30z4709z8a76z87eefb1a8c9c	2018	Propriétés statistiques du barycentre dans l’espace de Wasserstein	E. Cazelles	s2	arXiv:1512.02783
+aval	DOI:10.70675/7ac2ff25zebddz42e7z90a1z6e671841fd26	2018	Multidimensional martingale optimal transport.	Hadrien De March	s2	arXiv:1512.02783
+aval	arXiv:1806.07415	2018	Aggregation-diffusion to constrained interaction: Minimizers & gradient flows in the slow diffusion limit	Katy Craig	s2	arXiv:1512.02783
+aval	arXiv:1806.01879	2018	An explicit analysis of the entropic penalty in linear programming	J. Weed	s2	arXiv:1512.02783
+aval	arXiv:1806.01364	2018	The Data‐Driven Schrödinger Bridge	M. Pavon	s2	arXiv:1512.02783
+aval	arXiv:1804.08962	2018	Data-driven regularization of Wasserstein barycenters with an application to multivariate density registration	Jérémie Bigot	s2	arXiv:1512.02783
+aval	arXiv:1803.00567	2018	Computational Optimal Transport	G. Peyré	s2	arXiv:1512.02783
+aval	arXiv:1802.08539	2018	Computation of Optimal Transport and Related Hedging Problems via Penalization and Neural Networks	S. Eckstein	s2	arXiv:1512.02783
+aval	CorpusId:125652214	2018	Solving Approximate Wasserstein GANs to Stationarity	Maziar Sanjabi	s2	arXiv:1512.02783
+aval	arXiv:1802.08249	2018	On the Convergence and Robustness of Training GANs with Regularized Optimal Transport	Maziar Sanjabi	s2	arXiv:1512.02783
+aval	CorpusId:13269929	2018	Diffusing Policies : Towards Wasserstein Policy Gradient Flows	Pierre H. Richemond	s2	arXiv:1512.02783
+aval	arXiv:1712.07185	2017	On Wasserstein Reinforcement Learning and the Fokker-Planck equation	Pierre H. Richemond	s2	arXiv:1512.02783
+aval	arXiv:1712.06124	2017	A tumor growth model of Hele-Shaw type as a gradient flow	Simone Di Marino	s2	arXiv:1512.02783
+aval	arXiv:1712.03082	2017	The Sinkhorn algorithm, parabolic optimal transport and geometric Monge–Ampère equations	R. Berman	s2	arXiv:1512.02783
+aval	DOI:10.70675/dae5c87fz500cz45ebzb9bazf9dcb60a5152	2017	Le problème de Schrödinger et ses liens avec le transport optimal et les inégalités fonctionnelles	L. Ripani	s2	arXiv:1512.02783
+aval	CorpusId:125146528	2017	Transport optimal de mesures positives : modèles, méthodes numériques, applications	Lénaïc Chizat	s2	arXiv:1512.02783
+aval	arXiv:1710.06635	2017	A Sinkhorn-Newton method for entropic optimal transport	C. Brauer	s2	arXiv:1512.02783
+aval	DOI:10.70675/f265632czc1b7z4803z8b63zf532675ed749	2017	Analysis and Geometry of RCD spaces via the Schrödinger problem	L. Tamanini	s2	arXiv:1512.02783
+aval	arXiv:1707.00087	2017	Sharp asymptotic and finite-sample rates of convergence of empirical measures in Wasserstein distance	J. Weed	s2	arXiv:1512.02783
+aval	DOI:10.1090/mcom/3303	2017	Scaling algorithms for unbalanced optimal transport problems	Lénaïc Chizat	s2	arXiv:1512.02783
+aval	DOI:10.1007/978-3-319-58771-4_45	2017	Transport Based Image Morphing with Intensity Modulation	J. Maas	s2	arXiv:1512.02783
+aval	arXiv:1706.00292	2017	Learning Generative Models with Sinkhorn Divergences	A. Genevay	s2	arXiv:1512.02783
+aval	arXiv:1704.05491	2017	An LP-based, strongly-polynomial 2-approximation algorithm for sparse Wasserstein barycenters	Steffen Borgwardt	s2	arXiv:1512.02783
+aval	CorpusId:119590452	2017	Strongly Polynomial 2-Approximations of Discrete Wasserstein Barycenters	Steffen Borgwardt	s2	arXiv:1512.02783
+aval	arXiv:1703.10457	2017	The Entropic Regularization of the Monge Problem on the Real Line	Simone Di Marino	s2	arXiv:1512.02783
+aval	DOI:10.70675/0766af44zad92z4da0z8484z25b9024d1199	2016	Numerical Methods for Multi-Marginal Optimal Transportation	Luca Nenna	s2	arXiv:1512.02783
+aval	DOI:10.70675/5ca4e714zf1c1z4f17za507z56a8e3bb0960	2016	Interacting particles systems, Wasserstein gradient flow approach	M. Laborde	s2	arXiv:1512.02783
+aval	CorpusId:126136959	2016	Systèmes de particules en interaction, approche par flot de gradient dans l'espace de Wasserstein	M. Laborde	s2	arXiv:1512.02783
+aval	arXiv:1610.06519	2016	Stabilized Sparse Scaling Algorithms for Entropy Regularized Transport Problems	Bernhard Schmitzer	s2	arXiv:1512.02783
+aval	arXiv:1607.05816	2016	Scaling Algorithms for Unbalanced Transport Problems	Lénaïc Chizat	s2	arXiv:1512.02783
+aval	arXiv:1607.01186	2016	Generalized optimal transport with singular sources	J. Maas	s2	arXiv:1512.02783
+aval	arXiv:1605.08527	2016	Stochastic Optimization for Large-scale Optimal Transport	A. Genevay	s2	arXiv:1512.02783
+aval	CorpusId:266903132	2024	Entropic Gromov-Wasserstein Distances: Stability and Algorithms	Gabriel Rioux	s2	arXiv:1512.02783
+aval	CorpusId:231918566	2021	Unsupervised Ground Metric Learning using Wasserstein Eigenvectors	Geert-Jan Huizing	s2	arXiv:1512.02783
+aval	CorpusId:235166826	2021	Operator-splitting schemes for degenerate conservative-dissipative systems	Daniel Adams	s2	arXiv:1512.02783
+aval	CorpusId:239049381	2021	Sliced-Wasserstein Gradient Flows	Clément Bonet	s2	arXiv:1512.02783
+aval	CorpusId:240354093	2021	Learning generative models for valid knockoffs using novel multivariate-rank based statistics	Shoaib Bin Masud	s2	arXiv:1512.02783
+aval	CorpusId:243857064	2021	Lecture 3: Entropic Optimal Transport and Numerics	Luca Nenna	s2	arXiv:1512.02783
+aval	CorpusId:240291964	2021	Introduction to Entropic Optimal Transport	Marcel Nutz	s2	arXiv:1512.02783
+aval	CorpusId:261302202	2021	Regularization of Wasserstein barycenters for -exponential distributions	S. Kum	s2	arXiv:1512.02783
+aval	CorpusId:240001477	2020	THE SCHRÖDINGER PROBLEM ON THE NON		s2	arXiv:1512.02783
+aval	CorpusId:261710149	2020	STOCHASTIC CONTROL LIAISONS: RICHARD SINKHORN MEETS GASPARD MONGE ON A SCHRÖDINGER BRIDGE	Michele Pavon	s2	arXiv:1512.02783
+aval	CorpusId:215813425	2020	Advances in Numerical Calculus of Variations		s2	arXiv:1512.02783
+aval	DOI:10.70675/f395dbd2z6531z4abazb4dcz6f7826c9f9c8	2019	Unbalanced Optimal Transport : Models, Numerical Methods, Applications	L'enaic Chizat	s2	arXiv:1512.02783
+aval	CorpusId:13817162	2018	Report for CSE 5339 2018 — ( OTMLSA ) Optimal Transport in Machine Learning and Shape Analysis Γ-convergence of Entropy Regularized Wasserstein Distance	Samir Chowdhury	s2	arXiv:1512.02783
+aval	CorpusId:221948903	2017	Workshop: Applications of Optimal Transportation in the Natural Sciences Table of Contents	F. Otto	s2	arXiv:1512.02783
+aval	CorpusId:198961942	2016	2 Optimal Transport : Primal , Dual and Semi-dual Formulations	A. Genevay	s2	arXiv:1512.02783
+aval	CorpusId:267321983		A crash introduction to Optimal Transport		s2	arXiv:1512.02783
+aval	CorpusId:268130401		Lecture 2: Entropic Optimal Transport	Luca Nenna	s2	arXiv:1512.02783
+aval	CorpusId:270640757		Eﬀicient Gradient Flows in Sliced-Wasserstein Space	Clément Bonet	s2	arXiv:1512.02783
+aval	CorpusId:272202856		AN EXTERNAL DUAL CHARGE APPROACH	Rodrigue Lelotte	s2	arXiv:1512.02783
+aval	CorpusId:275922338		Large deviations for sticky-reﬂecting Brownian motion with boundary diﬀusion	Jean-Baptiste Casteras	s2	arXiv:1512.02783
+amont	arXiv:2412.03182	2024	Quantitative Convergence of Trained Quantum Neural Networks to a Gaussian Process	A. M. Hernandez	s2	arXiv:2501.14660
+amont	arXiv:2402.08726	2024	Trained Quantum Neural Networks are Gaussian Processes	Filippo Girardi	s2	arXiv:2501.14660
+amont	arXiv:2203.06174	2022	Quantifying the barren plateau phenomenon for a model of unstructured variational ans\"{a}tze	John Napp	s2	arXiv:2501.14660
+amont	arXiv:2203.00446	2022	Propagation of chaos: A review of models, methods and applications. I. Models and methods	Louis-Pierre Chaintron	s2	arXiv:2501.14660
+amont	arXiv:2106.14812	2021	Propagation of chaos: A review of models, methods and applications. Ⅱ. Applications	Louis-Pierre Chaintron	s2	arXiv:2501.14660
+amont	arXiv:2101.03037	2021	Learning quantum data with the quantum earth mover’s distance	B. Kiani	s2	arXiv:2501.14660
+amont	arXiv:2010.02174	2020	A rigorous and robust quantum speed-up in supervised machine learning	Yun-Chao Liu	s2	arXiv:2501.14660
+amont	arXiv:2008.08605	2020	Effect of data encoding on the expressive power of variational quantum-machine-learning models	M. Schuld	s2	arXiv:2501.14660
+amont	arXiv:2003.05508	2020	A Mean-field Analysis of Deep ResNet and Beyond: Towards Provable Optimization Via Overparameterization From Depth	Yiping Lu	s2	arXiv:2501.14660
+amont	DOI:10.1007/978-3-030-38438-8	2020	An Invitation to Statistics in Wasserstein Space	Victor M. Panaretos	s2	arXiv:2501.14660
+amont	arXiv:2001.11443	2020	A Rigorous Framework for the Mean Field Limit of Multilayer Neural Networks	Phan-Minh Nguyen	s2	arXiv:2501.14660
+amont	arXiv:2001.03622	2020	Quantum embeddings for machine learning	S. Lloyd	s2	arXiv:2501.14660
+amont	arXiv:1911.00803	2019	Quantum Optimal Transport with Quantum Channels	Giacomo De Palma	s2	arXiv:2501.14660
+amont	DOI:10.1007/978-3-030-19066-8	2019	A Primer on Quantum Computing	F. Marquezino	s2	arXiv:2501.14660
+amont	arXiv:1903.04440	2019	Mean Field Analysis of Deep Neural Networks	Justin A. Sirignano	s2	arXiv:2501.14660
+amont	arXiv:1903.06753	2019	Wasserstein Distance based Deep Adversarial Transfer Learning for Intelligent Fault Diagnosis	Cheng Cheng	s2	arXiv:2501.14660
+amont	arXiv:1902.06015	2019	Mean-field theory of two-layers neural networks: dimension-free bounds and kernel limit	Song Mei	s2	arXiv:2501.14660
+amont	DOI:10.1007/978-3-319-96424-9	2018	Supervised Learning with Quantum Computers	M. Schuld	s2	arXiv:2501.14660
+amont	arXiv:1805.00915	2018	Trainability and Accuracy of Artificial Neural Networks: An Interacting Particle System Approach	Grant M. Rotskoff	s2	arXiv:2501.14660
+amont	arXiv:1804.11326	2018	Supervised learning with quantum-enhanced feature spaces	Vojtěch Havlíček	s2	arXiv:2501.14660
+amont	arXiv:1803.00567	2018	Computational Optimal Transport	G. Peyré	s2	arXiv:2501.14660
+amont	CorpusId:2057420	2017	Wasserstein Generative Adversarial Networks	M. Arjovsky	s2	arXiv:2501.14660
+amont	arXiv:1611.09347	2016	Quantum machine learning	J. Biamonte	s2	arXiv:2501.14660
+amont	DOI:10.1111/jori.12157	2016	A Probability Metrics Approach to Financial Risk Measures	Ola Mahmoud	s2	arXiv:2501.14660
+amont	arXiv:1506.05439	2015	Learning with a Wasserstein Loss	Charlie Frogner	s2	arXiv:2501.14660
+amont	arXiv:1409.3097	2014	An introduction to quantum machine learning	M. Schuld	s2	arXiv:2501.14660
+amont	arXiv:1312.4314	2013	Learning Factored Representations in a Deep Mixture of Experts	D. Eigen	s2	arXiv:2501.14660
+amont	arXiv:1312.2128	2013	On the rate of convergence in Wasserstein distance of the empirical measure	N. Fournier	s2	arXiv:2501.14660
+amont	DOI:10.1002/9781444392715	2011	A Probability Metrics Approach to Financial Risk Measures: Rachev/A Probability Metrics Approach to Financial Risk Measures	S. Rachev	s2	arXiv:2501.14660
+amont	arXiv:1005.1699	2010	The phylogenetic Kantorovich–Rubinstein metric for environmental sequence samples	Steven N. Evans	s2	arXiv:2501.14660
+amont	DOI:10.1007/978-3-540-71050-9	2008	Optimal Transport: Old and New	C. Villani	s2	arXiv:2501.14660
+amont	DOI:10.1117/1.2819119	2006	Pattern Recognition and Machine Learning	Christopher M. Bishop	s2	arXiv:2501.14660
+amont	DOI:10.1016/0304-4149(92)90138-G	1992	McKean-Vlasov Ito-Skorohod equations, and nonlinear diffusions with discrete jump sets	C. Graham	s2	arXiv:2501.14660
+amont	DOI:10.1162/neco.1991.3.1.79	1991	Adaptive Mixtures of Local Experts	R. Jacobs	s2	arXiv:2501.14660
+amont	DOI:10.1112/blms/2.1.101	1970	CONVERGENCE OF PROBABILITY MEASURES	K. Parthasarathy	s2	arXiv:2501.14660
+amont	DOI:10.1287/MNSC.6.4.366	1960	Mathematical Methods of Organizing and Planning Production	L. Kantorovich	s2	arXiv:2501.14660
+amont	DOI:10.48550/arXiv.2407.06204	2024	A Survey on Mixture of Experts	Weilin Cai	s2	arXiv:2501.14660
+amont	DOI:10.1007/978-981-19-6897-6	2023	Concise Guide to Quantum Machine Learning	Davide Pastorello	s2	arXiv:2501.14660
+amont	DOI:10.1007/978-3-030-70679-1	2021	Variational Methods for Machine Learning with Applications to Deep Networks	Lucas P. Cinelli	s2	arXiv:2501.14660
+amont	-	2019	Mean-ﬁeld theory of two-layers neural		s2	arXiv:2501.14660
+amont	-	2018	Ontheglobalconvergenceofgradientdescentforover-parameterizedmodelsusing optimaltransport		s2	arXiv:2501.14660
+amont	-	2016	Artiﬁcial Intelligence: A Modern Approach		s2	arXiv:2501.14660
+amont	DOI:10.1007/978-3-319-20828-2	2015	Optimal Transport for Applied Mathematicians	F. Santambrogio	s2	arXiv:2501.14660
+amont	-	2009	Principles of Mathematical Sciences]		s2	arXiv:2501.14660
+amont	CorpusId:62824717	2005	Gradient Flows: In Metric Spaces and in the Space of Probability Measures	L. Ambrosio	s2	arXiv:2501.14660
+amont	-	2001	Inﬁnitemixturesofgaussianprocessexperts		s2	arXiv:2501.14660
+amont	DOI:10.1007/BFB0093177	1996	Asymptotic behaviour of some interacting particle systems; McKean-Vlasov and Boltzmann models	S. Méléard	s2	arXiv:2501.14660
+amont	DOI:10.1007/BFB0085169	1991	Topics in propagation of chaos	A. Sznitman	s2	arXiv:2501.14660
+amont	-		Mean-ﬁeldanalysisofmultipopulationdynamicswithlabelswitching		s2	arXiv:2501.14660
+amont	-		II) There exists a sequence of independent and identically distributed random variables (cid:2) Nt for which pathwise propagation of chaos in the sense of Deﬁnition 2.1 holds true with p = 2		s2	arXiv:2501.14660
+amont	-		Mean-ﬁeld limit from general mixtures…		s2	arXiv:2501.14660
+aval	arXiv:2606.21721	2026	On a Central Limit Theorem and Sanov's principle for quantum neural networks	A. Hernández	s2	arXiv:2501.14660
+aval	arXiv:2609.32708	2026	One-Step Generative Modeling via Unbalanced Optimal Transport	Yi-Rong Shen	s2	arXiv:2605.31369
+aval	arXiv:2607.18198	2026	Three-Body Scattering for Generative Modeling	Peng Sun	s2	arXiv:2605.31369
+aval	arXiv:2607.17235	2026	A Dynamical Approximation Scheme on the Stiefel manifold for Wasserstein Gradient Flows	Isabella Carla Gonnella	s2	arXiv:2605.31369
+amont	CorpusId:124181096	2015	Optimal Transport for Applied Mathematicians: Calculus of Variations, PDEs, and Modeling	F. Santambrogio	s2	arXiv:1506.00126
+amont	arXiv:1505.01304	2015	On systems of continuity equations with nonlinear diffusion and nonlocal drifts	G. Carlier	s2	arXiv:1506.00126
+amont	DOI:10.1088/0951-7715/26/10/2777	2013	Measure solutions for non-local interaction PDEs with two species	M. Di Francesco	s2	arXiv:1506.00126
+amont	arXiv:1208.0789	2012	Curves of steepest descent are entropy solutions for a class of degenerate convection–diffusion equations	M. Di Francesco	s2	arXiv:1506.00126
+amont	arXiv:0901.0540	2009	A Family of Nonlinear Fourth Order Equations of Gradient Flow Type	D. Matthes	s2	arXiv:1506.00126
+amont	DOI:10.1007/978-3-540-71050-9	2008	Optimal Transport: Old and New	C. Villani	s2	arXiv:1506.00126
+amont	DOI:10.1137/070683337	2008	Convergence of the Mass-Transport Steepest Descent Scheme for the Subcritical Patlak-Keller-Segel Model	A. Blanchet	s2	arXiv:1506.00126
+amont	arXiv:0801.2455	2008	Eulerian Calculus for the Displacement Convexity in the Wasserstein Distance	S. Daneri	s2	arXiv:1506.00126
+amont	DOI:10.1112/S0024609303233014	2004	TOPICS IN OPTIMAL TRANSPORTATION (Graduate Studies in Mathematics 58) By CÉDRIC VILLANI: 370 pp., US$59.00, ISBN 0-8218-3312-X (American Mathematical Society, Providence, RI, 2003)	G. Burton	s2	arXiv:1506.00126
+amont	DOI:10.1090/gsm/058	2003	Topics in Optimal Transportation	C. Villani	s2	arXiv:1506.00126
+amont	arXiv:math/0309410	2002	Existence of solutions to degenerate parabolic equations via the Monge-Kantorovich theory	M. Agueh	s2	arXiv:1506.00126
+amont	DOI:10.1006/AIMA.1997.1634	1997	A Convexity Principle for Interacting Gases	R. McCann	s2	arXiv:1506.00126
+amont	DOI:10.1002/CPA.3160440402	1991	Polar Factorization and Monotone Rearrangement of Vector-Valued Functions	Y. Brenier	s2	arXiv:1506.00126
+amont	DOI:10.1016/0362-546X(90)90007-4	1990	New lower semicontinuity results for nonconvex functionals defined on measures	G. Bouchitté	s2	arXiv:1506.00126
+amont	DOI:10.1007/BF00046892	1989	Lectures on the ekeland variational principle with applications and detours	D. G. de Figueiredo	s2	arXiv:1506.00126
+amont	DOI:10.1007/978-3-319-20828-2	2015	Optimal Transport for Applied Mathematicians	F. Santambrogio	s2	arXiv:1506.00126
+amont	CorpusId:12392162	2009	Author manuscript, published in "SIAM Journal on Control and Optimization (2008)?" An optimization problem for mass transportation with congested dynamics		s2	arXiv:1506.00126
+amont	CorpusId:62824717	2005	Gradient Flows: In Metric Spaces and in the Space of Probability Measures	L. Ambrosio	s2	arXiv:1506.00126
+amont	CorpusId:59022924	2003	Tightness, integral equicontinuity and compactness for evolution problems in Banach spaces	R. Rossi	s2	arXiv:1506.00126
+amont	DOI:10.1007/s002110050002	2000	A computational fluid mechanics solution to the Monge-Kantorovich mass transfer problem	J. Benamou	s2	arXiv:1506.00126
+amont	DOI:10.1137/S0036141096303359	1996	THE VARIATIONAL FORMULATION OF THE FOKKER-PLANCK EQUATION	R. Jordan	s2	arXiv:1506.00126
+amont	CorpusId:15459732	1996	Doubly Degenerate Diffusion Equations as Steepest Descent	F. Otto	s2	arXiv:1506.00126
+aval	arXiv:2309.07351	2023	Wasserstein Consensus ADMM	Iman Nodozi	s2	arXiv:1506.00126
+aval	arXiv:2303.10564	2023	A Controlled Mean Field Model for Chiplet Population Dynamics	Iman Nodozi	s2	arXiv:1506.00126
+aval	arXiv:2210.13879	2022	Proximal Mean Field Learning in Shallow Neural Networks	Alexis M. H. Teter	s2	arXiv:1506.00126
+aval	arXiv:1908.00533	2019	Gradient Flow Algorithms for Density Propagation in Stochastic Systems	Kenneth F. Caluya	s2	arXiv:1506.00126
+aval	arXiv:1907.11319	2019	Degenerate nonlinear parabolic equations with discontinuous diffusion coefficients	Dohyun Kwon	s2	arXiv:1506.00126
+aval	arXiv:1810.01145	2018	Coupled McKean–Vlasov diffusions: wellposedness, propagation of chaos and invariant measures	M. H. Duong	s2	arXiv:1506.00126
+aval	DOI:10.1007/s00245-018-9527-4	2018	On Cross-Diffusion Systems for Two Populations Subject to a Common Congestion Effect	M. Laborde	s2	arXiv:1506.00126
+aval	arXiv:1805.01331	2018	Nonlinear systems coupled through multi-marginal transport problems	M. Laborde	s2	arXiv:1506.00126
+aval	DOI:10.1007/s00526-018-1351-9	2018	On nonlinear cross-diffusion systems: an optimal transport approach	Inwon C. Kim	s2	arXiv:1506.00126
+aval	arXiv:1710.01653	2017	Nonlinear degenerate cross-diffusion systems with nonlocal interaction	M. Di Francesco	s2	arXiv:1506.00126
+aval	arXiv:1709.09109	2017	On Cross-Diffusion Systems for Two Populations Subject to a Common Congestion Effect	M. Laborde	s2	arXiv:1506.00126
+aval	arXiv:1705.02457	2017	On nonlinear cross-diffusion systems: an optimal transport approach	Inwon C. Kim	s2	arXiv:1506.00126
+aval	arXiv:1704.04541	2017	An unbalanced optimal transport splitting scheme for general advection-reaction-diffusion problems	Thomas O. Gallouët	s2	arXiv:1506.00126
+aval	DOI:10.1016/J.JMAA.2016.07.061	2016	Remarks on continuity equations with nonlinear diffusion and nonlocal drifts	G. Carlier	s2	arXiv:1506.00126
+aval	DOI:10.70675/5ca4e714zf1c1z4f17za507z56a8e3bb0960	2016	Interacting particles systems, Wasserstein gradient flow approach	M. Laborde	s2	arXiv:1506.00126
+aval	CorpusId:126136959	2016	Systèmes de particules en interaction, approche par flot de gradient dans l'espace de Wasserstein	M. Laborde	s2	arXiv:1506.00126
+aval	arXiv:1607.05816	2016	Scaling Algorithms for Unbalanced Transport Problems	Lénaïc Chizat	s2	arXiv:1506.00126
+aval	arXiv:1606.04793	2016	A splitting method for nonlinear diffusions with nonlocal, nonpotential drifts	G. Carlier	s2	arXiv:1506.00126
+aval	arXiv:1603.03790	2016	Congested Aggregation via Newtonian Interaction	Katy Craig	s2	arXiv:1506.00126
+aval	arXiv:1512.02783	2015	Convergence of Entropic Schemes for Optimal Transport and Gradient Flows	G. Carlier	s2	arXiv:1506.00126
+aval	arXiv:1505.01304	2015	On systems of continuity equations with nonlinear diffusion and nonlocal drifts	G. Carlier	s2	arXiv:1506.00126
+aval	DOI:10.2140/APDE.2016.9.615	2015	Advection-diffusion equations with density constraints	Alp'ar R. M'esz'aros	s2	arXiv:1506.00126
+aval	arXiv:1312.4065	2013	Local analytic regularity in the linearized Calderón problem	J. Sjöstrand	s2	arXiv:1506.00126
+aval	CorpusId:250955679	2019	University of Birmingham Coupled McKean-Vlasov diffusions	Julian Tugaut	s2	arXiv:1506.00126
+aval	CorpusId:263330123	2019	University of Birmingham Coupled McKean-Vlasov diffusions	Julian Tugaut	s2	arXiv:1506.00126
+aval	CorpusId:289585678		ADVECTION-DIFFUSION EQUATIONS WITH DENSITY CONSTRAINTS	A. L. R. Ichárd	s2	arXiv:1506.00126
+amont	DOI:10.48084/etasr.8832	2024	Optimal Index Selection using Optimized Deep Deterministic Policy Gradient for NoSQL Database	V. Sumalatha	s2	arXiv:1704.04541
+amont	arXiv:1712.06124	2017	A tumor growth model of Hele-Shaw type as a gradient flow	Simone Di Marino	s2	arXiv:1704.04541
+amont	arXiv:1607.05816	2016	Scaling Algorithms for Unbalanced Transport Problems	Lénaïc Chizat	s2	arXiv:1704.04541
+amont	arXiv:1606.04793	2016	A splitting method for nonlinear diffusions with nonlocal, nonpotential drifts	G. Carlier	s2	arXiv:1704.04541
+amont	DOI:10.1051/PROC/201654001	2016	An augmented Lagrangian approach to Wasserstein gradient flows and applications	J. Benamou	s2	arXiv:1704.04541
+amont	arXiv:1603.06431	2016	A fitness-driven cross-diffusion system from polulation dynamics as a gradient flow	S. Kondratyev	s2	arXiv:1704.04541
+amont	CorpusId:265096091	2016	Gamma-convergence and relaxations for gradient flows in metric spaces: a minimizing movement approach	F. Fleißner	s2	arXiv:1704.04541
+amont	arXiv:1602.04457	2016	A JKO Splitting Scheme for Kantorovich-Fisher-Rao Gradient Flows	Thomas O. Gallouët	s2	arXiv:1704.04541
+amont	CorpusId:124181096	2015	Optimal Transport for Applied Mathematicians: Calculus of Variations, PDEs, and Modeling	F. Santambrogio	s2	arXiv:1704.04541
+amont	arXiv:1509.00068	2015	Optimal Transport in Competition with Reaction: The Hellinger-Kantorovich Distance and Geodesic Curves	M. Liero	s2	arXiv:1704.04541
+amont	arXiv:1508.07941	2015	Optimal Entropy-Transport problems and a new Hellinger–Kantorovich distance between positive measures	M. Liero	s2	arXiv:1704.04541
+amont	arXiv:1508.05216	2015	Unbalanced Optimal Transport: Geometry and Kantorovich Formulation	Lénaïc Chizat	s2	arXiv:1704.04541
+amont	arXiv:1506.00126	2015	On some non linear evolution systems which are perturbations of Wasserstein gradient flows	M. Laborde	s2	arXiv:1704.04541
+amont	arXiv:1505.07746	2015	A new optimal transport distance on the space of finite Radon measures	S. Kondratyev	s2	arXiv:1704.04541
+amont	arXiv:1503.06389	2015	BV Estimates in Optimal Transportation and Applications	G. De Philippis	s2	arXiv:1704.04541
+amont	arXiv:1501.04437	2015	A Wasserstein gradient flow approach to Poisson−Nernst−Planck equations	D. Kinderlehrer	s2	arXiv:1704.04541
+amont	arXiv:1412.3266	2014	Geodesically convex energies and confinement of solutions for a multi-component system of nonlocal interaction equations	Jonathan Zinsl	s2	arXiv:1704.04541
+amont	arXiv:1401.3649	2014	Traveling wave solution of the Hele–Shaw model of tumor growth with nutrient	B. Perthame	s2	arXiv:1704.04541
+amont	DOI:10.1088/0951-7715/26/10/2777	2013	Measure solutions for non-local interaction PDEs with two species	M. Di Francesco	s2	arXiv:1704.04541
+amont	arXiv:1304.3072	2013	Quasi-static evolution and congested crowd transport	Damon Alexander	s2	arXiv:1704.04541
+amont	arXiv:1301.2612	2013	The Hele–Shaw Asymptotics for Mechanical Models of Tumor Growth	B. Perthame	s2	arXiv:1704.04541
+amont	DOI:10.1098/rsta.2012.0346	2012	Gradient structures and geodesic convexity for reaction–diffusion systems	M. Liero	s2	arXiv:1704.04541
+amont	arXiv:1206.3219	2012	Generalized Wasserstein Distance and its Application to Transport Equations with Source	B. Piccoli	s2	arXiv:1704.04541
+amont	arXiv:1201.2367	2012	Cahn–Hilliard and thin film equations with nonlinear mobility as gradient flows in weighted-Wasserstein metrics	Stefano Lisini	s2	arXiv:1704.04541
+amont	DOI:10.1215/00127094-2010-211	2011	Global-in-time weak measure solutions and finite-time aggregation for nonlocal interaction equations	J. Carrillo	s2	arXiv:1704.04541
+amont	arXiv:1101.4102	2011	Handling congestion in crowd motion modeling	B. Maury	s2	arXiv:1704.04541
+amont	arXiv:1506.06430	2010	An Interpolating Distance Between Optimal Transport and Fisher–Rao Metrics	Lénaïc Chizat	s2	arXiv:1704.04541
+amont	DOI:10.1007/S00032-010-0133-4	2010	Global Existence in Reaction-Diffusion Systems with Control of Mass: a Survey	M. Pierre	s2	arXiv:1704.04541
+amont	DOI:10.1016/J.MATPUR.2009.11.005	2010	A new transportation distance between non-negative measures, with applications to gradients flows with Dirichlet boundary conditions	A. Figalli	s2	arXiv:1704.04541
+amont	arXiv:0901.0540	2009	A Family of Nonlinear Fourth Order Equations of Gradient Flow Type	D. Matthes	s2	arXiv:1704.04541
+amont	DOI:10.1007/978-3-540-71050-9	2008	Optimal Transport: Old and New	C. Villani	s2	arXiv:1704.04541
+amont	DOI:10.1007/978-3-7643-7842-4	2006	Transport Equations in Biology	B. Perthame	s2	arXiv:1704.04541
+amont	DOI:10.1093/ACPROF:OSO/9780198569039.001.0001	2006	The Porous Medium Equation: Mathematical Theory	J. Vázquez	s2	arXiv:1704.04541
+amont	DOI:10.1109/MM.2006.77	2006	Old and New	R. Mateosian	s2	arXiv:1704.04541
+amont	DOI:10.1002/CPA.20046	2004	Gamma‐convergence of gradient flows with applications to Ginzburg‐Landau	E. Sandier	s2	arXiv:1704.04541
+amont	DOI:10.1007/S00245-004-0801-2	2004	Variational Principle for General Diffusion Problems	L. Petrelli	s2	arXiv:1704.04541
+amont	DOI:10.1090/gsm/058	2003	Topics in Optimal Transportation	C. Villani	s2	arXiv:1704.04541
+amont	arXiv:math/0309410	2002	Existence of solutions to degenerate parabolic equations via the Monge-Kantorovich theory	M. Agueh	s2	arXiv:1704.04541
+amont	DOI:10.1017/S0024609301309281	2001	FUNCTIONS OF BOUNDED VARIATION AND FREE DISCONTINUITY PROBLEMS (Oxford Mathematical Monographs)	Ronald F. Gariepy	s2	arXiv:1704.04541
+amont	DOI:10.1081/PDE-100002243	2001	THE GEOMETRY OF DISSIPATIVE EVOLUTION EQUATIONS: THE POROUS MEDIUM EQUATION	F. Otto	s2	arXiv:1704.04541
+amont	DOI:10.1007/S002050050073	1998	Dynamics of Labyrinthine Pattern Formation in Magnetic Fluids: A Mean‐Field Theory	F. Otto	s2	arXiv:1704.04541
+amont	DOI:10.1007/BF02392620	1996	The geometry of optimal transportation	W. Gangbo	s2	arXiv:1704.04541
+amont	DOI:10.1007/BF00048808	2021	Mathematical biology	Mei-Xia Wang	s2	arXiv:1704.04541
+amont	DOI:10.1007/978-3-319-20828-2	2015	Optimal Transport for Applied Mathematicians	F. Santambrogio	s2	arXiv:1704.04541
+amont	CorpusId:62824717	2005	Gradient Flows: In Metric Spaces and in the Space of Probability Measures	L. Ambrosio	s2	arXiv:1704.04541
+amont	CorpusId:59022924	2003	Tightness, integral equicontinuity and compactness for evolution problems in Banach spaces	R. Rossi	s2	arXiv:1704.04541
+amont	DOI:10.1007/b98869	2003	Mathematical Biology	V. Cristini	s2	arXiv:1704.04541
+amont	CorpusId:118264853	2002	Γ-convergence for beginners	Andrea Braides	s2	arXiv:1704.04541
+amont	DOI:10.1007/s002110050002	2000	A computational fluid mechanics solution to the Monge-Kantorovich mass transfer problem	J. Benamou	s2	arXiv:1704.04541
+amont	CorpusId:118499431	2000	Functions of Bounded Variation and Free Discontinuity Problems	L. Ambrosio	s2	arXiv:1704.04541
+amont	DOI:10.1137/S0036141096303359	1996	THE VARIATIONAL FORMULATION OF THE FOKKER-PLANCK EQUATION	R. Jordan	s2	arXiv:1704.04541
+amont	CorpusId:15459732	1996	Doubly Degenerate Diffusion Equations as Steepest Descent	F. Otto	s2	arXiv:1704.04541
+aval	DOI:10.1140/epjp/s13360-026-08425-7	2026	Chapman–Enskog analysis of a Schrödinger-based lattice-Boltzmann formulation for imaginary-time dynamics	Mohanad Radhi	s2	arXiv:1704.04541
+aval	arXiv:2609.33857	2026	PI-NOMT: Physics-Informed Neural Optimal Mass Transport for Brain Fluid Dynamics	Mehmet Emin Acar	s2	arXiv:1704.04541
+aval	arXiv:2412.14746	2024	Solving unbalanced optimal transport on point cloud by tangent radial basis function method	Jiangong Pan	s2	arXiv:1704.04541
+aval	arXiv:2407.21346	2024	A Network Based Approach for Unbalanced Optimal Transport on Surfaces	Jiangong Pan	s2	arXiv:1704.04541
+aval	arXiv:2401.16842	2024	Sticky-reflecting diffusion as a Wasserstein gradient flow	Jean-Baptiste Casteras	s2	arXiv:1704.04541
+aval	arXiv:2401.08188	2024	Bounded weak solutions for Keller-Segel equations with generalized diffusion and logistic source via an unbalanced optimal transport splitting scheme	Kyungkeun Kang	s2	arXiv:1704.04541
+aval	DOI:10.1016/j.jmaa.2023.127602	2023	On the well-posedness via the JKO approach and a study of blow-up of solutions for a multispecies Keller-Segel chemotaxis system with no mass conservation	J. C. Valencia-Guevara	s2	arXiv:1704.04541
+aval	arXiv:2305.03945	2023	A first-order computational algorithm for reaction-diffusion type equations via primal-dual hybrid gradient method	Shu Liu	s2	arXiv:1704.04541
+aval	arXiv:2301.11228	2023	Unbalanced regularized optimal mass transport with applications to fluid flows in the brain	Xi-Nan Chen	s2	arXiv:1704.04541
+aval	arXiv:2211.08771	2022	Symmetries in the dynamics of wide two-layer neural networks	Karl Hajjar	s2	arXiv:1704.04541
+aval	arXiv:2207.09815	2022	Evolutionary variational inequalities on the Hellinger-Kantorovich and spherical Hellinger-Kantorovich spaces	Vaios Laschos	s2	arXiv:1704.04541
+aval	arXiv:2109.02792	2021	A second-order accurate, operator splitting scheme for reaction-diffusion systems in an energetic variational formulation	Chun Liu	s2	arXiv:1704.04541
+aval	DOI:10.1063/5.0036742	2021	Room temperature rectification in tapered-channel thermal diodes through nanoscale confinement-induced liquid–solid phase change	M. Jacobs	s2	arXiv:1704.04541
+aval	arXiv:2006.09558	2020	Darcy’s Law with a Source Term	M. Jacobs	s2	arXiv:1704.04541
+aval	arXiv:2003.04558	2020	A Mixed Finite Element Discretization of Dynamical Optimal Transport	Andrea Natale	s2	arXiv:1704.04541
+aval	arXiv:2002.07724	2020	A new transportation distance with bulk/interface interactions and flux penalization	Léonard Monsaingeon	s2	arXiv:1704.04541
+aval	arXiv:1910.12958	2019	Sinkhorn Divergences for Unbalanced Optimal Transport	Thibault Séjourné	s2	arXiv:1704.04541
+aval	arXiv:1904.04112	2019	Convex Sobolev inequalities related to unbalanced optimal transport	S. Kondratyev	s2	arXiv:1704.04541
+aval	DOI:10.1007/s00245-018-9527-4	2018	On Cross-Diffusion Systems for Two Populations Subject to a Common Congestion Effect	M. Laborde	s2	arXiv:1704.04541
+aval	arXiv:1809.03430	2018	Spherical Hellinger-Kantorovich Gradient Flows	S. Kondratyev	s2	arXiv:1704.04541
+aval	arXiv:1806.07415	2018	Aggregation-diffusion to constrained interaction: Minimizers & gradient flows in the slow diffusion limit	Katy Craig	s2	arXiv:1704.04541
+aval	arXiv:1802.01321	2018	Simulation of multiphase porous media flows with minimising movement and finite volume schemes	C. Cancès	s2	arXiv:1704.04541
+aval	arXiv:1712.06124	2017	A tumor growth model of Hele-Shaw type as a gradient flow	Simone Di Marino	s2	arXiv:1704.04541
+aval	CorpusId:125146528	2017	Transport optimal de mesures positives : modèles, méthodes numériques, applications	Lénaïc Chizat	s2	arXiv:1704.04541
+aval	arXiv:1709.09109	2017	On Cross-Diffusion Systems for Two Populations Subject to a Common Congestion Effect	M. Laborde	s2	arXiv:1704.04541
+aval	arXiv:1706.08957	2017	Nonlinear Fokker-Planck equations with reaction as gradient flows of the free energy	S. Kondratyev	s2	arXiv:1704.04541
+aval	CorpusId:215813425	2020	Advances in Numerical Calculus of Variations		s2	arXiv:1704.04541
+aval	DOI:10.70675/f395dbd2z6531z4abazb4dcz6f7826c9f9c8	2019	Unbalanced Optimal Transport : Models, Numerical Methods, Applications	L'enaic Chizat	s2	arXiv:1704.04541
+amont	DOI:10.1007/s10107-021-01632-3	2019	Riemannian proximal gradient methods	Wen Huang	s2	arXiv:2002.03035
+amont	arXiv:1905.11768	2019	Stochastic Proximal Langevin Algorithm: Potential Splitting and Nonasymptotic Rates	A. Salim	s2	arXiv:2002.03035
+amont	arXiv:1905.11261	2019	A Unified Theory of SGD: Variance Reduction, Sampling, Quantization and Coordinate Descent	Eduard A. Gorbunov	s2	arXiv:2002.03035
+amont	DOI:10.1007/978-3-319-91578-4	2018	Lectures on Convex Optimization	Y. Nesterov	s2	arXiv:2002.03035
+amont	arXiv:1811.00980	2018	Proximal Gradient Method for Manifold Optimization	Shi-Xiang Chen	s2	arXiv:2002.03035
+amont	arXiv:1802.09188	2018	Analysis of Langevin Monte Carlo via Convex Optimization	A. Durmus	s2	arXiv:2002.03035
+amont	arXiv:1802.08671	2018	Langevin Monte Carlo and JKO splitting	Espen Bernton	s2	arXiv:2002.03035
+amont	arXiv:1802.08089	2018	Sampling as optimization in the space of measures: The Langevin dynamics as a composite optimization problem	Andre Wibisono	s2	arXiv:2002.03035
+amont	arXiv:1704.07520	2017	Stein Variational Gradient Descent as Gradient Flow	Qiang Liu	s2	arXiv:2002.03035
+amont	arXiv:1702.04144	2017	A Constant Step Forward-Backward Algorithm Involving Random Maximal Monotone Operators	P. Bianchi	s2	arXiv:2002.03035
+amont	arXiv:1609.03890	2016	{Euclidean, metric, and Wasserstein} gradient flows: an overview	F. Santambrogio	s2	arXiv:2002.03035
+amont	arXiv:1608.04471	2016	Stein Variational Gradient Descent: A General Purpose Bayesian Inference Algorithm	Qiang Liu	s2	arXiv:2002.03035
+amont	CorpusId:124591590	2016	Sampling from a strongly log-concave distribution with the Unadjusted Langevin Algorithm	A. Durmus	s2	arXiv:2002.03035
+amont	arXiv:1502.06800	2015	On the Equivalence between Kernel Quadrature Rules and Random Feature Expansions	F. Bach	s2	arXiv:2002.03035
+amont	arXiv:1412.7392	2014	Theoretical guarantees for approximate sampling from smooth and log‐concave densities	A. Dalalyan	s2	arXiv:2002.03035
+amont	arXiv:1503.01243	2014	A Differential Equation for Modeling Nesterov's Accelerated Gradient Method: Theory and Insights	Weijie Su	s2	arXiv:2002.03035
+amont	arXiv:1306.0895	2013	Sinkhorn Distances: Lightspeed Computation of Optimal Transport	Marco Cuturi	s2	arXiv:2002.03035
+amont	DOI:10.1007/978-3-319-48311-5	2011	Convex Analysis and Monotone Operator Theory in Hilbert Spaces	Heinz H. Bauschke	s2	arXiv:2002.03035
+amont	arXiv:0905.1270	2009	Evolution Equations for Maximal Monotone Operators: Asymptotic Analysis in Continuous and Discrete Time	J. Peypouquet	s2	arXiv:2002.03035
+amont	DOI:10.1007/978-3-540-71050-9	2008	Optimal Transport: Old and New	C. Villani	s2	arXiv:2002.03035
+amont	arXiv:0704.2458	2007	Existence and stability for Fokker–Planck equations with log-concave reference measure	L. Ambrosio	s2	arXiv:2002.03035
+amont	DOI:10.1007/PL00001679	2001	Polar factorization of maps on Riemannian manifolds	R. McCann	s2	arXiv:2002.03035
+amont	DOI:10.1081/PDE-100002243	2001	THE GEOMETRY OF DISSIPATIVE EVOLUTION EQUATIONS: THE POROUS MEDIUM EQUATION	F. Otto	s2	arXiv:2002.03035
+amont	DOI:10.1002/CPA.3160440402	1991	Polar Factorization and Monotone Rearrangement of Vector-Valued Functions	Y. Brenier	s2	arXiv:2002.03035
+amont	DOI:10.1112/BLMS/6.2.221	1974	OPERATEURS MAXIMAUX MONOTONES ET SEMI‐GROUPES DE CONTRACTIONS DANS LES ESPACES DE HILBERT	J. L. Webb	s2	arXiv:2002.03035
+amont	CorpusId:208527571	2019	Proximal Splitting Algorithms: Overrelax them all!	Laurent Condat	s2	arXiv:2002.03035
+amont	-	2014	Geometry of isotropic convex bodies, volume 196		s2	arXiv:2002.03035
+amont	CorpusId:62824717	2005	Gradient Flows: In Metric Spaces and in the Space of Probability Measures	L. Ambrosio	s2	arXiv:2002.03035
+amont	DOI:10.1137/S0036141096303359	1996	THE VARIATIONAL FORMULATION OF THE FOKKER-PLANCK EQUATION	R. Jordan	s2	arXiv:2002.03035
+amont	DOI:10.1051/M2AN/197004R301541	1970	Brève communication. Régularisation d'inéquations variationnelles par approximations successives	B. Martinet	s2	arXiv:2002.03035
+aval	arXiv:2602.03413	2026	On the Convergence of Wasserstein Gradient Descent for Sampling	Van Chien Ta	s2	arXiv:2002.03035
+aval	arXiv:2105.09994	2021	Kernel Stein Discrepancy Descent	Anna Korba	s2	arXiv:2002.03035
+aval	arXiv:2006.02509	2020	SVGD as a kernelized Wasserstein gradient flow of the chi-squared divergence	Sinho Chewi	s2	arXiv:2002.03035
+aval	arXiv:2005.09669	2020	Exponential ergodicity of mirror-Langevin diffusions	Sinho Chewi	s2	arXiv:2002.03035

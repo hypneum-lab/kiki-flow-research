@@ -1,0 +1,576 @@
+direction	id	annee	titre	premier_auteur	source_api	lot
+amont	arXiv:2609.18118	2026	Preservation of Log-Concavity and Convergence of Wasserstein-Fisher-Rao Gradient Flows	F. R. Crucinio	s2	A
+amont	arXiv:2510.25315	2025	Tuning-Free Sampling via Optimization on the Space of Probability Measures	Louis Sharrock	s2	A
+amont	arXiv:2507.04330	2025	A note on the unique properties of the Kullback-Leibler divergence for sampling via gradient flows	F. R. Crucinio	s2	A
+amont	arXiv:2506.05905	2025	Sequential Monte Carlo approximations of Wasserstein-Fisher-Rao gradient flows	F. R. Crucinio	s2	A
+amont	arXiv:2504.20400	2025	Evolution of Gaussians in the Hellinger-Kantorovich-Boltzmann gradient flow	M. Liero	s2	A
+amont	arXiv:2411.16366	2024	Connections between sequential Bayesian inference and evolutionary dynamics	S. Pathiraja	s2	A
+amont	arXiv:2409.01464	2024	Stein transport for Bayesian inference	N. Nüsken	s2	A
+amont	arXiv:2408.12057	2024	Optimised Annealed Sequential Monte Carlo Samplers	Saifuddin Syed	s2	A
+amont	arXiv:2407.15693	2024	Fisher-Rao Gradient Flow: Geodesic Convexity and Functional Inequalities	J. A. Carrillo	s2	A
+amont	arXiv:2406.17263	2024	Efficient, multimodal, and derivative-free bayesian inference with Fisher–Rao gradient flows	Yifan Chen	s2	A
+amont	arXiv:2402.17067	2024	Characterizing Dependence of Samples Along the Langevin Dynamics and Algorithms via Contraction of Φ-Mutual Information	Jiaming Liang	s2	A
+amont	arXiv:2401.12967	2024	Measure transport with kernel mean embeddings	Linfeng Wang	s2	A
+amont	arXiv:2401.03892	2024	Sampling in Unit Time with Kernel Fisher-Rao Flow	Aimee Maurais	s2	A
+amont	arXiv:2401.01722	2024	Splitting methods for differential equations	S. Blanes	s2	A
+amont	arXiv:2311.05025	2023	Unbiased Kinetic Langevin Monte Carlo with Inexact Gradients	N. K. Chada	s2	A
+amont	arXiv:2310.11914	2023	A connection between Tempering and Entropic Mirror Descent	Nicolas Chopin	s2	A
+amont	arXiv:2310.03597	2023	Sampling via Gradient Flows in the Space of Probability Measures	Yifan Chen	s2	A
+amont	S2:?	2023	Transport meets Variational Inference: Controlled Monte Carlo Diffusions		s2	A
+amont	arXiv:2302.12229	2023	An Explicit Expansion of the Kullback-Leibler Divergence along its Fisher-Rao Gradient Flow	Carles Domingo-Enrich	s2	A
+amont	arXiv:2302.05208	2023	Covariance inequalities for convex and log-concave functions	M. Bonnefont	s2	A
+amont	arXiv:2211.00450	2022	Birth–death dynamics for sampling: global convergence, approximations and their asymptotics	Yu-Long Lu	s2	A
+amont	arXiv:2110.15590	2021	Adaptive Importance Sampling meets Mirror Descent : a Bias-variance Tradeoff	Anna Korba	s2	A
+amont	arXiv:2007.12658	2020	McKean-Vlasov SDEs in nonlinear filtering	S. Pathiraja	s2	A
+amont	S2:d2d5cf9956da8a358935379b048fb04da8bf5f14	2020	The Wasserstein Proximal Gradient Algorithm	A. Salim	s2	A
+amont	arXiv:1908.10859	2019	High-Order Langevin Diffusion Yields an Accelerated MCMC Algorithm	Wen-Long Mou	s2	A
+amont	arXiv:1905.11768	2019	Stochastic Proximal Langevin Algorithm: Potential Splitting and Nonasymptotic Rates	A. Salim	s2	A
+amont	arXiv:1905.09863	2019	Accelerating Langevin Sampling with Birth-death	Yu-Long Lu	s2	A
+amont	arXiv:1812.06464	2018	Poincaré and Log–Sobolev Inequalities for Mixtures	A. Schlichting	s2	A
+amont	arXiv:1802.09188	2018	Analysis of Langevin Monte Carlo via Convex Optimization	A. Durmus	s2	A
+amont	arXiv:1802.08089	2018	Sampling as optimization in the space of measures: The Langevin dynamics as a composite optimization problem	Andre Wibisono	s2	A
+amont	arXiv:1712.07879	2017	A probabilistic interpretation of replicator-mutator dynamics	Ö. D. Akyildiz	s2	A
+amont	arXiv:1710.00064	2017	Gradient Flows in Filtering and Fisher-Rao Geometry	A. Halder	s2	A
+amont	arXiv:1701.04247	2017	Nonreversible Langevin Samplers: Splitting Schemes, Analysis and Implementation	A. Duncan	s2	A
+amont	arXiv:1602.04457	2016	A JKO Splitting Scheme for Kantorovich-Fisher-Rao Gradient Flows	Thomas O. Gallouët	s2	A
+amont	arXiv:1508.07941	2015	Optimal Entropy-Transport problems and a new Hellinger–Kantorovich distance between positive measures	M. Liero	s2	A
+amont	DOI:10.1137/140962644	2015	Long Time Accuracy of Lie-Trotter Splitting Methods for Langevin Dynamics	A. Abdulle	s2	A
+amont	arXiv:1404.5886	2014	Log-Concavity and Strong Log-Concavity: a review	Adrien Saumard	s2	A
+amont	arXiv:1203.5428	2012	Rational Construction of Stochastic Numerical Methods for Molecular Sampling	B. Leimkuhler	s2	A
+amont	DOI:10.1093/IMAMAN/DPQ012	2011	The covariance sign of transformed random variables with applications to economics and finance	Martín Egozcue	s2	A
+amont	arXiv:0712.4123	2007	Long-Run Accuracy of Variational Integrators in the Stochastic Context	Nawaf Bou-Rabee	s2	A
+amont	DOI:10.1016/J.JTBI.2005.07.022	2006	Stability of the replicator equation for a single species with a multi-dimensional continuous trait space.	R. Cressman	s2	A
+amont	DOI:10.1023/A:1023562417138	2002	Langevin Diffusions and Metropolis-Hastings Algorithms	G. Roberts	s2	A
+amont	DOI:10.1006/JFAN.2001.3772	2001	On Diffusion Semigroups Preserving the Log-Concavity	A. Kolesnikov	s2	A
+amont	DOI:10.1016/S0764-4442(97)84778-7	1997	Nonlinear filtering : Interacting particle resolution	P. Del Moral	s2	A
+amont	DOI:10.2307/2288814	1987	Stochastic differential equations : an introduction with applications	B. Øksendal	s2	A
+amont	DOI:10.1073/PNAS.54.3.731	1965	A stochastic model concerning the maintenance of genetic variability in quantitative characters.	M. Kimura	s2	A
+amont	S2:3cd4baeaab90d5f7386ecd2f7e1a7d6b01160b62	2022	Analysis of Langevin Monte Carlo from Poincare to Log-Sobolev	Sinho Chewi	s2	A
+amont	S2:?	2011	Inference for L´evy-driven stochastic volatility models via adaptive sequential Monte Carlo		s2	A
+amont	S2:1f6b8e901a7ff21de57c4f8fce537e7723305676	2010	The Lie–Trotter splitting method for nonlinear evolutionary problems involving critical parameters. An exact local error representation and application to nonlinear Schrödinger equations in the semi-classical regime	S. Descombes	s2	A
+amont	S2:20deb704cf6346a73521a4298f8d9143e012d39d	2009	On some covariance inequalities for monotonic and non-monotonic functions	Martín Egozcue	s2	A
+amont	S2:9682782c26bb418741304436bb3a721ffc96c0f0	2006	The Matrix Cookbook	Kaare Brandt Petersen	s2	A
+amont	S2:6d971c3f1860e360b75b3b6c76e5a3722ab22d82	2005	Gradient Flows: In Metric Spaces and in the Space of Probability Measures	L. Ambrosio	s2	A
+amont	DOI:10.1007/978-3-662-09017-6	2003	Numerical solution of time-dependent advection-diffusion-reaction equations	W. Hundsdorfer	s2	A
+amont	DOI:10.1137/S0036141096303359	1996	THE VARIATIONAL FORMULATION OF THE FOKKER-PLANCK EQUATION	R. Jordan	s2	A
+amont	DOI:10.2307/44153837	1993	CHEBYSHEV INEQUALITIES AND COMONOTONICITY	Armstrong	s2	A
+amont	S2:?	1983	Replicator dynamics		s2	A
+amont	S2:?		Wasserstein Fisher Rao Gradient Flows: Operator Splitting & Convergence Speed		s2	A
+amont	S2:?		(ii) Suppose E 0 ≺ 0 . Then E n ≺ 0 , E βn ≺ 0 and E αn ≺ 0 for all n = 1 , 2 , 3 . . . . Furthermore, || E αn || F > || E n || F > || E βn || F for all n = 1 , 2 , 3 , . .		s2	A
+amont	S2:?		(b) µ 0 ( x ) ∝ e − V 0 ( x ) is α 0 -strongly log-concave and L 0 -smooth, i.e. there exists an L 0 ≥ α 0 > 0 such that L 0 I ⪰ ∇ 2 V 0 ( x ) ⪰ α 0 I for all x ∈ R d		s2	A
+amont	S2:?		(a) π ( x ) ∝ e − V π ( x ) is α π -strongly log-concave and L π -smooth		s2	A
+aval	arXiv:2609.18118	2026	Preservation of Log-Concavity and Convergence of Wasserstein-Fisher-Rao Gradient Flows	F. R. Crucinio	s2	A
+aval	arXiv:2604.20301	2026	Properties and limitations of geometric tempering for gradient flow dynamics	F. R. Crucinio	s2	A
+amont	DOI:10.1016/j.jcp.2022.110943	2022	Energy-decreasing exponential time differencing Runge-Kutta methods for phase-field models	Zhaohui Fu	s2	A
+amont	arXiv:2107.08237	2021	On a reversible Gray-Scott type system from energetic variational approach and its irreversible limit	Jiangyan Liang	s2	A
+amont	DOI:10.1016/J.JCP.2021.110253	2021	A structure-preserving, operator splitting scheme for reaction-diffusion equations with detailed balance	Chun Liu	s2	A
+amont	arXiv:2105.09415	2021	Convergence analysis of the variational operator splitting scheme for a reaction-diffusion system with detailed balance	Chun Liu	s2	A
+amont	arXiv:2104.14053	2021	A positivity-preserving, energy stable scheme for a Ternary Cahn-Hilliard system with the singular interfacial parameters	Li-Xiu Dong	s2	A
+amont	arXiv:2101.09838	2021	A two species micro-macro model of wormlike micellar solutions and its maximum entropy closure approximations: An energetic variational approach	Yiwei Wang	s2	A
+amont	arXiv:2009.08076	2020	A positivity-preserving, energy stable and convergent numerical scheme for the Poisson-Nernst-Planck system	Chun Liu	s2	A
+amont	arXiv:2005.11465	2020	Maximum bound principles for a class of semilinear parabolic equations and exponential time differencing schemes	Q. Du	s2	A
+amont	arXiv:2004.03371	2020	A positivity-preserving second-order BDF scheme for the Cahn-Hilliard equation with variable interfacial parameters	Li-Xiu Dong	s2	A
+amont	arXiv:2002.09690	2020	A Positive and Energy Stable Numerical Scheme for the Poisson-Nernst-Planck-Cahn-Hilliard Equations with Steric Interactions	Y. Qian	s2	A
+amont	arXiv:2001.10149	2020	Field theory of reaction-diffusion: Law of mass action with an energetic variational approach.	Yiwei Wang	s2	A
+amont	DOI:10.1007/s00285-019-01462-0	2020	Spatial pattern formation in reaction–diffusion models: a computational approach	Wenrui Hao	s2	A
+amont	arXiv:2003.10413	2020	A Variational Lagrangian Scheme for a Phase Field Model: A Discrete Energetic Variational Approach	Chun Liu	s2	A
+amont	DOI:10.1016/j.jcp.2020.109566	2019	On Lagrangian schemes for porous medium type generalized diffusion equations: A discrete energetic variational approach	Chun Liu	s2	A
+amont	DOI:10.1137/17M1158379	2018	Splitting Schemes and Segregation in Reaction Cross-Diffusion Systems	J. Carrillo	s2	A
+amont	DOI:10.1007/s10915-018-0852-1	2018	Positivity-Preserving Time Discretizations for Production–Destruction Equations with Applications to Non-equilibrium Flows	Juntao Huang	s2	A
+amont	DOI:10.1007/s10915-018-0693-y	2018	A Second Order Energy Stable Linear Scheme for a Thin Film Model Without Slope Selection	Weijia Li	s2	A
+amont	DOI:10.1039/c7cs90121f	2017	Chemical reaction dynamics.	Xue-Ming Yang	s2	A
+amont	arXiv:1712.03225	2017	Positivity-preserving, energy stable numerical schemes for the Cahn-Hilliard equation with logarithmic potential	Wen-Bin Chen	s2	A
+amont	arXiv:1708.08395	2017	An accurate front capturing scheme for tumor growth models with a free boundary limit	Jian-Guo Liu	s2	A
+amont	arXiv:1704.04541	2017	An unbalanced optimal transport splitting scheme for general advection-reaction-diffusion problems	Thomas O. Gallouët	s2	A
+amont	arXiv:1702.01707	2017	A Lagrangian Scheme for the Solution of Nonlinear Diffusion Equations Using Moving Simplex Meshes	J. Carrillo	s2	A
+amont	DOI:10.1051/PROC/201654001	2016	An augmented Lagrangian approach to Wasserstein gradient flows and applications	J. Benamou	s2	A
+amont	DOI:10.1137/16M1102240	2015	Non-equilibrium Thermodynamical Principles for Chemical Reactions with Mass-Action Kinetics	A. Mielke	s2	A
+amont	arXiv:1509.07721	2015	A fully discrete variational scheme for solving nonlinear Fokker-Planck equations in higher space dimensions	O. Junge	s2	A
+amont	DOI:10.1038/nphys3224	2015	Active gel physics	J. Prost	s2	A
+amont	arXiv:1411.5248	2014	Stability and Convergence of a Second Order Mixed Finite Element Method for the Cahn-Hilliard Equation	Amanda E. Diegel	s2	A
+amont	arXiv:1301.2612	2013	The Hele–Shaw Asymptotics for Mechanical Models of Tumor Growth	B. Perthame	s2	A
+amont	DOI:10.1098/rsta.2012.0346	2012	Gradient structures and geodesic convexity for reaction–diffusion systems	M. Liero	s2	A
+amont	arXiv:1208.2643	2012	Energy stable and efficient finite-difference nonlinear multigrid schemes for the modified phase field crystal equation	A. Baskaran	s2	A
+amont	arXiv:1208.1469	2012	Convergence Analysis of a Second Order Convex Splitting Scheme for the Modified Phase Field Crystal Equation	A. Baskaran	s2	A
+amont	DOI:10.4208/AAMM.10-M11180	2012	Moving finite element simulations for reaction-diffusion systems	Guang-Hui Hu	s2	A
+amont	DOI:10.1002/cnm.1467	2012	Numerical simulation of a thermodynamically consistent four‐species tumor growth model	A. Hawkins-Daarud	s2	A
+amont	DOI:10.1016/j.jcp.2011.04.009	2011	Operator Splitting Implicit Integration Factor Methods for Stiff Reaction-Diffusion-Advection Systems	Su Zhao	s2	A
+amont	DOI:10.1137/100789592	2011	Positivity and Conservation Properties of Some Integration Schemes for Mass Action Kinetics	L. Formaggia	s2	A
+amont	DOI:10.1201/b10387	2010	Discrete variational derivative method—A structure-preserving numerical method for partial differential equations	Daisuke Furihata	s2	A
+amont	DOI:10.1126/science.1179047	2010	Reaction-Diffusion Model as a Framework for Understanding Biological Pattern Formation	Shigeru Kondo	s2	A
+amont	DOI:10.1063/1.3476262	2010	Energy variational analysis of ions in water and channels: Field theory for primitive models of complex ionic fluids.	B. Eisenberg	s2	A
+amont	DOI:10.1016/j.jcp.2009.04.020	2009	Stable and efficient finite-difference nonlinear-multigrid schemes for the phase field crystal equation	Zheng-Zheng Hu	s2	A
+amont	DOI:10.1142/9789814273268_0004	2009	An Introduction of Elastic Complex Fluids: An Energetic Variational Approach	Chun Liu	s2	A
+amont	DOI:10.1137/S1064827502410633	2005	Fourth-Order Time-Stepping for Stiff PDEs	Aly-Khan Kassam	s2	A
+amont	DOI:10.1023/A:1024719028273	2003	A Variational Principle for Molecular Motors	M. Chipot	s2	A
+amont	DOI:10.1006/JTBI.2003.3200	2003	A robust numerical algorithm for studying biomolecular transport processes.	Hong-Yun Wang	s2	A
+amont	DOI:10.1006/JCPH.2002.6995	2002	Exponential Time Differencing for Stiff Systems	S. Cox	s2	A
+amont	DOI:10.1090/S0025-5718-00-01277-1	2001	Convergence of a splitting method of high order for reaction-diffusion systems	S. Descombes	s2	A
+amont	DOI:10.3390/e1040148	1999	Modern Thermodynamics: From Heat Engines to Dissipative Structures	Shu-Kun Lin	s2	A
+amont	DOI:10.1103/REVMODPHYS.69.1269	1997	Modeling molecular motors	F. Jülicher	s2	A
+amont	DOI:10.1016/0898-1221(96)00142-3	1996	Positive and conservative schemes for mass action kinetics	E. Bertolazzi	s2	A
+amont	DOI:10.1093/oso/9780195076943.001.0001	1994	Thermodynamics of flowing systems : with internal microstructure	A. Beris	s2	A
+amont	arXiv:patt-sol/9304003	1993	Complex Patterns in a Simple System	J. E. Pearson	s2	A
+amont	DOI:10.1137/0728069	1991	Numerical analysis of a continuum model of phase transition	Q. Du	s2	A
+amont	DOI:10.1137/0705041	1968	On the Construction and Comparison of Difference Schemes	G. Strang	s2	A
+amont	DOI:10.1103/PHYSREV.38.2265	1931	Reciprocal Relations in Irreversible Processes. II.	L. Onsager	s2	A
+amont	DOI:10.1112/PLMS/S1-5.1.119	1873	Note on the Numerical Calculation of the Roots of Fluctuating Functions	Rayleigh	s2	A
+amont	DOI:10.4310/cms.2019.v17.n4.a3	2019	A positivity-preserving, energy stable and convergent numerical scheme for the Cahn–Hilliard equation with a Flory–Huggins–Degennes energy	Li-Xiu Dong	s2	A
+amont	DOI:10.4208/CICP.OA-2016-0197	2018	A Second-Order Energy Stable BDF Numerical Scheme for the Cahn-Hilliard Equation	Yue Yan	s2	A
+amont	DOI:10.1007/978-3-319-10151-4	2017	Handbook of Mathematical Analysis in Mechanics of Viscous Fluids	Y. Giga	s2	A
+amont	DOI:10.1007/978-3-319-10151-4_2-1	2017	Variational Modeling and Complex Fluids	Mi-Ho Giga	s2	A
+amont	S2:?	2016	An H2 convergence of a second-order convex-splitting		s2	A
+amont	DOI:10.4310/CMS.2016.V14.N2.A8	2016	An $H^2$ convergence of a second-order convex-splitting, finite difference scheme for the three-dimensional Cahn–Hilliard equation	Jing Guo	s2	A
+amont	DOI:10.1137/110822839	2012	Second-order Convex Splitting Schemes for Gradient Flows with Ehrlich-Schwoebel Type Energy: Application to Thin Film Epitaxy	Jie Shen	s2	A
+amont	DOI:10.1007/978-3-642-25333-1_3	2012	Non-equilibrium Thermodynamics	Y. Ichikawa	s2	A
+amont	S2:729f1a8bfd81e3fd01d7e03d1e5b0b6a45881c77	2011	現代の熱力学 = Modern thermodynamics	光雲 白井	s2	A
+amont	DOI:10.1090/QAM/644105	1982	Thermodynamic principle of virtual dissipation and the dynamics of physical-chemical fluid mixtures including radiation pressure	M. Biot	s2	A
+amont	DOI:10.1038/140344c0	1937	Thermodynamic Theory of Affinity :	F. R.	s2	A
+amont	S2:?	1927	L’affinité		s2	A
+amont	S2:?	1927	L’aﬃnit´e , M´emoires de la Classe des sciences		s2	A
+aval	DOI:10.1140/epjp/s13360-026-08425-7	2026	Chapman–Enskog analysis of a Schrödinger-based lattice-Boltzmann formulation for imaginary-time dynamics	Mohanad Radhi	s2	A
+aval	DOI:10.1016/j.physd.2026.135345	2026	Phase-field modeling and simulation of two- and three-dimensional curvature-dependent tissue growth on surfaces	Ze-Cheng Qiu	s2	A
+aval	DOI:10.1117/12.3100381	2026	High-performance coupled opto-chemical simulation of gradient-index light transport in vat photopolymerization	Marwan Aarab	s2	A
+aval	arXiv:2604.17606	2026	Fully discrete scheme for the fifth-order KdV-Burgers-Fisher equation using Strang splitting and Fourier collocation methods	Nurcan Gücüyenen Kaymak	s2	A
+aval	DOI:10.1007/s11075-025-02235-1	2025	Error estimate of the operator splitting L2-NIPG method for two-dimensional time-fractional diffusion equations	Sandip Maji	s2	A
+aval	DOI:10.1090/mcom/4097	2025	Numerical analysis of a first-order computational algorithm for reaction-diffusion equations via the primal-dual hybrid gradient method	Shu Liu	s2	A
+aval	DOI:10.1016/j.cam.2025.116789	2025	A uniquely solvable and positivity-preserving finite difference scheme for the Flory-Huggins-Cahn-Hilliard equation with dynamical boundary condition	Yun-Zhuo Guo	s2	A
+aval	DOI:10.1016/j.matcom.2025.06.003	2025	Unconditional error estimate of a linearized variable-time-step BDF2 nonconforming virtual element method for nonlinear coupled predator–prey equations	Shan-Shan Peng	s2	A
+aval	DOI:10.1016/j.camwa.2024.12.016	2025	Semi-analytical algorithm for quasicrystal patterns	Keyue Sun	s2	A
+aval	arXiv:2408.06655	2024	Strang splitting structure-preserving high-order compact difference schemes for nonlinear convection diffusion equations	Baolin Kuang	s2	A
+aval	arXiv:2407.13453	2024	A uniquely solvable and positivity-preserving finite difference scheme for the Flory-Huggins-Cahn-Hilliard equation with dynamical boundary condition	Yun-Zhuo Guo	s2	A
+aval	DOI:10.1016/j.cnsns.2024.107956	2024	Shape transformation on curved surfaces using a phase-field model	Hyundong Kim	s2	A
+aval	DOI:10.1016/j.cnsns.2024.108143	2024	A second-order Strang splitting scheme for the generalized Allen-Cahn type phase-field crystal model with FCC ordering structure	Ying Ye	s2	A
+aval	arXiv:2405.02616	2024	Convergence analysis of a second order numerical scheme for the Flory-Huggins-Cahn-Hilliard-Navier-Stokes system	Wenbin Chen	s2	A
+aval	arXiv:2402.03731	2024	On a positive-preserving, energy-stable numerical scheme to mass-action kinetics with detailed balance	Chun Liu	s2	A
+aval	arXiv:2401.16316	2024	Convergence Analysis of a Preconditioned Steepest Descent Solver for the Cahn-Hilliard Equation with Logarithmic Potential	Amanda E. Diegel	s2	A
+aval	arXiv:2401.14602	2024	Numerical analysis of a first-order computational algorithm for reaction-diffusion equations via the primal-dual hybrid gradient method	Shu Liu	s2	A
+aval	arXiv:2305.03945	2023	A first-order computational algorithm for reaction-diffusion type equations via primal-dual hybrid gradient method	Shu Liu	s2	A
+aval	DOI:10.1016/j.matcom.2023.04.032	2023	Improved uniform error bounds of a time-splitting Fourier pseudo-spectral scheme for the Klein-Gordon-Schrödinger equation with the small coupling constant	Ji-Yong Li	s2	A
+aval	arXiv:2303.08950	2023	High order spatial discretization for variational time implicit schemes: Wasserstein gradient flows and reaction-diffusion systems	Guo-Sheng Fu	s2	A
+aval	DOI:10.1016/j.jmaa.2025.130382	2026	Analysis of operator splitting methods for the dispersive-Fisher equation	Fatma Zürnacı‐Yetiş	s2	A
+aval	DOI:10.1016/j.apnum.2025.01.005	2025	Variable-time-step weighted IMEX FEMs for nonlinear evolution equations	Meng Li	s2	A
+amont	S2:3a5bc41928371cb9e026809c4c3ea4c5d9076866	2018	Accelerated Stochastic Mirror Descent: From Continuous-time Dynamics to Discrete-time Algorithms	Pan Xu	s2	A
+amont	arXiv:1802.08671	2018	Langevin Monte Carlo and JKO splitting	Espen Bernton	s2	A
+amont	arXiv:1802.04475	2018	Graph-Based Ascent Algorithms for Function Maximization	Muni Sreenivas Pydi	s2	A
+amont	arXiv:1801.02309	2018	Log-concave sampling: Metropolis-Hastings algorithms are fast!	Raaz Dwivedi	s2	A
+amont	arXiv:1710.11029	2017	Stochastic Gradient Descent Performs Variational Inference, Converges to Limit Cycles for Deep Networks	Pratik Chaudhari	s2	A
+amont	arXiv:1710.06261	2017	Convergence rate of Riemannian Hamiltonian Monte Carlo and faster polytope volume computation	Yin Lee	s2	A
+amont	arXiv:1710.00095	2017	User-friendly guarantees for the Langevin Monte Carlo with inaccurate gradient	A. Dalalyan	s2	A
+amont	arXiv:1708.07114	2017	Rapid Mixing of Hamiltonian Monte Carlo on Strongly Log-Concave Distributions	Oren Mangoubi	s2	A
+amont	arXiv:1707.03663	2017	Underdamped Langevin MCMC: A non-asymptotic analysis	Xiang Cheng	s2	A
+amont	arXiv:1705.09048	2017	Convergence of Langevin MCMC in KL-divergence	Xiang Cheng	s2	A
+amont	arXiv:1705.00166	2017	On the convergence of Hamiltonian Monte Carlo	A. Durmus	s2	A
+amont	arXiv:1704.04752	2017	Further and stronger analogy between sampling and optimization: Langevin Monte Carlo and gradient descent	A. Dalalyan	s2	A
+amont	arXiv:1704.07520	2017	Stein Variational Gradient Descent as Gradient Flow	Qiang Liu	s2	A
+amont	arXiv:1702.05575	2017	A Hitting Time Analysis of Stochastic Gradient Langevin Dynamics	Yu-Chen Zhang	s2	A
+amont	arXiv:1702.03849	2017	Non-convex learning via Stochastic Gradient Langevin Dynamics: a nonasymptotic analysis	M. Raginsky	s2	A
+amont	arXiv:1701.02434	2017	A Conceptual Introduction to Hamiltonian Monte Carlo	M. Betancourt	s2	A
+amont	arXiv:1611.02635	2016	A Lyapunov Analysis of Momentum Methods in Optimization	Ashia C. Wilson	s2	A
+amont	arXiv:1608.04636	2016	Linear Convergence of Gradient and Proximal-Gradient Methods Under the Polyak-Łojasiewicz Condition	Hamed Karimi	s2	A
+amont	arXiv:1608.04471	2016	Stein Variational Gradient Descent: A General Purpose Bayesian Inference Algorithm	Qiang Liu	s2	A
+amont	arXiv:1605.01559	2016	High-dimensional Bayesian inference via the unadjusted Langevin algorithm	A. Durmus	s2	A
+amont	arXiv:1603.04245	2016	A variational perspective on accelerated methods in optimization	Andre Wibisono	s2	A
+amont	arXiv:1602.06053	2016	First-order Methods for Geodesically Convex Optimization	Hongyi Zhang	s2	A
+amont	DOI:10.1007/s10957-015-0861-2	2016	A New Approach to the Proximal Point Method: Convergence on General Riemannian Manifolds	Glaydston de Carvalho Bento	s2	A
+amont	arXiv:1610.06665	2015	On the Convergence of Stochastic Gradient MCMC Algorithms with High-Order Integrators	Chang-You Chen	s2	A
+amont	arXiv:1511.06251	2015	Stochastic Modified Equations and Adaptive Stochastic Gradient Algorithms	Qianxiao Li	s2	A
+amont	arXiv:1412.7392	2014	Theoretical guarantees for approximate sampling from smooth and log‐concave densities	A. Dalalyan	s2	A
+amont	S2:f244da7263ef3e5c25a7780c7c2f32ca07a25d12	2014	Introductory Lectures on Convex Optimization - A Basic Course	Y. Nesterov	s2	A
+amont	S2:2939c42d40b6a45fef2429ad09f4a348911d1b48	2013	Stochastic Gradient Riemannian Langevin Dynamics on the Probability Simplex	Sam Patterson	s2	A
+amont	S2:52c701cfee48b5a5ccd457d6ff6bf5bf0ffcfa04	2013	How to Hedge an Option Against an Adversary: Black-Scholes Pricing is Minimax Optimal	J. Abernethy	s2	A
+amont	DOI:10.1093/ACPROF:OSO/9780199535255.003.0005	2013	Logarithmic Sobolev Inequalities	S. Boucheron	s2	A
+amont	DOI:10.1007/S00205-011-0471-6	2012	Fokker–Planck Equations for a Free Energy Functional or Markov Process on a Graph	S. Chow	s2	A
+amont	arXiv:1202.2585	2012	Minimax option pricing meets black-scholes in the limit	J. Abernethy	s2	A
+amont	DOI:10.18910/4973	2011	Wasserstein geometry of Gaussian measures	Asuka Takatsu	s2	A
+amont	arXiv:1206.1901	2011	Handbook of Markov Chain Monte Carlo	Steve P. Brooks	s2	A
+amont	arXiv:1102.5238	2011	Gradient flows of the entropy for finite Markov chains	J. Maas	s2	A
+amont	arXiv:math/0612562	2006	Some Geometric Calculations on Wasserstein Space	J. Lott	s2	A
+amont	DOI:10.1016/J.JMAA.2005.08.049	2006	Proximal subgradient and a characterization of Lipschitz function on Riemannian manifolds	O. P. Ferreira	s2	A
+amont	DOI:10.1007/S00205-003-0276-3	2004	Isotropic Hypoellipticity and Trend to Equilibrium for the Fokker-Planck Equation with a High-Degree Potential	F. Hérau	s2	A
+amont	arXiv:math/0312063	2003	Constrained steepest descent in the 2-Wasserstein metric	E. Carlen	s2	A
+amont	DOI:10.1090/gsm/058	2003	Topics in Optimal Transportation	C. Villani	s2	A
+amont	DOI:10.1109/18.850718	2000	"A short proof of the ""Concavity of entropy power"""	C. Villani	s2	A
+amont	DOI:10.1006/JFAN.1999.3557	2000	Generalization of an Inequality by Talagrand and Links with the Logarithmic Sobolev Inequality	F. Otto	s2	A
+amont	DOI:10.1023/A:1022675100677	1998	Subgradient Algorithm on Riemannian Manifolds	O. P. Ferreira	s2	A
+amont	DOI:10.2307/3318418	1996	Exponential convergence of Langevin distributions and their discrete approximations	G. Roberts	s2	A
+amont	DOI:10.1007/BF02249265	1996	Transportation cost for Gaussian and other product measures	M. Talagrand	s2	A
+amont	DOI:10.1111/J.2517-6161.1994.TB02000.X	1994	REPRESENTATIONS OF KNOWLEDGE IN COMPLEX SYSTEMS	U. Grenander	s2	A
+amont	DOI:10.1109/18.104312	1991	Information theoretic inequalities	A. Dembo	s2	A
+amont	DOI:10.1016/0920-5632(88)90157-0	1988	Hybrid Monte Carlo	A. D. Kennedy	s2	A
+amont	DOI:10.1007/BF01011161	1987	Logarithmic Sobolev inequalities and stochastic Ising models	R. Holley	s2	A
+amont	DOI:10.1086/260062	1973	The Pricing of Options and Corporate Liabilities	F. Black	s2	A
+amont	DOI:10.1090/S0002-9939-1961-0120462-2	1961	A well posed problem for the backward heat equation	W. Miranker	s2	A
+amont	DOI:10.1016/S0019-9958(59)90348-1	1959	Some Inequalities Satisfied by the Quantities of Information of Fisher and Shannon	A. J. Stam	s2	A
+amont	S2:7754c2c7a7b1087c1534116c7fd4b1d419ae774d	2017	Acceleration and Averaging in Stochastic Descent Dynamics	Walid Krichene	s2	A
+amont	DOI:10.1007/978-3-319-33255-0_8	2016	Proximal Point Algorithm	A. Zaslavski	s2	A
+amont	S2:?	2008	Optimal Transport: Old and New, volume 338 of Grundlehren der mathematischen Wissenschaften		s2	A
+amont	S2:?	2006	Geometric numerical integration: Structurepreserving algorithms for ordinary differential equations, volume 31		s2	A
+amont	S2:?	2006	A review of discretization methods for a flow in space We provide brief review of discretization methods, and refer the reader to (Hairer et al., 2006) for more detail. B.1		s2	A
+amont	DOI:10.1137/S0036144503423264	2004	Fastest Mixing Markov Chain on a Graph	Stephen P. Boyd	s2	A
+amont	S2:7449f8982f9de36faf9d34bca680444ab827657c	2003	The Frkhet Distance between Multivariate Normal Distributions	D. Dowson	s2	A
+amont	DOI:10.1214/ss/1015346318	2001	A geometric interpretation of the Metropolis-Hastings algorithm	L. Billera	s2	A
+amont	S2:?	1992	Time’s Arrow: The Origins of Thermodynamics Behavior		s2	A
+amont	S2:8d3a318b62d2e970122da35b2a2e70a5d12cc16f	1983	A method for solving the convex programming problem with convergence rate O(1/k^2)	Y. Nesterov	s2	A
+amont	DOI:10.1016/0041-5553(64)90137-5	1964	Some methods of speeding up the convergence of iteration methods	Boris Polyak	s2	A
+amont	S2:?	1963	Une propriété topologique des sous-ensembles analytiques réels		s2	A
+amont	S2:?	1963	Gradient methods for minimizing functionals		s2	A
+amont	S2:?	1963	In the setting of M = R, this is variously called the Polyak-Łojaciewicz condition or (a special case of) the Kurdyka-Łojaciewicz condition (Polyak		s2	A
+aval	arXiv:2610.12052	2026	Diffusion Removes Langevin's Conditioning Dependence: A Sharp Gaussian Analysis	Adam Perbost	s2	A
+aval	arXiv:2610.02081	2026	Wasserstein Gradient Flows and Forward-Only Diffusion Are Not Enough for Multimodal Sampling	Daniel McBride	s2	A
+aval	arXiv:2609.31612	2026	First-Order Stationarity of Reverse Diffusions	Zhi-Feng Chen	s2	A
+aval	arXiv:2609.28035	2026	SWAP: A Scalable, Warm-Startable, Anytime Permutation Solver for Optimal Transport	Xue-Kai Jiang	s2	A
+aval	arXiv:2609.07812	2026	The Fenchel Game of Underdamped Langevin Dynamics: Insights into Accelerated Convergence	Alexandra G. Borkowski	s2	A
+aval	arXiv:2609.06574	2026	Equivalence between $N$-particle log-Sobolev inequalities and non-linear {\L}ojasiewicz inequalities for a class of mean field systems	Pierre Monmarché	s2	A
+aval	arXiv:2608.19198	2026	Probabilistic Representation and Convergence of Gromov-Wasserstein Gradient Flows	Venkatkrishna Karumanchi	s2	A
+aval	arXiv:2608.05022	2026	Exact simulation of diffusions and improved algorithms for log-concave sampling	Fan Chen	s2	A
+aval	arXiv:2608.02430	2026	Wasserstein mixing time of the unadjusted Langevin algorithm	Francesco Pedrotti	s2	A
+aval	arXiv:2607.23008	2026	Nesterov acceleration in optimizing over probability measures	Jiaqi Tang	s2	A
+aval	arXiv:2606.27767	2026	Difference of Convex Programming in the Wasserstein Space with Applications to MMD Optimization	Clément Bonet	s2	A
+aval	arXiv:2606.01351	2026	Recognize Your Orchestrator: An Entropy Dynamics Perspective for LLM Multi-Agent Systems	Jun-Ze Zhu	s2	A
+aval	arXiv:2605.31413	2026	Improved Guarantees for Langevin Monte Carlo with Average Smoothness	A. Dalalyan	s2	A
+aval	arXiv:2606.00293	2026	Accurate Large-sample Uncertainty Quantification using Stochastic Gradient Markov Chain Monte Carlo	Yu Wang	s2	A
+aval	arXiv:2605.11884	2026	Sobolev Regularized MMD Gradient Flow	Chenyang Tian	s2	A
+aval	arXiv:2605.08916	2026	Diffusion Restore: Real-Time Markov Chain Monte Carlo Light Transport	Sascha Holl	s2	A
+aval	arXiv:2605.07907	2026	Consistency Regularised Gradient Flows for Inverse Problems	Alessio Spagnoletti	s2	A
+aval	arXiv:2604.04342	2026	Generative models for decision-making under distributional shift	Xiu-Yuan Cheng	s2	A
+aval	arXiv:2603.28910	2026	Input-to-State Stability of Gradient Flows in Distributional Space	Guillem Pascual	s2	A
+aval	arXiv:2602.20758	2026	Deep unfolding of MCMC kernels: scalable, modular & explainable GANs for high-dimensional posterior sampling	Jonathan Spence	s2	A
+aval	arXiv:2602.18718	2026	Stochastic Gradient Variational Inference with Price's Gradient Estimator from Bures-Wasserstein to Parameter Space	Kyurae Kim	s2	A
+aval	arXiv:2602.05227	2026	Radon-Wasserstein Gradient Flows for Interacting-Particle Sampling in High Dimensions	Elias Hess-Childs	s2	A
+aval	arXiv:2602.05172	2026	Finite-Particle Rates for Regularized Stein Variational Gradient Descent	Ye He	s2	A
+aval	arXiv:2602.03413	2026	On the Convergence of Wasserstein Gradient Descent for Sampling	Van Chien Ta	s2	A
+aval	arXiv:2602.03999	2026	Functional Stochastic Localization	An-Ming Gu	s2	A
+aval	arXiv:2601.22038	2026	Anderson Mixing in Bures Wasserstein Space of Gaussian Measures	Vitalii Aksenov	s2	A
+aval	arXiv:2512.17598	2025	A Systems-Theoretic View on the Convergence of Algorithms under Disturbances	Güner Dilsad Er	s2	A
+aval	arXiv:2512.08176	2025	Worst-case generation via minimax optimization in Wasserstein space	Xiu-Yuan Cheng	s2	A
+aval	arXiv:2511.18060	2025	An operator splitting analysis of Wasserstein-Fisher-Rao gradient flows	F. R. Crucinio	s2	A
+aval	arXiv:2510.12238	2025	A Gradient Guided Diffusion Framework for Chance Constrained Programming	Boyan Zhang	s2	A
+aval	arXiv:2510.06028	2025	Generalization of Gibbs and Langevin Monte Carlo Algorithms in the Interpolation Regime	Andreas Maurer	s2	A
+aval	arXiv:2510.02730	2025	Dale meets Langevin: A Multiplicative Denoising Diffusion Model	Nishanth Shetty	s2	A
+aval	arXiv:2509.00336	2025	Are We Really Learning the Score Function? Reinterpreting Diffusion Models Through Wasserstein Gradient Flow Matching	An B. Vuong	s2	A
+aval	arXiv:2508.07631	2025	Efficient Approximate Posterior Sampling with Annealed Langevin Monte Carlo	Advait Parulekar	s2	A
+aval	arXiv:2507.12385	2025	Convergence of Drift-Diffusion PDEs Arising as Wasserstein Gradient Flows of Convex Functions	L'enaic Chizat	s2	A
+aval	arXiv:2507.11387	2025	From Kinetic Theory to AI: a Rediscovery of High-Dimensional Divergences and Their Properties	G. Auricchio	s2	A
+aval	arXiv:2506.20185	2025	Affine invariant interacting Langevin dynamics in Markov chain importance sampling for rare event estimation	Jason Beh	s2	A
+aval	arXiv:2506.12544	2025	Constrained Diffusers for Safe Planning and Control	Ji-Chen Zhang	s2	A
+aval	arXiv:2506.09681	2025	Assessing the Quality of Denoising Diffusion Models in Wasserstein Distance: Noisy Score and Optimal Bounds	Vahan Arsenyan	s2	A
+aval	arXiv:2506.05905	2025	Sequential Monte Carlo approximations of Wasserstein-Fisher-Rao gradient flows	F. R. Crucinio	s2	A
+aval	arXiv:2505.23517	2025	Inexact JKO and proximal-gradient algorithms in the Wasserstein space	Simone Di Marino	s2	A
+aval	arXiv:2505.23614	2025	Inference-time Scaling of Diffusion Models through Classical Search	Xiang-Cheng Zhang	s2	A
+aval	arXiv:2505.12599	2025	Accelerated Markov Chain Monte Carlo Algorithms on Discrete States	Bo-Han Zhou	s2	A
+aval	arXiv:2505.05301	2025	Operator-level quantum acceleration of non-logconcave sampling	Jia-Qi Leng	s2	A
+aval	arXiv:2505.02621	2025	Mirror Mean-Field Langevin Dynamics	An-Ming Gu	s2	A
+aval	arXiv:2504.20400	2025	Evolution of Gaussians in the Hellinger-Kantorovich-Boltzmann gradient flow	M. Liero	s2	A
+aval	arXiv:2504.20285	2025	Computation of Capacity-Distortion-Cost Functions for Continuous Memoryless Channels	Xin-Yan Li	s2	A
+aval	arXiv:2504.18130	2025	Score-Based Deterministic Density Sampling	V. Ilin	s2	A
+aval	arXiv:2504.02831	2025	Beyond Smoothness and Convexity: Optimization via sampling	N. Seyoum	s2	A
+aval	arXiv:2503.01140	2025	DDEQs: Distributional Deep Equilibrium Models through Wasserstein Gradient Flows	Jonathan Geuter	s2	A
+aval	arXiv:2502.19210	2025	Langevin Multiplicative Weights Update with Applications in Polynomial Portfolio Management	Yi Feng	s2	A
+aval	arXiv:2502.07650	2025	Guiding Time-Varying Generative Models with Natural Gradients on Exponential Family Manifold	Song Liu	s2	A
+aval	arXiv:2502.06525	2025	Towards Understanding Gradient Dynamics of the Sliced-Wasserstein Distance via Critical Point Analysis	Christophe Vauthier	s2	A
+aval	arXiv:2502.05623	2025	Mixing Time of the Proximal Sampler in Relative Fisher Information via Strong Data Processing Inequality	Andre Wibisono	s2	A
+aval	arXiv:2501.14993	2025	Convergence Analysis of the Wasserstein Proximal Algorithm beyond Geodesic Convexity	Shuailong Zhu	s2	A
+aval	arXiv:2501.06408	2025	Computational and Statistical Asymptotic Analysis of the JKO Scheme for Iterative Algorithms to update distributions	Shang Wu	s2	A
+aval	arXiv:2501.00429	2024	Poincare Inequality for Local Log-Polyak-\L ojasiewicz Measures: Non-asymptotic Analysis in Low-temperature Regime	Yun Gong	s2	A
+aval	arXiv:2412.13928	2024	Subspace Langevin Monte Carlo	Tyler Maunu	s2	A
+aval	arXiv:2412.07435	2024	Parallel Simulation for Log-concave Sampling and Score-based Diffusion Models	Huan-Jian Zhou	s2	A
+aval	arXiv:2411.15067	2024	Linear convergence of proximal descent schemes on the Wasserstein space	Razvan-Andrei Lascu	s2	A
+aval	arXiv:2411.00568	2024	Constrained Sampling with Primal-Dual Langevin Monte Carlo	Luiz F. O. Chamon	s2	A
+aval	arXiv:2410.10699	2024	Fast Convergence of Φ-Divergence Along the Unadjusted Langevin Algorithm and Proximal Sampler	Siddharth Mitra	s2	A
+aval	arXiv:2410.09697	2024	Provable Convergence and Limitations of Geometric Tempering for Langevin Dynamics	Omar Chehab	s2	A
+aval	arXiv:2410.06397	2024	Provable Accuracy Bounds for Hybrid Dynamical Optimization and Sampling	Matthew X. Burns	s2	A
+aval	arXiv:2410.02490	2024	Stochastic variance-reduced Gaussian variational inference on the Bures-Wasserstein manifold	Hoang Phuc Hau Luu	s2	A
+aval	arXiv:2408.16543	2024	Statistical and Geometrical properties of regularized Kernel Kullback-Leibler divergence	Clémentine Chazal	s2	A
+aval	arXiv:2408.13045	2024	The adaptive complexity of parallelized log-concave sampling	Huan-Jian Zhou	s2	A
+aval	arXiv:2407.17949	2024	Fast convergence of the Expectation Maximization algorithm under a logarithmic Sobolev inequality	Rocco Caprio	s2	A
+aval	arXiv:2407.15693	2024	Fisher-Rao Gradient Flow: Geodesic Convexity and Functional Inequalities	J. A. Carrillo	s2	A
+aval	arXiv:2406.13661	2024	Hitchhiker's guide on the relation of Energy-Based Models with other generative models, sampling and statistical physics: a comprehensive review	Davide Carbone	s2	A
+aval	arXiv:2406.06851	2024	Unbiased Markov Chain Monte Carlo: what, why, and how	Yves Atchad'e	s2	A
+aval	arXiv:2406.04012	2024	Theoretical Guarantees for Variational Inference with Fixed-Variance Mixture of Gaussians	Tom Huix	s2	A
+aval	arXiv:2406.00502	2024	Non-geodesically-convex optimization in the Wasserstein space	Hoang Phuc Hau Luu	s2	A
+aval	arXiv:2405.18098	2024	Analysis of Primal-Dual Langevin Algorithms	Martin Burger	s2	A
+aval	arXiv:2405.16736	2024	A Separation in Heavy-Tailed Sampling: Gaussian vs. Stable Oracles for Proximal Samplers	Ye He	s2	A
+aval	arXiv:2405.09536	2024	Wasserstein Gradient Boosting: A Framework for Distribution-Valued Supervised Learning	Takuo Matsubara	s2	A
+aval	DOI:10.1109/ICASSP48485.2024.10446376	2024	Momentum-Imbued Langevin Dynamics (MILD) for Faster Sampling	Nishanth Shetty	s2	A
+aval	arXiv:2404.08792	2024	Convergence of coordinate ascent variational inference for log-concave measures via optimal transport	Manuel Arnese	s2	A
+aval	arXiv:2404.02239	2024	Proximal Oracles for Optimization and Sampling	Jiaming Liang	s2	A
+aval	arXiv:2403.17042	2024	Provably Robust Score-Based Diffusion Posterior Sampling for Plug-and-Play Image Reconstruction	Xing-Yu Xu	s2	A
+aval	arXiv:2403.13249	2024	A Unified and General Framework for Continual Learning	Zhenyi Wang	s2	A
+aval	arXiv:2403.06183	2024	An Improved Analysis of Langevin Algorithms with Prior Diffusion for Non-Log-Concave Sampling	Xunpeng Huang	s2	A
+aval	arXiv:2402.18012	2024	Diffusion Models as Constrained Samplers for Optimization with Unknown Constraints	Lingkai Kong	s2	A
+aval	arXiv:2402.10418	2024	A Distributionally Robust Estimator that Dominates the Empirical Average	Nikolas P. Koumpis	s2	A
+aval	arXiv:2402.07355	2024	Sampling from the Mean-Field Stationary Distribution	Yunbum Kook	s2	A
+aval	arXiv:2402.05468	2024	Implicit Diffusion: Efficient Optimization through Stochastic Sampling	Pierre Marion	s2	A
+aval	arXiv:2312.08823	2023	Fast sampling from constrained spaces using the Metropolis-adjusted Mirror Langevin Algorithm	Vishwak Srinivasan	s2	A
+aval	arXiv:2312.02849	2023	Algorithms for Mean-Field Variational Inference Via Polyhedral Optimization in the Wasserstein Space	Yi-Heng Jiang	s2	A
+aval	arXiv:2311.00894	2023	Minimizing Convex Functionals over Space of Probability Measures via KL Divergence Gradient Flow	Rentian Yao	s2	A
+aval	arXiv:2310.20090	2023	Bridging the Gap Between Variational Inference and Wasserstein Gradient Flows	Ming-Xuan Yi	s2	A
+aval	arXiv:2310.18908	2023	Estimating the Rate-Distortion Function by Wasserstein Gradient Descent	Yibo Yang	s2	A
+aval	arXiv:2310.11914	2023	A connection between Tempering and Entropic Mirror Descent	Nicolas Chopin	s2	A
+aval	arXiv:2310.03597	2023	Sampling via Gradient Flows in the Space of Probability Measures	Yifan Chen	s2	A
+aval	DOI:10.1016/j.automatica.2023.111221	2023	Distributed event-triggered unadjusted Langevin algorithm for Bayesian learning	Kinjal Bhar	s2	A
+aval	DOI:10.1109/TPAMI.2023.3317874	2023	Distributionally Robust Memory Evolution With Generalized Divergence for Continual Learning	Zhenyi Wang	s2	A
+aval	arXiv:2309.07351	2023	Wasserstein Consensus ADMM	Iman Nodozi	s2	A
+aval	arXiv:2308.14945	2023	Noise-free sampling algorithms via regularized Wasserstein proximals	Hong-Wei Tan	s2	A
+aval	arXiv:2308.09460	2023	Accelerated Bayesian imaging by relaxed proximal-point Langevin sampling	Teresa Klatzer	s2	A
+aval	arXiv:2306.17737	2023	Proximal Langevin Sampling With Inexact Proximal Mapping	Matthias Joachim Ehrhardt	s2	A
+aval	arXiv:2305.17558	2023	Provably Fast Finite Particle Variants of SVGD via Virtual Particle Stochastic Approximation	Aniket Das	s2	A
+aval	arXiv:2305.14746	2023	Wasserstein Gaussianization and Efficient Variational Bayes for Robust Bayesian Synthetic Likelihood	Nhat-Minh Nguyen	s2	A
+aval	arXiv:2305.15577	2023	Minimizing f-Divergences by Interpolating Velocity Fields	Song Liu	s2	A
+aval	arXiv:2305.14943	2023	Learning Rate Free Sampling in Constrained Domains	L. Mackey	s2	A
+aval	arXiv:2305.09792	2023	Score Operator Newton transport	N. Chandramoorthy	s2	A
+aval	arXiv:2305.05127	2023	Accelerated gradient descent method for functionals of probability measures by new convexity and smoothness based on transport maps	Ken'ichiro Tanaka	s2	A
+aval	arXiv:2304.05398	2023	Forward-backward Gaussian variational inference via JKO in the Bures-Wasserstein Space	Michael Diao	s2	A
+aval	arXiv:2304.02599	2023	Query lower bounds for log-concave sampling	Sinho Chewi	s2	A
+aval	arXiv:2304.00200	2023	Diffusion map particle systems for generative modeling	Fengyi Li	s2	A
+aval	arXiv:2303.18168	2023	Speeding up Langevin Dynamics by Mixing	Alexander Christie	s2	A
+aval	arXiv:2303.04622	2023	ELF: Federated Langevin Algorithms with Primal, Dual and Bidirectional Compression	Avetik G. Karagulyan	s2	A
+aval	arXiv:2302.12229	2023	An Explicit Expansion of the Kullback-Leibler Divergence along its Fisher-Rao Gradient Flow	Carles Domingo-Enrich	s2	A
+aval	arXiv:2302.10249	2023	Faster high-accuracy log-concave sampling via algorithmic warm starts	Jason M. Altschuler	s2	A
+aval	arXiv:2302.04411	2023	Geometry of Score Based Generative Models	S. Ghimire	s2	A
+aval	arXiv:2301.11294	2023	Coin Sampling: Gradient-Based Bayesian Inference without Learning Rates	Louis Sharrock	s2	A
+aval	arXiv:2211.13954	2022	Particle-based Variational Inference with Preconditioned Functional Gradient Flow	Hanze Dong	s2	A
+aval	arXiv:2211.08603	2022	Asynchronous Bayesian Learning over a Network	Kinjal Bhar	s2	A
+aval	arXiv:2211.07861	2022	Regularized Stein Variational Gradient Flow	Ye He	s2	A
+aval	arXiv:2211.00450	2022	Birth–death dynamics for sampling: global convergence, approximations and their asymptotics	Yu-Long Lu	s2	A
+aval	arXiv:2210.13867	2022	A Dynamical System View of Langevin-Based Non-Convex Sampling	Mohammad Reza Karimi	s2	A
+aval	arXiv:2210.13400	2022	Sampling with Mollified Interaction Energy Descent	Lingxiao Li	s2	A
+aval	arXiv:2210.08448	2022	Resolving the Mixing Time of the Langevin Algorithm to its Stationary Distribution for Log-Concave Sampling	Jason M. Altschuler	s2	A
+aval	arXiv:2210.02482	2022	Fisher information lower bounds for sampling	Sinho Chewi	s2	A
+aval	DOI:10.23919/eusipco55093.2022.9909580	2022	A versatile distributed MCMC algorithm for large scale inverse problems	Pierre-Antoine Thouvenin	s2	A
+aval	arXiv:2208.07459	2022	Nesterov Smoothing for Sampling Without Smoothness	JiaoJiao Fan	s2	A
+aval	arXiv:2208.00587	2022	A Particle-Based Algorithm for Distributional Optimization on \textit{Constrained Domains} via Variational Transport and Mirror Descent	D. Nguyen	s2	A
+aval	arXiv:2207.08074	2022	Mean-field Variational Inference via Wasserstein Gradient Flow	Rentian Yao	s2	A
+aval	arXiv:2206.09384	2022	Sampling from Log-Concave Distributions over Polytopes via a Soft-Threshold Dikin Walk	Oren Mangoubi	s2	A
+aval	arXiv:2206.08873	2022	Mirror Descent with Relative Smoothness in Measure Spaces, with application to Sinkhorn and EM	Pierre-Cyril Aubin-Frankowski	s2	A
+aval	arXiv:2206.03792	2022	Utilising the CLT Structure in Stochastic Gradient based Sampling : Improved Analysis and Faster Algorithms	Aniket Das	s2	A
+aval	arXiv:2206.00920	2022	Federated Learning with a Sampling Algorithm under Isoperimetry	Lukang Sun	s2	A
+aval	arXiv:2206.00508	2022	Convergence of Stein Variational Gradient Descent under a Weaker Smoothness Condition	Lukang Sun	s2	A
+aval	arXiv:2205.15902	2022	Variational inference via Wasserstein gradient flows	Marc Lambert	s2	A
+aval	arXiv:2205.14240	2022	Deterministic Langevin Monte Carlo with Normalizing Flows for Bayesian Inference	U. Seljak	s2	A
+aval	arXiv:2203.16217	2022	Improved Convergence Rate of Stochastic Gradient Langevin Dynamics with Variance Reduction and its Application to Optimization	Yuri Kinoshita	s2	A
+aval	arXiv:2202.13975	2022	A Proximal Algorithm for Sampling	Jiaming Liang	s2	A
+aval	arXiv:2202.06386	2022	Improved analysis for a proximal algorithm for sampling	Yong-Xin Chen	s2	A
+aval	arXiv:2202.05214	2022	Towards a Theory of Non-Log-Concave Sampling: First-Order Stationarity Guarantees for Langevin Monte Carlo	K. Balasubramanian	s2	A
+aval	arXiv:2202.00977	2022	HMC and Underdamped Langevin United in the Unadjusted Convex Smooth Case	Nicolai Gouraud	s2	A
+aval	arXiv:2201.10469	2022	Convex Analysis of the Mean Field Langevin Dynamics	Atsushi Nitanda	s2	A
+aval	arXiv:2112.02424	2021	Variational Wasserstein gradient flow	JiaoJiao Fan	s2	A
+aval	arXiv:2112.00945	2021	DPVI: A Dynamic-Weight Particle-Based Variational Inference Framework	Chao Zhang	s2	A
+aval	arXiv:2111.04089	2021	Sampling from Log-Concave Distributions with Infinity-Distance Guarantees and Applications to Differentially Private Optimization	Oren Mangoubi	s2	A
+aval	arXiv:2110.10972	2021	Efficient Gradient Flows in Sliced-Wasserstein Space	Clément Bonet	s2	A
+aval	arXiv:2110.04597	2021	A Proximal Algorithm for Sampling from Non-Smooth Potentials	Jiaming Liang	s2	A
+aval	arXiv:2110.01827	2021	When is the Convergence Time of Langevin Algorithms Dimension Independent? A Composite Optimization Viewpoint	Y. Freund	s2	A
+aval	arXiv:2110.11131	2021	Statistical Finite Elements via Langevin Dynamics	Ö. D. Akyildiz	s2	A
+aval	arXiv:2109.12077	2021	The Mirror Langevin Algorithm Converges with Vanishing Bias	Ruilin Li	s2	A
+aval	arXiv:2109.03839	2021	Sqrt(d) Dimension Dependence of Langevin Monte Carlo	Ruilin Li	s2	A
+aval	DOI:10.3390/e23080993	2021	Accelerated Diffusion-Based Sampling by the Non-Reversible Dynamics with Skew-Symmetric Matrices	Futoshi Futami	s2	A
+aval	DOI:10.1093/GJI/GGAB287	2021	Bayesian seismic inversion: a fast sampling Langevin dynamics Markov chain Monte Carlo method	M. Izzatullah	s2	A
+aval	DOI:10.1016/j.isci.2021.102796	2021	Temporal fluctuations in chemotaxis gain implement a simulated-tempering strategy for efficient navigation in complex environments	Omer Karin	s2	A
+aval	arXiv:2106.03076	2021	A Convergence Theory for SVGD in the Population Limit under Talagrand's Inequality T1	A. Salim	s2	A
+aval	arXiv:2106.00774	2021	Optimizing Functionals on the Space of Probabilities with Input Convex Neural Networks	David Alvarez-Melis	s2	A
+aval	arXiv:2105.14163	2021	The query complexity of sampling from strongly log-concave distributions in one dimension	Sinho Chewi	s2	A
+aval	arXiv:2105.09994	2021	Kernel Stein Discrepancy Descent	Anna Korba	s2	A
+aval	DOI:10.3150/20-BEJ1297	2021	Is there an analog of Nesterov acceleration for gradient-based MCMC?	Yi-An Ma	s2	A
+aval	arXiv:2102.13176	2021	A Probabilistic Interpretation of Self-Paced Learning with Applications to Reinforcement Learning	P. Klink	s2	A
+aval	arXiv:2012.15477	2020	Particle dual averaging: optimization of mean field neural network with global convergence rate analysis	Atsushi Nitanda	s2	A
+aval	arXiv:2012.11554	2020	Variational Transport: A Convergent Particle-BasedAlgorithm for Distributional Optimization	Zhuo-Ran Yang	s2	A
+aval	arXiv:2010.16212	2020	Efficient constrained sampling via the mirror-Langevin algorithm	Kwangjun Ahn	s2	A
+aval	arXiv:2010.14658	2020	Faster Differentially Private Samplers via Rényi Divergence Analysis of Discretized Langevin MCMC	Arun Ganesh	s2	A
+aval	arXiv:2010.05263	2020	Fast Convergence of Langevin Dynamics on Manifold: Geodesics meet Log-Sobolev	Xiao Wang	s2	A
+aval	arXiv:2007.06799	2020	A Decentralized Approach to Bayesian Learning	Anjaly Parayil	s2	A
+aval	S2:6b29cce8b68c17c3022aa447c20a9c0ae942e4d1	2020	Accelerating the diffusion-based ensemble sampling by non-reversible dynamics	Futoshi Futami	s2	A
+aval	arXiv:2006.13998	2020	Penalized Langevin dynamics with vanishing penalty for smooth and log-concave targets	Avetik G. Karagulyan	s2	A
+aval	arXiv:2006.09797	2020	A Non-Asymptotic Analysis for Stein Variational Gradient Descent	Anna Korba	s2	A
+aval	arXiv:2006.09230	2020	Hessian-Free High-Resolution Nesterov Acceleration for Sampling	Ruilin Li	s2	A
+aval	arXiv:2006.09270	2020	Primal Dual Interpretation of the Proximal Stochastic Gradient Langevin Algorithm	A. Salim	s2	A
+aval	arXiv:2006.02509	2020	SVGD as a kernelized Wasserstein gradient flow of the chi-squared divergence	Sinho Chewi	s2	A
+aval	arXiv:2005.13097	2020	On the Convergence of Langevin Monte Carlo: The Interplay between Tail Growth and Smoothness	Murat A. Erdogdu	s2	A
+aval	arXiv:2005.09669	2020	Exponential ergodicity of mirror-Langevin diffusions	Sinho Chewi	s2	A
+aval	arXiv:2004.11812	2020	Self-Paced Deep Reinforcement Learning	P. Klink	s2	A
+aval	DOI:10.1093/biomet/asz066	2020	The Hastings algorithm at fifty	D. Dunson	s2	A
+aval	S2:d2d5cf9956da8a358935379b048fb04da8bf5f14	2020	The Wasserstein Proximal Gradient Algorithm	A. Salim	s2	A
+aval	arXiv:2002.03035	2020	Wasserstein Proximal Gradient	A. Salim	s2	A
+aval	arXiv:1911.01469	2019	Proximal Langevin Algorithm: Rapid Convergence Under Isoperimetry	Andre Wibisono	s2	A
+aval	arXiv:1910.13389	2019	Learning Sparse Distributions using Iterative Hard Thresholding	J. Y. Zhang	s2	A
+aval	arXiv:1910.00551	2019	An Efficient Sampling Algorithm for Non-smooth Composite Potentials	Wen-Long Mou	s2	A
+aval	arXiv:1907.11331	2019	Improved bounds for discretization of Langevin diffusions: Near-optimal rates without convexity	Wen-Long Mou	s2	A
+aval	arXiv:1906.08530	2019	Bounding the error of discretized Langevin algorithms for non-strongly log-concave targets	A. Dalalyan	s2	A
+aval	DOI:10.70675/c5c2a775zc4adz485aza0f1z600b46cb6e63	2019	Autour de l'algorithme du Langevin : extensions et applications	Nicolas Brosse	s2	A
+aval	arXiv:1905.11768	2019	Stochastic Proximal Langevin Algorithm: Potential Splitting and Nonasymptotic Rates	A. Salim	s2	A
+aval	arXiv:1905.02313	2019	Optimal Convergence Rate of Hamiltonian Monte Carlo for Strongly Logconcave Distributions	Zongchen Chen	s2	A
+aval	arXiv:1903.12322	2019	Implicit Langevin Algorithms for Sampling From Log-concave Densities	Liam Hodgkinson	s2	A
+aval	arXiv:1903.08568	2019	Rapid Convergence of the Unadjusted Langevin Algorithm: Isoperimetry Suffices	S. Vempala	s2	A
+aval	S2:4ce9b1338c073e5cb4bd5b3dc70b2d5f6d57f5a1	2019	Rapid Convergence of the Unadjusted Langevin Algorithm: Log-Sobolev Suffices	S. Vempala	s2	A
+aval	arXiv:1902.08825	2019	Accelerating Rescaled Gradient Descent: Fast Optimization of Smooth Functions	Ashia C. Wilson	s2	A
+aval	arXiv:1902.08567	2019	Wasserstein Contraction of Stochastic Nonlinear Systems	J. Bouvrie	s2	A
+aval	arXiv:1902.00996	2019	Is There an Analog of Nesterov Acceleration for MCMC?	Yian Ma	s2	A
+aval	arXiv:1902.00282	2019	Understanding MCMC Dynamics as Flows on the Wasserstein Space	Chang Liu	s2	A
+aval	arXiv:1811.08413	2018	Sampling can be faster than optimization	Yian Ma	s2	A
+aval	arXiv:1809.04618	2018	Global Convergence of Stochastic Gradient Hamiltonian Monte Carlo for Non-Convex Stochastic Optimization: Non-Asymptotic Performance Bounds and Momentum-Based Acceleration	Xue-Feng Gao	s2	A
+aval	arXiv:1802.09188	2018	Analysis of Langevin Monte Carlo via Convex Optimization	A. Durmus	s2	A
+aval	arXiv:1802.08671	2018	Langevin Monte Carlo and JKO splitting	Espen Bernton	s2	A
+aval	DOI:10.1109/TASE.2024.3475951	2025	Rare Event Detection by Acquisition-Guided Sampling	Hui-Ling Liao	s2	A
+aval	S2:c76ac22ce1f27098be1ec07e50948c5ec465d259	2024	Federated Sampling with Langevin Algorithm under Isoperimetry	Lukang Sun	s2	A
+aval	DOI:10.48550/arXiv.2405.09536	2024	Wasserstein Gradient Boosting: A General Framework with Applications to Posterior Regression	Takuo Matsubara	s2	A
+aval	S2:7079cab3740dd959ef6caed49abdbd2637604eef	2024	Open problem: Convergence of single-timescale mean-field Langevin descent-ascent for two-player zero-sum games	Guillaume Wang	s2	A
+aval	DOI:10.48550/arXiv.2305.14943	2023	Learning Rate Free Bayesian Inference in Constrained Domains	Louis Sharrock	s2	A
+aval	DOI:10.48550/arXiv.2305.09792	2023	A score-based operator Newton method for measure transport	N. Chandramoorthy	s2	A
+aval	DOI:10.52202/075280-1385	2023	Sampling from Structured Log-Concave Distributions via a Soft-Threshold Dikin Walk	Oren Mangoubi	s2	A
+aval	S2:5b80a39404fe23e3b83b4f67d5bc79961ae8a18d	2022	Sampling with Trustworthy Constraints: A Variational Gradient Framework	Xing-Chao Liu	s2	A
+aval	S2:e81b9d3d6f76a4ca606e573a3043345e042f4f80	2022	The Manifold Joys of Sampling	Yin Lee	s2	A
+aval	S2:77dc201ba1151ce645265559fced84ce26aed5bb	2022	Improved Algorithms and Upper Bounds in Differential Privacy	Arun Ganesh	s2	A
+aval	DOI:10.48550/arXiv.2206.09384	2022	Faster Sampling from Log-Concave Distributions over Polytopes via a Soft-Threshold Dikin Walk	Oren Mangoubi	s2	A
+aval	S2:e7d8e91a361aced0a1f46d2ed5203647bddd226a	2022	A P ARTICLE -B ASED A LGORITHM FOR D ISTRIBUTIONAL O PTIMIZATION ON Constrained Domains VIA V ARIATIONAL T RANSPORT AND M IRROR D ESCENT	Mirror Descent	s2	A
+aval	S2:5aaf698c54d8fc2b835fe2b06a9a5ba6059b45dd	2022	A P ARTICLE -B ASED A LGORITHM FOR D ISTRIBUTIONAL O PTIMIZATION ON Constrained Domains VIA V ARIATIONAL T RANSPORT AND M IRROR D ESCENT	Mirror Descent	s2	A
+aval	S2:a78bb30c1535bc0b1c60957fb8803261f4cad0a0	2021	Complexity Analysis of Stein Variational Gradient Descent Under Talagrand's Inequality T1	A. Salim	s2	A
+aval	S2:d426d653ca7c6506544d478f60fbc178376b370e	2021	Infinite-Dimensional Optimization for Zero-Sum Games via Variational Transport	Lewis Liu	s2	A
+aval	S2:52ddbd4aaf1f7f5ffa5c1e3928529d0369191984	2021	No-regret approximate inference via Bayesian optimisation	Rafael Oliveira	s2	A
+aval	S2:bbc108bd44dd9f0bec1770f39aec4089a33491bb	2021	Mean-Square Analysis with An Application to Optimal Dimension Dependence of Langevin Monte Carlo	Ruilin Li	s2	A
+aval	S2:37ba89778c6fb4504a8381298d47794cfec54090	2021	Sliced-Wasserstein Gradient Flows	Clément Bonet	s2	A
+aval	S2:865b2bab77d75349f12fb631fca14df34f9559b2	2021	Mirror Langevin Monte Carlo: the Case Under Isoperimetry	Qijia Jiang	s2	A
+aval	S2:a1e65aa145a007feef0039b1425ff0dcb66e89df	2021	Skew-symmetrically perturbed gradient flow for convex optimization	Futoshi Futami	s2	A
+aval	S2:3d0443409f77818a4570c895cfdbe6b20d691743	2020	Decentralized Langevin Dynamics for Bayesian Learning	Anjaly Parayil	s2	A
+aval	S2:aa1c9b96375ab02ab7047333789c9ef1c1437d2a	2020	A Functional Mirror Descent Perspective on Reinforcement Learning	B. Belousov	s2	A
+aval	S2:68621356b2cbe3a8c52064f1c5e076b7288e87a8	2020	Black-Box Variational Inference as Distilled Langevin Dynamics:	Matthew W. Hoffman	s2	A
+aval	S2:b7b2dd15494a7dd378d2b2936741ed9ddbaa0dac	2020	Inﬁnite-Dimensional Game Optimization via Variational Transport	Lewis Liu	s2	A
+aval	S2:632531948a9bb5deaaeb12a4e9535ba3dbccc577	2018	Lyapunov Arguments in Optimization	Ashia C. Wilson	s2	A
+aval	S2:a713ae4d638ef679a7165fbf7301a6c045e2588d		Provably Robust Score-Based Diﬀusion Posterior Sampling for Plug-and-Play Image Reconstruction	Xing-Yu Xu	s2	A
+aval	S2:a239e2a7a9fe9e15533606efb9606f7d6994ba49		Eﬀicient Gradient Flows in Sliced-Wasserstein Space	Clément Bonet	s2	A
+aval	S2:65a052aaad94d8e20a00c5af90e1ed773c762d45		ARALLEL SIMULATION FOR SAMPLING UNDER ISOPERIMETRY AND SCORE - BASED DIFFUSION MODELS		s2	A
+aval	S2:ac57372de0333942e4d06787019f7b85fd67ba8d		Di ﬀ usion Models as Constrained Samplers for Optimization with Unknown Constraints	Lingkai Kong	s2	A
+aval	S2:37d8632ecf69d0adb5a3ff65cf90202a621997e5		ON GENERATIVE ENERGY-BASED MODELS	Yves F. Atchadé	s2	A
+aval	S2:00b270128ab45f01c131504b5526828d87a53413		Curvature Coupling Makes Langevin Bias Condition-Number Sharp	Pahan Dewasurendra	s2	A
+amont	DOI:10.1007/978-3-540-71050-9	2008	Optimal Transport: Old and New	C. Villani	s2	A
+amont	DOI:10.1007/S00526-007-0134-5	2008	On the Jordan–Kinderlehrer–Otto variational scheme and constrained optimization in the Wasserstein metric	A. Tudorascu	s2	A
+amont	DOI:10.1081/PDE-100002243	2001	THE GEOMETRY OF DISSIPATIVE EVOLUTION EQUATIONS: THE POROUS MEDIUM EQUATION	F. Otto	s2	A
+amont	DOI:10.1006/AIMA.1997.1634	1997	A Convexity Principle for Interacting Gases	R. McCann	s2	A
+amont	S2:0df8bfad648c7e44865130fd844683e6ffb26125	2010	Introduction to Gradient Flows in Metric Spaces (II)	Ph Cl	s2	A
+amont	S2:82ce1577f6b4e9891dd11d087c4827cb57f68274	2010	some remarks on the equivalence between metric formulations of gradient flows	P. Clément	s2	A
+amont	S2:ba25c6d4b254ff731c129404d4df33d975ca5523	1992	Measure theory and fine properties of functions	L. Evans	s2	A
+amont	DOI:10.2969/JMSJ/03010169	1978	Trotter's product formula for nonlinear semigroups generated by the subdifferentials of convex functionals	Tosio Kato	s2	A
+amont	DOI:10.1016/s0304-0208(08)x7125-7	1973	Opérateurs maximaux monotones et semi-groupes de contractions dans les espaces de Hilbert	H. Brezis	s2	A
+aval	arXiv:1411.1461	2014	Gradient flows and a Trotter-Kato formula of semi-convex functions on CAT(1)-spaces	Shin-ichi Ohta	s2	A
+amont	arXiv:2312.13284	2023	A structure preserving discretization for the Derrida-Lebowitz-Speer-Spohn equation based on diffusive transport	Daniel Matthes	s2	A
+amont	arXiv:2306.02226	2023	Variational convergence of the Scharfetter–Gummel scheme to the aggregation-diffusion equation and vanishing diffusion limit	Anastasiia M. Hraivoronska	s2	A
+amont	arXiv:2304.05069	2023	Gradient flows of interacting Laguerre cells as discrete porous media flows	Andrea Natale	s2	A
+amont	arXiv:2209.15361	2022	Hidden Dissipation and Convexity for Kimura Equations	Jean-Baptiste Casteras	s2	A
+amont	arXiv:2209.14622	2022	From geodesic extrapolation to a variational BDF2 scheme for Wasserstein gradient flows	Thomas O. Gallouët	s2	A
+amont	arXiv:2208.06123	2022	A second order accurate numerical method for the Poisson-Nernst-Planck system in the energetic variational formulation	Chongxing Liu	s2	A
+amont	arXiv:2206.14461	2022	A Local Continuum Model of Cell-Cell Adhesion	Carles Falcó	s2	A
+amont	arXiv:2206.05133	2022	On the square-root approximation finite volume scheme for nonlinear drift-diffusion equations	C. Cancès	s2	A
+amont	arXiv:2203.05435	2022	Cosh gradient systems and tilting	M. Peletier	s2	A
+amont	arXiv:2201.13193	2022	Mathematical analysis of a thermodynamically consistent reduced model for iron corrosion	C. Cancès	s2	A
+amont	DOI:10.1007/3-540-30686-2_4	2021	Finite-Volume Methods	Michael Schäfer	s2	A
+amont	arXiv:2105.12605	2021	Convergence of a Lagrangian discretization for barotropic fluids and porous media flow	Thomas O. Gallouët	s2	A
+amont	arXiv:2103.00846	2021	A new minimizing-movements scheme for curves of maximal slope	U. Stefanelli	s2	A
+amont	arXiv:2008.10962	2020	Evolutionary Γ-convergence of entropic gradient flow structures for Fokker-Planck equations in multiple dimensions	Dominik Forkert	s2	A
+amont	arXiv:2006.10624	2020	Jump processes as generalized gradient flows	M. Peletier	s2	A
+amont	arXiv:2001.07005	2020	TPFA Finite Volume Approximation of Wasserstein Gradient Flows	Andrea Natale	s2	A
+amont	arXiv:1912.09834	2019	Nonlocal-Interaction Equation on Graphs: Gradient Flow Structure and Continuum Limit	A. Esposito	s2	A
+amont	arXiv:1909.08790	2019	Unconditional convergence for discretizations of dynamical optimal transport	Hugo Lavenant	s2	A
+amont	arXiv:1907.08305	2019	A variational finite volume scheme for Wasserstein gradient flows	C. Cancès	s2	A
+amont	arXiv:1907.02152	2019	Fisher information regularization schemes for Wasserstein gradient flows	Wuchen Li	s2	A
+amont	arXiv:1905.08507	2019	Lagrangian Discretization of Crowd Motion and Linear Diffusion	H. Leclerc	s2	A
+amont	arXiv:1901.08081	2019	Primal Dual Methods for Wasserstein Gradient Flows	J. Carrillo	s2	A
+amont	DOI:10.1007/s00245-019-09605-x	2018	Two Structure-Preserving Time Discretizations for Gradient Flows	A. Jüngel	s2	A
+amont	arXiv:1809.01092	2018	Scaling Limits of Discrete Optimal Transport	Peter Gladbach	s2	A
+amont	arXiv:1712.06446	2017	A Two-Phase Two-Fluxes Degenerate Cahn–Hilliard Model as Constrained Wasserstein Gradient Flow	C. Cancès	s2	A
+amont	DOI:10.1142/S0218202518500562	2017	Convergences of the squareroot approximation scheme to the Fokker–Planck operator	M. Heida	s2	A
+amont	DOI:10.1016/J.CRMA.2017.02.001	2017	Second-order in time schemes for gradient flows in Wasserstein and geodesic metric spaces	G. Legendre	s2	A
+amont	DOI:10.23943/princeton/9780691172767.001.0001	2016	Optimal Transport Methods in Economics	Alfred Galichon	s2	A
+amont	arXiv:1607.01508	2016	Improving Newton's Method Performance by Parametrization: The Case of the Richards Equation	K. Brenner	s2	A
+amont	arXiv:1602.07359	2016	Improved $L^2$ estimate for gradient schemes and super-convergence of the TPFA finite volume scheme	J. Droniou	s2	A
+amont	S2:5d3f82856178dca5b48d14a8259b66121145c97c	2015	Optimal Transport for Applied Mathematicians: Calculus of Variations, PDEs, and Modeling	F. Santambrogio	s2	A
+amont	arXiv:1507.06322	2015	On microscopic origins of generalized gradient structures	M. Liero	s2	A
+amont	arXiv:1504.03891	2015	A nonlinear time compactness result and applications to discretization of degenerate parabolic-elliptic PDEs	Boris Andreianov	s2	A
+amont	arXiv:1503.05649	2015	Numerical Analysis of a Robust Free Energy Diminishing Finite Volume Scheme for Parabolic Equations with Gradient Structure	C. Cancès	s2	A
+amont	arXiv:1501.04437	2015	A Wasserstein gradient flow approach to Poisson−Nernst−Planck equations	D. Kinderlehrer	s2	A
+amont	arXiv:1401.7231	2014	Some variants of the classical Aubin–Lions Lemma	A. Moussa	s2	A
+amont	arXiv:1312.7591	2013	On the Relation between Gradient Flows and the Large-Deviation Principle, with Applications to Markov Chains and Diffusion	A. Mielke	s2	A
+amont	DOI:10.1137/120899959	2013	A Square Root Approximation of Transition Rates for a Markov State Model	Cheng-Lie Han	s2	A
+amont	S2:20813564f53ac154ca699e8659acfb18259f471b	2013	A GRADIENT FLOW APPROACH TO THE KELLER-SEGEL SYSTEMS (Progress in Variational Problems : Variational Problems Interacting with Probability Theories)	A. Blanchet	s2	A
+amont	arXiv:1301.0747	2013	Convergence of a variational Lagrangian scheme for a nonlinear drift diffusion equation	D. Matthes	s2	A
+amont	DOI:10.1201/B10387-4	2010	Discrete Variational Derivative Method	Daisuke Furihata	s2	A
+amont	DOI:10.1007/S00526-009-0303-9	2010	On the heat flow on metric measure spaces: existence, uniqueness and stability	Nicola Gigli	s2	A
+amont	arXiv:1002.0686	2010	A MACROSCOPIC CROWD MOTION MODEL OF GRADIENT FLOW TYPE	B. Maury	s2	A
+amont	arXiv:0812.1269	2008	Well-posedness of a parabolic moving-boundary problem in the setting of Wasserstein gradient flows	J. Portegies	s2	A
+amont	DOI:10.1002/CPA.20223	2008	A gradient flow approach to an evolution problem arising in superconductivity	L. Ambrosio	s2	A
+amont	arXiv:0801.1430	2008	Discretisation of heterogeneous and anisotropic diffusion problems on general non-conforming meshes. SUSHI: a scheme using stabilisation and hybrid interfaces	R. Eymard	s2	A
+amont	DOI:10.1063/1.1709721	1967	Diffusion Currents in Large Electric Fields for Discrete Lattices	A. T. Fromhold	s2	A
+amont	DOI:10.3934/dcdss.2020345	2021	Effective diffusion in thin structures via generalized gradient systems and EDP-convergence	T. Frenzel	s2	A
+amont	DOI:10.1016/S0021-7824(01)01241-7	2002	A density result in Sobolev spaces	J. Droniou	s2	A
+amont	DOI:10.1007/s002110050002	2000	A computational fluid mechanics solution to the Monge-Kantorovich mass transfer problem	J. Benamou	s2	A
+amont	S2:?		DISCRETIZING THE FOKKER-PLANCK EQUATION WITH SECOND-ORDER ACCURACY 41		s2	A
+amont	S2:?		Inria, Univ. Lille, CNRS, UMR 8524 - Laboratoire Paul Painlev ´ e, F-59000 Lille, France. Email address : clement.cances@inria.fr, andrea		s2	A
+amont	S2:366e79867171b51bab6c2fcc52e3c88685db6fcf		FINITE ELEMENTS FOR WASSERSTEIN W 𝑝 GRADIENT FLOWS	Cances	s2	A
+aval	arXiv:2608.30693	2026	Efficient primal--dual splitting methods for a Poisson-constrained JKO scheme for Poisson-Nernst-Planck models	Wei Wu	s2	A
+aval	arXiv:2608.30121	2026	Structure-Preserving Detailed-Balance Master-Equation Discretizations for Fokker--Planck Equations	S. Chandran	s2	A
+aval	arXiv:2512.05826	2025	Entropy and Fisher information in non-convex domains: one chain to rule them all	Jean-Baptiste Casteras	s2	A
+aval	arXiv:2511.10884	2025	Guaranteeing Higher Order Convergence Rates for Accelerated Wasserstein Gradient Flow Schemes	Raymond Chu	s2	A
+amont	arXiv:2405.04987	2024	The Riemannian geometry of Sinkhorn divergences	Hugo Lavenant	s2	B
+amont	arXiv:2111.01666	2021	Regularized unbalanced optimal transport as entropy minimization with respect to branching Brownian motion	Aymeric Baradat	s2	B
+amont	DOI:10.4171/ETB/22	2021	An Invitation to Optimal Transport, Wasserstein Distances, and Gradient Flows	A. Figalli	s2	B
+amont	arXiv:1911.06850	2019	An Optimal Transport Approach for the Schrödinger Bridge Problem and Convergence of Sinkhorn Algorithm	Simone Di Marino	s2	B
+amont	arXiv:1810.12036	2018	Small Noise Limit and Convexity for Generalized Incompressible Flows, Schrödinger Problems, and Optimal Transport	Aymeric Baradat	s2	B
+amont	arXiv:1810.08278	2018	Interpolating between Optimal Transport and MMD using Sinkhorn Divergences	Jean Feydy	s2	B
+amont	arXiv:1706.00292	2017	Learning Generative Models with Sinkhorn Divergences	A. Genevay	s2	B
+amont	arXiv:1609.03890	2016	{Euclidean, metric, and Wasserstein} gradient flows: an overview	F. Santambrogio	s2	B
+amont	arXiv:1512.02783	2015	Convergence of Entropic Schemes for Optimal Transport and Gradient Flows	G. Carlier	s2	B
+amont	arXiv:1510.08230	2015	About the analogy between optimal transport and minimal entropy	I. Gentil	s2	B
+amont	DOI:10.1137/15M1010087	2015	Entropic Approximation of Wasserstein Gradient Flows	G. Peyré	s2	B
+amont	arXiv:1509.02237	2015	On Wasserstein Two-Sample Testing and Related Families of Nonparametric Tests	Aaditya Ramdas	s2	B
+amont	arXiv:1412.5154	2014	Iterative Bregman Projections for Regularized Transportation Problems	J. Benamou	s2	B
+amont	DOI:10.1051/COCV/2013049	2013	WASSERSTEIN GRADIENT FLOWS FROM LARGE DEVIATIONS OF MANY-PARTICLE LIMITS	M. H. Duong	s2	B
+amont	arXiv:1308.0215	2013	"A survey of the Schr\""odinger problem and some of its connections with optimal transport"	Christian Léonard	s2	B
+amont	arXiv:1306.0895	2013	Sinkhorn Distances: Lightspeed Computation of Optimal Transport	Marco Cuturi	s2	B
+amont	arXiv:1011.2564	2010	"From the Schr\""odinger problem to the Monge-Kantorovich problem"	Christian Léonard	s2	B
+amont	DOI:10.1090/GSM/019	2010	Partial Differential Equations, Second edition	Lawrence C. Evans	s2	B
+amont	DOI:10.4249/scholarpedia.2859	2007	Method of lines	S. Hamdi	s2	B
+amont	DOI:10.2307/2314570	1967	Diagonal Equivalence to Matrices with Prescribed Row and Column Sums	Richard Sinkhorn	s2	B
+amont	DOI:10.1214/AOMS/1177703591	1964	A Relationship Between Arbitrary Positive Matrices and Doubly Stochastic Matrices	Richard Sinkhorn	s2	B
+amont	S2:25dd64539ef0704bdd6532baab7dcd763575ac79	2019	Benamou–Brenier and duality formulas for the entropic cost on RCD ∗ ( K , N ) spaces	Nicola Gigli	s2	B
+amont	DOI:10.1007/978-3-319-20828-2	2015	Optimal Transport for Applied Mathematicians	F. Santambrogio	s2	B
+amont	S2:1747308c4a8b187622e21674d0b5f8654d5eb99c	2011	Communications in Mathematical Physics From a Large-Deviations Principle to the Wasserstein Gradient Flow : A New Micro-Macro Passage	Stefan Adams	s2	B
+amont	S2:41ac0cdded77ad3e373a87916f3ff5df6ea6f95a	2003	Tightness, integral equicontinuity and compactness for evolution problems in Banach spaces	R. Rossi	s2	B
+amont	S2:debf59cb950b209c75c3337f04ab85ee6a4887bb	1958	On the probability of large deviations of random variables	I. N. Sanov	s2	B
+aval	arXiv:2604.08283	2026	A convergence rate for the entropic JKO scheme	Aymeric Baradat	s2	B
+aval	arXiv:2511.14278	2025	Gradient Flows of Potential Energies in the Geometry of Sinkhorn Divergences	Mathis Hardion	s2	B
+aval	arXiv:2506.18884	2025	A synthetic approach to comparison principles for variational problems, with applications to optimal transport	Flavien L'eger	s2	B
+aval	arXiv:2504.13513	2025	Convergence of the fully discrete JKO scheme	Anastasiia Hraivoronska	s2	B
+amont	arXiv:2502.12666	2025	Using Sinkhorn in the JKO Scheme Adds Linear Diffusion	Aymeric Baradat	s2	B
+amont	arXiv:2306.06940	2023	Convergence Rates of the Regularized Optimal Transport: Disentangling Suboptimality and Entropy	Hugo Malamut	s2	B
+amont	arXiv:2012.10701	2020	Entropic-Wasserstein Barycenters: PDE Characterization, Regularity, and CLT	G. Carlier	s2	B
+amont	arXiv:1912.10555	2019	A formula for the time derivative of the entropic cost and applications	Giovanni Conforti	s2	B
+amont	arXiv:1710.08234	2017	Generalized incompressible flows, multi-marginal transport and Sinkhorn algorithm	J. Benamou	s2	B
+amont	arXiv:1505.05712	2015	From large deviations to Wasserstein gradient flows in multiple dimensions	Matthias Erbar	s2	B
+amont	DOI:10.1007/978-3-319-48311-5	2011	Convex Analysis and Monotone Operator Theory in Hilbert Spaces	Heinz H. Bauschke	s2	B
+amont	DOI:10.1007/978-0-387-70914-7	2010	Functional Analysis, Sobolev Spaces and Partial Differential Equations	H. Brézis	s2	B
+amont	DOI:10.1002/(SICI)1097-0312(199907)52:7<873::AID-CPA5>3.0.CO;2-T	1999	Evolution of microstructure in unstable porous media flow: A relaxational approach	F. Otto	s2	B
+amont	DOI:10.1002/CPA.3160440402	1991	Polar Factorization and Monotone Rearrangement of Vector-Valued Functions	Y. Brenier	s2	B
+amont	DOI:10.1007/978-1-4757-4015-8	2021	Foundations of Modern Probability	O. Kallenberg	s2	B
+amont	DOI:10.1007/978-3-642-32160-3_1	2013	A User’s Guide to Optimal Transport	L. Ambrosio	s2	B
+amont	S2:?		we will exhibit a model for which one of the inequalities obtained along the proof of Theorem 1.3, that we reproduce at equations (5.7), (5.8		s2	B
+amont	arXiv:2410.03367	2024	Discretizing the Fokker-Planck equation with second-order accuracy: a dissipation driven approach	C. Cancès	s2	B
+amont	arXiv:2312.11438	2023	Nonlocal Approximation of Slow and Fast Diffusion	Katy Craig	s2	B
+amont	arXiv:2306.09120	2023	Some convexity criteria for differentiable functions on the 2‐Wasserstein space	G. Parker	s2	B
+amont	arXiv:2302.08248	2023	Nonlocal approximation of nonlinear diffusion equations	J. Carrillo	s2	B
+amont	arXiv:2211.07011	2022	High Order Schemes for Gradient Flow with Respect to a Metric	Saem Han	s2	B
+amont	arXiv:2209.10884	2022	Deterministic particle approximation of aggregation diffusion equations with nonlinear mobility	S. Daneri	s2	B
+amont	arXiv:2202.12927	2022	A blob method for inhomogeneous diffusion with applications to multi-agent control and sampling	Katy Craig	s2	B
+amont	arXiv:2202.05030	2022	Porous medium equation and cross-diffusion systems as limit of nonlocal interaction	M. Burger	s2	B
+amont	arXiv:2012.01966	2020	Deterministic particle approximation of aggregation-diffusion equations on unbounded domains	S. Daneri	s2	B
+amont	arXiv:2004.01660	2020	Global Well‐Posedness of Master Equations for Deterministic Displacement Convex Potential Mean Field Games	W. Gangbo	s2	B
+amont	arXiv:2003.03803	2020	Lagrangian schemes for Wasserstein gradient flows	J. Carrillo	s2	B
+amont	DOI:10.1016/J.MATPUR.2018.09.003	2019	On differentiability in the Wasserstein space and well-posedness for Hamilton–Jacobi equations	W. Gangbo	s2	B
+amont	arXiv:1711.02935	2017	A variational formulation of the BDF2 method for metric gradient flows	D. Matthes	s2	B
+amont	arXiv:1710.10536	2017	A partial Laplacian as an infinitesimal generator on the Wasserstein space	Y. Chow	s2	B
+amont	arXiv:1709.09195	2017	A blob method for diffusion	J. Carrillo	s2	B
+amont	arXiv:1509.02505	2015	The Master Equation and the Convergence Problem in Mean Field Games	P. Cardaliaguet	s2	B
+amont	DOI:10.1007/S00229-006-0003-0	2006	Stability of flows associated to gradient vector fields and convergence of iterated transport maps	L. Ambrosio	s2	B
+amont	S2:?	2021	Lectures on optimal transport , volume 130		s2	B
+amont	S2:?	2020	Structure-preserving variational schemes for fourth order nonlinear partial differential equations with a Wasserstein gradient flow structure		s2	B
+amont	S2:?	2018	Probabilistic theory of mean field games with applications I-II		s2	B
+amont	S2:?	2017	Optimal transport for applied mathematicians. Birkäuser, NY , 55(58-63		s2	B
+amont	DOI:10.1137/04061386X	2005	Diffeomorphisms and Nonlinear Heat Flows	L. Evans	s2	B
+amont	S2:?		Optimal Transport in Stochastic and Deterministic Settings with Applications to PDEs		s2	B

@@ -30,6 +30,7 @@ def test_t2_f_has_all_four_terms():
         potentials={name: np.zeros(n) for name in species.species_names()},
         prior={name: np.full(n, 1.0 / n) for name in species.species_names()},
         turing_strength=0.1,
+        turing_smoothing=None,
     )
     v = f.value(state)
     assert np.isfinite(v)
@@ -45,5 +46,6 @@ def test_t2_f_kl_zero_on_prior_match():
         potentials={n_: np.zeros(n) for n_ in state.rho},
         prior=prior,
         turing_strength=0.0,
+        turing_smoothing=None,
     )
     assert np.isfinite(f.value(state))

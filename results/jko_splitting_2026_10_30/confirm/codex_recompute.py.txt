@@ -1,0 +1,246 @@
+#!/usr/bin/env python3
+"""Independent implementation of data/prereg.md §§4–7; numpy + stdlib only.
+
+Run from any directory: python3 codex/recompute.py
+Detailed results (including all failing configurations and per-cell classes)
+are written next to this script. No repository implementation is imported.
+"""
+import hashlib
+import itertools
+import json
+from collections import Counter
+from pathlib import Path
+
+import numpy as np
+
+ROOT = Path(__file__).resolve().parents[1]
+SPECIES = ("phono", "lex", "syntax", "sem")
+SCHEMES = ("implicit", "lie", "strang")
+HS = (0.1, 0.05, 0.025, 0.0125)
+M5_HS = (0.05, 0.025)
+CELLS = list(itertools.product((2, 5, 10), (0, 5, 10, 20, 30, 50, 70, 100), (500, 501)))
+PRIMARY = [c for c in CELLS if c[1] <= 30]
+STATES = ("proven", "violated", "indeterminate", "missing")
+CLASSES = ("first", "second", "neither", "unresolved")
+
+
+def key(record):
+    return tuple(record[k] for k in ("alpha", "gamma", "seed", "scheme", "h"))
+
+
+def initial(seed):
+    rng = np.random.default_rng(seed)
+    return np.array([rng.dirichlet(np.ones(16)) for _ in SPECIES])
+
+
+def tv(a, b):
+    return float(np.max(0.5 * np.sum(np.abs(a - b), axis=1)))
+
+
+def certified(step):
+    return step.get("status") == "converged"
+
+
+def dissipation(step):
+    """§5, lines 183–189: validate brackets BEFORE comparing endpoints."""
+    d = step.get("dissipation")
+    if not isinstance(d, dict) or d.get("bracket") != "ok":
+        return "missing"
+    try:
+        bounds = np.array([d["Q_out"], d["Q_in"]], dtype=float)
+    except (KeyError, TypeError, ValueError):
+        return "missing"
+    if bounds.shape != (2, 2) or not np.isfinite(bounds).all():
+        return "missing"
+    if np.any(bounds[:, 0] > bounds[:, 1]):
+        return "missing"
+    out, inp = bounds
+    if out[1] <= inp[0]:
+        return "proven"
+    if out[0] > inp[1]:
+        return "violated"
+    return "indeterminate"
+
+
+def counts(values, labels):
+    c = Counter(values)
+    return {label: c[label] for label in labels}
+
+
+def main():
+    path = ROOT / "data/confirm.jsonl"
+    raw = path.read_bytes()
+    records = [json.loads(line) for line in raw.splitlines() if line.strip()]
+    # The supplied dataset has no explicit RUN_KEY. Require a single identity
+    # and a single set of recorded numerical settings; never pool distinct runs.
+    identity_fields = ("git_commit", "git_dirty", "git_diff_sha256", "solver_version",
+                       "split_version", "delta", "grid", "step_cap_s",
+                       "bracket_cap_s", "jko_defaults")
+    identities = {json.dumps({k: r.get(k) for k in identity_fields}, sort_keys=True)
+                  for r in records}
+    if len(identities) != 1:
+        raise ValueError("Multiple run identities/settings: select the intended run first")
+    jobs, extra, infrastructure = {}, [], []
+    for line, r in enumerate(records, 1):
+        k = key(r)
+        if r.get("kind") == "infrastructure" or (
+                r.get("kind") == "job_error" and r.get("error_kind") == "infrastructure"):
+            infrastructure.append(line)
+            continue
+        if k in jobs:
+            extra.append({"line": line, "job": k})
+        else:
+            jobs[k] = r
+    expected = {(*c, scheme, h) for c in CELLS for scheme in SCHEMES for h in HS}
+    if set(jobs) - expected:
+        raise ValueError("Unexpected jobs outside preregistered design")
+    missing = sorted(expected - set(jobs))
+
+    def steps(c, scheme, h):
+        return jobs.get((*c, scheme, h), {}).get("steps", [])
+
+    def output(c, scheme, h, n):
+        ss = steps(c, scheme, h)
+        if len(ss) < n or not all(certified(s) for s in ss[:n]):
+            return None
+        rho = np.array([ss[n - 1]["rho_out"][sp] for sp in SPECIES], dtype=float)
+        if rho.shape != (4, 16) or not np.isfinite(rho).all():
+            raise ValueError("Invalid stored density on a certified step")
+        return rho
+
+    def all_three(c, scheme, h):
+        ss = steps(c, scheme, h)
+        return len(ss) >= 3 and all(certified(s) for s in ss[:3])
+
+    def defect(c, scheme, h):
+        coarse, fine = output(c, scheme, h, 1), output(c, scheme, h / 2, 2)
+        return None if coarse is None or fine is None else tv(coarse, fine)
+
+    def verdict(s):
+        return ("provisional_" if missing else "") + s
+
+    # §5: usability is independent of the splitting scheme.
+    margins, margin_by_config = [], {}
+    for c in PRIMARY:
+        for h in M5_HS:
+            config = (*c, h)
+            s = output(c, "implicit", h, 1)
+            ref = output(c, "implicit", h / 2, 2)
+            d = None if s is None else tv(s, initial(c[2]))
+            margin = None if s is None or ref is None else tv(s, ref)
+            usable = margin is not None and margin < 0.5 * d
+            entry = {"config": config, "d_S": d, "s_S": margin, "usable": usable,
+                     "availability": "absent" if margin is None else "computed"}
+            margins.append(entry)
+            margin_by_config[config] = entry
+    usable_count = sum(m["usable"] for m in margins)
+    q1 = {}
+    for scheme in ("lie", "strang"):
+        failures = {"C1": [], "C2": [], "C3": []}
+        state_details, comparisons, near_ties = [], [], []
+        for c in PRIMARY:
+            for h in M5_HS:
+                config = (*c, h)
+                if not all_three(c, scheme, h):
+                    failures["C1"].append(config)
+                m = margin_by_config[config]
+                x, s = output(c, scheme, h, 1), output(c, "implicit", h, 1)
+                e = None if x is None or s is None else tv(x, s)
+                failed = m["usable"] and (e is None or e > m["s_S"])
+                if failed:
+                    failures["C2"].append(config)
+                comparisons.append({"config": config, "e_X": e, "s_S": m["s_S"],
+                                    "usable": m["usable"], "fails": bool(failed)})
+                if m["usable"] and e is not None and abs(e - m["s_S"]) <= 1e-5:
+                    near_ties.append(config)
+                per_step = [{"step": i + 1, "state": dissipation(st)}
+                            for i, st in enumerate(steps(c, scheme, h)) if certified(st)]
+                state_details.append({"config": config, "certified_steps": per_step})
+                if any(st["state"] in ("violated", "missing") for st in per_step):
+                    failures["C3"].append(config)
+        decision = ("not_substitutable" if any(failures.values()) else
+                    "undecided" if usable_count < 30 else "substitutable")
+        q1[scheme] = {"failures": failures, "failure_counts": {k: len(v) for k, v in failures.items()},
+                      "dissipation_counts": counts((st["state"] for row in state_details
+                                                    for st in row["certified_steps"]), STATES),
+                      "dissipation_by_config": state_details, "C2_comparisons": comparisons,
+                      "C2_near_ties": near_ties, "usable_margins": usable_count,
+                      "verdict": verdict(decision)}
+
+    q2 = {}
+    for scheme in ("lie", "strang"):
+        rescued, indeterminate, details = [], [], []
+        for c in CELLS:
+            if c[1] < 50:
+                continue
+            for h in M5_HS:
+                obs = jobs.get((*c, "implicit", h), {})
+                ss = steps(c, "implicit", h)
+                if obs.get("kind") != "trajectory" or not ss or certified(ss[0]):
+                    continue
+                ds = [dissipation(st) for st in steps(c, scheme, h)[:3]]
+                if all_three(c, scheme, h) and all(s in ("proven", "indeterminate") for s in ds):
+                    config = (*c, h)
+                    rescued.append(config)
+                    if "indeterminate" in ds:
+                        indeterminate.append(config)
+                    x, ref = output(c, scheme, h, 1), output(c, "implicit", h / 2, 2)
+                    details.append({"config": config, "states": ds,
+                                    "e_prime": None if ref is None else tv(x, ref)})
+        q2[scheme] = {"rescued": rescued, "with_indeterminate": indeterminate, "details": details}
+
+    cells = []
+    for c in PRIMARY:
+        cell = {"cell": c, "schemes": {}}
+        for scheme in SCHEMES:
+            defects = [defect(c, scheme, h) for h in HS[:3]]
+            exponents, slope, label = None, None, "unresolved"
+            if all(s is not None and s >= 1e-5 for s in defects):
+                exponents = [float(np.log2(defects[i] / defects[i + 1])) for i in (0, 1)]
+                slope = float(np.mean(exponents))
+                label = ("first" if all(1.5 <= a < 2.5 for a in exponents) else
+                         "second" if all(2.5 <= a <= 3.5 for a in exponents) else "neither")
+            cell["schemes"][scheme] = {"defects": defects, "exponents": exponents,
+                                        "slope": slope, "class": label}
+        cells.append(cell)
+    gated = [c for c in cells if c["schemes"]["implicit"]["class"] == "first"]
+    summaries = {}
+    for scheme in SCHEMES:
+        all_counts = counts((c["schemes"][scheme]["class"] for c in cells), CLASSES)
+        gate_counts = counts((c["schemes"][scheme]["class"] for c in gated), CLASSES)
+        resolved = [c["schemes"][scheme] for c in cells if c["schemes"][scheme]["slope"] is not None]
+        medians = None if not resolved else {
+            "a1": float(np.median([r["exponents"][0] for r in resolved])),
+            "a2": float(np.median([r["exponents"][1] for r in resolved])),
+            "slope": float(np.median([r["slope"] for r in resolved]))}
+        decision = "not_identifiable"
+        if len(gated) >= 15:
+            if gate_counts["first"] > len(gated) / 2:
+                decision = "first_order_like"
+            elif gate_counts["second"] > len(gated) / 2:
+                decision = "second_order_like"
+        summaries[scheme] = {"all_cells": all_counts, "gated_cells": gate_counts,
+                             "resolved_cells_medians": medians}
+        if scheme != "implicit":
+            summaries[scheme]["verdict"] = verdict(decision)
+
+    result = {
+        "audit": {"records": len(records), "observed_jobs": len(jobs), "expected_jobs": 576,
+                  "missing_jobs": missing, "extra_records": extra,
+                  "infrastructure_lines": infrastructure, "run_identity": json.loads(next(iter(identities))),
+                  "input_sha256": hashlib.sha256(raw).hexdigest(), "numpy": np.__version__},
+        "margin_counts": {"usable": usable_count,
+                          "computed_degenerate": sum(m["s_S"] is not None and not m["usable"] for m in margins),
+                          "absent": sum(m["s_S"] is None for m in margins),
+                          "unusable_total": len(margins) - usable_count},
+        "margins": margins, "Q1": q1, "Q2": q2,
+        "Q3": {"per_cell": cells, "gated_cells": [c["cell"] for c in gated], "summaries": summaries}}
+    destination = Path(__file__).with_name("results.json")
+    destination.write_text(json.dumps(result, indent=2, ensure_ascii=False, allow_nan=False) + "\n")
+    print(json.dumps({"audit": result["audit"], "margin_counts": result["margin_counts"],
+                      "Q1": {s: {k: q1[s][k] for k in ("failure_counts", "dissipation_counts", "verdict")}
+                             for s in q1}, "Q2": q2, "Q3": summaries}, indent=2))
+
+
+if __name__ == "__main__":
+    main()

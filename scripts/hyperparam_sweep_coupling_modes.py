@@ -108,6 +108,7 @@ def _build_energy(
         potentials=potentials,
         prior=prior,
         turing_strength=gamma * 0.1,
+        turing_smoothing=None,
     )
     if mode.startswith("symmetric-"):
         # Kill the non-conservative drift (drift only shows up in

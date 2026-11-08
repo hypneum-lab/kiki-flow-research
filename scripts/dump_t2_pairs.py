@@ -27,7 +27,9 @@ names = species.species_names()
 support = np.linspace(-2.0, 2.0, STATE_DIM).reshape(-1, 1)
 potentials = {n: np.zeros(STATE_DIM) for n in names}
 prior = {n: np.full(STATE_DIM, 1.0 / STATE_DIM) for n in names}
-f_func = T2FreeEnergy(species=species, potentials=potentials, prior=prior, turing_strength=0.0)
+f_func = T2FreeEnergy(
+    species=species, potentials=potentials, prior=prior, turing_strength=0.0, turing_smoothing=None
+)
 jko = FullJKOSolver(
     scheme="legacy_split",
     f_functional=f_func,

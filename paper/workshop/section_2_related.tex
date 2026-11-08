@@ -7,7 +7,7 @@ action as the minimization of a variational free energy that
 decomposes into an accuracy term (how well internal states predict
 observations) and a complexity term (how far the posterior drifts
 from the prior)~\citep{friston2010}. Its computational instantiation
-as variational message passing~\citep{parr2017} and gradient-flow
+as variational message passing~\citep{parr2019} and gradient-flow
 inference~\citep{daCosta2020} provides the theoretical scaffolding
 for our functional. Crucially, classical active-inference
 implementations use Gaussian or factorized categorical posteriors,
@@ -36,10 +36,10 @@ The Jordan-Kinderlehrer-Otto scheme~\citep{jko1998} discretizes
 Wasserstein gradient flows on probability measures, providing the
 dynamic substrate for our oracle. Recent neural-network
 instantiations~\citep{bunne2022wgf} train surrogates that mimic JKO
-trajectories, but typically without text conditioning. Adjacent work
-on text-to-distribution bridging \citep{rezende2015variational} uses
-affine flows parameterized by text, but on free-support densities,
-not on bounded simplex latents. To the best of our knowledge,
+trajectories, but typically without text conditioning. Normalizing
+flows \citep{rezende2015variational} build flexible densities by
+composing invertible maps, but on free-support densities, not on
+bounded simplex latents. To the best of our knowledge,
 \textsc{QueryConditionedF} is the first JKO formulation that
 (a) couples to a text encoder via a JEPA-style accuracy decoder,
 (b) operates on a product-of-simplices latent, and (c) preserves the
@@ -58,11 +58,11 @@ justified by the free-energy principle rather than by likelihood
 maximization.
 
 \paragraph{French psycholinguistic resources.}
-Our heuristic labeler relies on Lexique.org~\citep{newboucard2004lexique}
+Our heuristic labeler relies on Lexique.org~\citep{newboucard2004lexique,new2007subtitles}
 for word frequency bins, SpaCy-fr~\citep{honnibal2020spacy} for
 dependency parsing, and the \texttt{phonemizer}
 toolkit~\citep{phonemizer} for IPA extraction.
-Levelt's working-memory architecture~\citep{levelt1989speaking}
+Levelt's speech-production architecture~\citep{levelt1989speaking}
 motivates the four-species decomposition (phono, sem, lex,
 syntax), which Baddeley and Hitch's multi-component working memory
 model \citep{baddeley1974} reinforces by treating phonological and

@@ -16,6 +16,7 @@ dependencies = [
     "pyyaml>=6.0",
     "prometheus-client>=0.20",
     "scikit-learn>=1.8.0",
+    "scipy>=1.17",
     "safetensors>=0.7.0",
     "optax>=0.2",
     "flax>=0.8",
@@ -59,6 +60,7 @@ packages = ["kiki_flow_core"]
 [tool.ruff]
 line-length = 100
 target-version = "py314"
+extend-exclude = ["results"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "N", "UP", "B", "SIM", "RET", "PL"]
