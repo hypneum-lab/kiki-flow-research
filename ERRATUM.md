@@ -941,3 +941,40 @@ the module's repository and records a SHA-256 of the tracked diff.
 `tau = 0` before each JKO step (`multiscale_loop.py`, lines 84 and 148),
 so the output `tau` is 1 after every step instead of counting steps
 (review m4); to be fixed separately.
+
+## 17. λ̂ ≈ 67.8 and Conger et al. Theorem 3.4 withdrawn as support (2026-11-15)
+
+**Status: PROPOSED (issue #69), text only, no rerun.** No measured
+value changes; `paper/lambda_monotonicity.json` is not edited.
+
+- `paper/main.tex`, Discussion ("Potential-driven specialization"): the
+  sentence "the fitted pair-contraction rate λ̂ ≈ 67.8 of §λ-mono
+  quantifies the transient contraction that the full coupling provides;
+  a fully decoupled system matches the stationary statistics but not the
+  dynamic ones" is replaced by a statement that the fit was run on the
+  coupled system only (`coupling_variant = "dell"` in
+  `paper/lambda_monotonicity.json`) and has no decoupled counterpart.
+- Conger, Hoffmann, Mazumdar, Ratliff (arXiv:2506.22947) "Theorem 3.4"
+  was removed from `paper/main.tex` on 2026-11-05 (`92e8edc`); it was
+  never recorded here. `CHANGELOG.md` (entry of 2026-04-22) still cites
+  it as support for an exponential-convergence claim; that entry is
+  historical and is not rewritten.
+
+Root cause. (a) Numbering: in arXiv:2506.22947v2, 3.4 is a remark
+(p. 11); the main result is Theorem 3.2 (p. 10), and λ-monotonicity is
+a condition on the velocity fields for every pair of measures
+(Definition 1.1, p. 2), which a fit on three trajectories does not
+establish (`92e8edc`; `paper/main.tex` §λ-mono). (b) Interpretation:
+λ̂ was fitted on the coupled system only, so it cannot measure what the
+coupling adds. (c) Convergence: the NH-20 reading note
+(`docs/prereg/nh20/reading-note.md`, PR #61) finds that the convergence
+theorem for entropic JKO, Carlier, Duval, Peyré, Schmitzer Th. 3.16
+(arXiv:1512.02783, p. 17), needs ε|log ε| = O(τ²), that the paper's
+rigorous path sits at a ratio of 18.4 (ε = 0.01, h = 0.05, l. 111),
+and that "aucun résultat de convergence de Carlier ne s'applique donc
+au JKO du labo" (l. 142-144). No published theorem therefore carries a
+discrete trajectory rate over to the continuous flow. The same note
+treats "Strang with JKO sub-steps stays first order" as a prediction
+that no source proves or refutes (l. 362-364), not as a result.
+
+The published PDFs and tags are unchanged.
