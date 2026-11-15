@@ -301,8 +301,8 @@ independent seed pairs with $h = 2\times 10^{-3}$ and
 $n_{\mathrm{inner}} = 1$, using the Sinkhorn divergence~%
 \cite{feydy2019interpolating} to cancel the entropic bias floor
 inherent to regularized $W_2^2$. The fitted contraction rate
-$\hat\lambda$ is withdrawn (\texttt{ERRATUM.md}~\S17): it may be a
-grid artefact, and it was fitted on the coupled system only. Even
+$\hat\lambda$ is withdrawn (\texttt{ERRATUM.md}~\S17): its grid
+dependence is untested, and it was fitted on the coupled system only. Even
 taken at face value, such a fit would not establish
 $\lambda$-monotonicity: the trajectory
 inequality~\eqref{eq:lambda-mono} is a consequence of the condition
@@ -635,8 +635,8 @@ $\{1042, 1043, 1044\}$), $50$ slow steps each at
 $h = 2 \times 10^{-3}$, $n_{\mathrm{inner}} = 1$, fitting
 $\log d(t) = \log d(0) - 2 \hat\lambda \cdot t$ on the Sinkhorn
 divergence $d(t) = \sum_i S_\varepsilon(\rho_i(t), \rho_i'(t))$. The
-fitted rate is withdrawn (\texttt{ERRATUM.md}~\S17: plausible grid
-artefact, coupled system only). As discussed in
+fitted rate is withdrawn (\texttt{ERRATUM.md}~\S17: grid dependence
+untested, coupled system only). As discussed in
 Section~\ref{sec:lambda-mono}, such a trajectory fit could not by
 itself establish $\lambda$-monotonicity in the sense of
 Conger--Hoffmann--Mazumdar--Ratliff~\cite{conger2025monotone}.
