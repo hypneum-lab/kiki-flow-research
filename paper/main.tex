@@ -290,24 +290,20 @@ initial conditions satisfy
     \;\le\; -2\lambda \sum_i W_2^2(\rho_i(t), \rho_i'(t)).
   \label{eq:lambda-mono}
 \end{equation}
-We verify~\eqref{eq:lambda-mono} numerically (Section~\ref{sec:exp-lambda};
+We tested~\eqref{eq:lambda-mono} numerically (Section~\ref{sec:exp-lambda};
 script \texttt{experiments/check\_lambda\_monotonicity.py}) on three
 independent seed pairs with $h = 2\times 10^{-3}$ and
 $n_{\mathrm{inner}} = 1$, using the Sinkhorn divergence~%
 \cite{feydy2019interpolating} to cancel the entropic bias floor
-inherent to regularized $W_2^2$. We obtain
-\begin{equation}
-  \hat\lambda \;=\; 67.79 \pm 3.78,
-  \qquad \text{std/mean} = 5.6\%,
-  \label{eq:lambda-estimate}
-\end{equation}
-all three trajectories monotone-decreasing over $50$ slow
-steps~{\small\% from paper/lambda\_monotonicity.json}. This decay
-is compatible with $\lambda$-monotonicity but does not establish it:
-the trajectory inequality~\eqref{eq:lambda-mono} is a consequence of
-the condition on velocity fields, not the condition itself, and a fit
-of $\hat\lambda$ on three trajectories does not establish that
-condition, nor the contraction and uniqueness results that
+inherent to regularized $W_2^2$. The fitted contraction rate
+$\hat\lambda$ is withdrawn (\texttt{ERRATUM.md}~\S17): it may be a
+grid artefact, and it was fitted on the coupled system only. Even
+taken at face value, such a fit would not establish
+$\lambda$-monotonicity: the trajectory
+inequality~\eqref{eq:lambda-mono} is a consequence of the condition
+on velocity fields, not the condition itself, and a fit of
+$\hat\lambda$ on three trajectories establishes neither that
+condition nor the contraction and uniqueness results that
 \cite{conger2025monotone} derive from it.
 
 \subsection{Baddeley phono loop and multi-scale dynamics}
@@ -634,16 +630,10 @@ $\{1042, 1043, 1044\}$), $50$ slow steps each at
 $h = 2 \times 10^{-3}$, $n_{\mathrm{inner}} = 1$, fitting
 $\log d(t) = \log d(0) - 2 \hat\lambda \cdot t$ on the Sinkhorn
 divergence $d(t) = \sum_i S_\varepsilon(\rho_i(t), \rho_i'(t))$. The
-fit yields
-\begin{equation*}
-  \hat\lambda \;=\; 67.79 \pm 3.78
-  \qquad (\sigma / \bar{\hat\lambda} = 5.6\%),
-\end{equation*}
-with all three trajectories monotone-decreasing over the full
-$50$~steps~{\small\% from paper/lambda\_monotonicity.json}. As
-discussed in Section~\ref{sec:lambda-mono}, this trajectory fit is
-compatible with, but does not establish, $\lambda$-monotonicity in
-the sense of
+fitted rate is withdrawn (\texttt{ERRATUM.md}~\S17: plausible grid
+artefact, coupled system only). As discussed in
+Section~\ref{sec:lambda-mono}, such a trajectory fit could not by
+itself establish $\lambda$-monotonicity in the sense of
 Conger--Hoffmann--Mazumdar--Ratliff~\cite{conger2025monotone}.
 
 \begin{figure}[h]
@@ -925,9 +915,10 @@ topology carries the causal production direction of the dynamics
 rather than the stationary entropy, and a decoupled baseline reaches
 the same final entropy only along a qualitatively different
 trajectory. The pair-contraction fit of \S\ref{sec:lambda-mono}
-was run on the coupled system only; it does not quantify the
-transient contraction that the coupling provides, and no decoupled
-counterpart has been measured. The architectural
+is withdrawn (\texttt{ERRATUM.md}~\S17); it was run on the coupled
+system only, so it could not quantify the transient contraction that
+the coupling provides, and no decoupled counterpart has been
+measured. The architectural
 question ``what does the hierarchy do?'' therefore shifts from ``it
 produces specialization'' to ``it sets the transient geometry along
 which specialization emerges'', a distinction we argue is

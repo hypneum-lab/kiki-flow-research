@@ -942,31 +942,42 @@ the module's repository and records a SHA-256 of the tracked diff.
 so the output `tau` is 1 after every step instead of counting steps
 (review m4); to be fixed separately.
 
-## 17. λ̂ ≈ 67.8 and Conger et al. Theorem 3.4 withdrawn as support (2026-11-15)
+## 17. λ̂ ≈ 67.8 and Conger et al. Theorem 3.4 withdrawn (2026-11-15)
 
-**Status: PROPOSED (issue #69), text only, no rerun.** No measured
-value changes; `paper/lambda_monotonicity.json` is not edited.
+**Status: PROPOSED (issue #69), text only, no rerun.** Decided by the
+PI on 2026-11-15, following the reading-lock spec of 2026-11-01
+(line 78: withdraw λ̂ = 67.8 and the reference to Theorem 3.4) and the
+hypothesis catalogue v2 (line 40). `paper/lambda_monotonicity.json` and
+`experiments/check_lambda_monotonicity.py` are not edited.
 
+- **The measurement itself is withdrawn from the running text**, not
+  only its interpretation. The fitted rate λ̂ = 67.79 ± 3.78
+  (std/mean 5.6 %, 3 seed pairs, h = 0.002, n_inner = 1, 50 slow steps,
+  Sinkhorn ε = 0.01, `paper/lambda_monotonicity.json`) no longer
+  appears in `paper/main.tex` (§λ-mono, §Free-energy decay and
+  empirical contraction rate); both passages point here. This section
+  is the only place in the current text where the value is given.
 - `paper/main.tex`, Discussion ("Potential-driven specialization"): the
   sentence "the fitted pair-contraction rate λ̂ ≈ 67.8 of §λ-mono
   quantifies the transient contraction that the full coupling provides;
   a fully decoupled system matches the stationary statistics but not the
-  dynamic ones" is replaced by a statement that the fit was run on the
-  coupled system only (`coupling_variant = "dell"` in
-  `paper/lambda_monotonicity.json`) and has no decoupled counterpart.
+  dynamic ones" is replaced by a statement that the fit is withdrawn,
+  was run on the coupled system only (`coupling_variant = "dell"`) and
+  has no decoupled counterpart.
 - Conger, Hoffmann, Mazumdar, Ratliff (arXiv:2506.22947) "Theorem 3.4"
   was removed from `paper/main.tex` on 2026-11-05 (`92e8edc`); it was
   never recorded here. `CHANGELOG.md` (entry of 2026-04-22) still cites
-  it as support for an exponential-convergence claim; that entry is
-  historical and is not rewritten.
+  it and the value; that entry is historical and is not rewritten.
 
-Root cause. (a) Numbering: in arXiv:2506.22947v2, 3.4 is a remark
-(p. 11); the main result is Theorem 3.2 (p. 10), and λ-monotonicity is
-a condition on the velocity fields for every pair of measures
-(Definition 1.1, p. 2), which a fit on three trajectories does not
-establish (`92e8edc`; `paper/main.tex` §λ-mono). (b) Interpretation:
-λ̂ was fitted on the coupled system only, so it cannot measure what the
-coupling adds. (c) Convergence: the NH-20 reading note
+Root cause. (a) Grid artefact: the value may be an artefact of the
+grid (catalogue v2, line 40); it is withdrawn, not corrected, and no
+rerun has been made. (b) Interpretation: λ̂ was fitted on the coupled
+system only, so it cannot measure what the coupling adds. (c)
+Numbering: in arXiv:2506.22947v2, 3.4 is a remark (p. 11); the main
+result is Theorem 3.2 (p. 10), and λ-monotonicity is a condition on the
+velocity fields for every pair of measures (Definition 1.1, p. 2),
+which a fit on three trajectories does not establish (`92e8edc`). (d)
+Convergence: the NH-20 reading note
 (`docs/prereg/nh20/reading-note.md`, PR #61) finds that the convergence
 theorem for entropic JKO, Carlier, Duval, Peyré, Schmitzer Th. 3.16
 (arXiv:1512.02783, p. 17), needs ε|log ε| = O(τ²), that the paper's
