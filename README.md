@@ -20,7 +20,11 @@ Upstream numerical engine of the *dreamOfkiki* research program, part of
 > (γ ≥ 20) is not interpretable (§14, which lists what it leaves
 > unchanged); the recomputation with the certified implicit step decided
 > by the PI (§16) has not been run. The table under "Quantitative
-> results" predates §14–§16. Read `ERRATUM.md` before citing any number.
+> results" predates §14–§17. Update of 2026-11-15: the fitted
+> pair-contraction rate is withdrawn from the current paper text (§17).
+> Historical result files, published PDFs and tags retain their original
+> contents; their preservation does not reinstate the withdrawn claim.
+> Read `ERRATUM.md` before citing any number.
 
 ---
 

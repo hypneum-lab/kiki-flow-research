@@ -14,7 +14,7 @@
 \maketitle
 
 % Status banner added 2026-11-04 (deep review of 2026-11-01, finding B10).
-% The body below is left unchanged; ERRATUM.md is the reference record.
+% Textual withdrawals are recorded in ERRATUM.md, the reference record.
 \begin{center}
 \fbox{\parbox{0.94\linewidth}{\small
 \textbf{Superseded draft --- read ERRATUM.md first (status of 2026-11-04).}
@@ -36,7 +36,12 @@ the PI decided to recompute the specialisation sweep and the paper-scale
 run with the certified implicit step (ERRATUM~\S16), and that
 recomputation has not been run.
 Zenodo records up to \texttt{paper-v0.13-draft} (2026-10-25) predate
-ERRATUM~\S11--\S16. Do not cite the quantitative results of this draft
+ERRATUM~\S11--\S17.
+Update of 2026-11-15: the fitted pair-contraction rate is withdrawn
+from the current paper text (ERRATUM~\S17). Historical result files,
+published PDFs and tags retain their original contents; their
+preservation does not reinstate the withdrawn claim.
+Do not cite the quantitative results of this draft
 without the ERRATUM.}}
 \end{center}
 
@@ -276,7 +281,7 @@ the asymmetry ratios $\|J^{\mathrm{asym}}\|_F / \|J\|_F$ are $0.314$
 and $0.330$ respectively, isolating topology as the primary
 difference between the two conditions.
 
-\subsection{Empirical \texorpdfstring{$\lambda$}{lambda}-monotonicity}
+\subsection{\texorpdfstring{$\lambda$}{lambda}-monotonicity: theoretical condition and withdrawn empirical fit}
 \label{sec:lambda-mono}
 
 In \cite{conger2025monotone}, $\lambda$-monotonicity at rate
@@ -615,7 +620,7 @@ the canonical operating point.
   \label{fig:coupling-modes}
 \end{figure}
 
-\subsection{Free-energy decay and empirical contraction rate}
+\subsection{Free-energy decay and withdrawn pair-contraction fit}
 \label{sec:exp-lambda}
 
 Figure~\ref{fig:fdecay} plots $F[\rho^\tau]$ along seed~0's
@@ -910,20 +915,17 @@ learned projection; its analysis is deferred to future work.
 ablation of \S\ref{sec:coupling-ablation} shows that at the canonical
 operating point the five modes span under $0.007$ bits of mean
 entropy, with \textsc{separable} slightly below \textsc{dell-full}.
-This does not render the Levelt--Baddeley coupling cosmetic: the
-topology carries the causal production direction of the dynamics
-rather than the stationary entropy, and a decoupled baseline reaches
-the same final entropy only along a qualitatively different
-trajectory. The pair-contraction fit of \S\ref{sec:lambda-mono}
-is withdrawn (\texttt{ERRATUM.md}~\S17); it was run on the coupled
-system only, so it could not quantify the transient contraction that
-the coupling provides, and no decoupled counterpart has been
-measured. The architectural
-question ``what does the hierarchy do?'' therefore shifts from ``it
-produces specialization'' to ``it sets the transient geometry along
-which specialization emerges'', a distinction we argue is
-empirically meaningful and deserves its own quantitative treatment
-separate from the steady-state reporting in \S\ref{sec:exp}.
+The ablation establishes nearly equal final entropies across
+coupling modes. Whether coupling changes transient trajectories
+remains an open question: the withdrawn pair-contraction fit
+(\texttt{ERRATUM.md}~\S17) used only the coupled system and provides
+no coupled-versus-decoupled comparison. The architectural question
+``what does the hierarchy do?'' is therefore left open: these data
+do not show that it produces specialization, nor that it sets the
+transient geometry along which specialization emerges; telling these
+apart would require a measured comparison of coupled and decoupled
+trajectories, separate from the steady-state reporting in
+\S\ref{sec:exp}.
 See also \cite{agliari2026networks,agliari2026modularrbm}, where
 specialisation of modules arises from an imposed competitive
 (anti-Hebbian) inter-module coupling.
@@ -970,12 +972,13 @@ cells:
 \end{enumerate}
 Mean $\Delta \hat H$ across the $18$ \textsc{*-full} cells is
 $+4.7 \times 10^{-3}$ bits (min $+4 \times 10^{-4}$, max
-$+8.8 \times 10^{-3}$). The default numerical results reported
-in \S\ref{sec:coupling-ablation} and \S\ref{sec:exp-lambda}
-correspond to the non-splitting path for reproducibility against
-the committed
-\texttt{paper/hyperparam\_sweep\_coupling\_modes.json}; the
-splitting-active companion file is provided as a parallel artifact.
+$+8.8 \times 10^{-3}$). The coupling-ablation results of
+\S\ref{sec:coupling-ablation} use the non-splitting path and are
+archived in \texttt{paper/hyperparam\_sweep\_coupling\_modes.json};
+the splitting-active companion file is provided as a parallel
+artifact. The withdrawn pair-contraction fit also used no
+asymmetric-drift splitting; its record is discussed in
+\texttt{ERRATUM.md}~\S17.
 The $\hat\lambda$ measurement of \S\ref{sec:lambda-mono} is
 withdrawn (\texttt{ERRATUM.md}~\S17); no propagation of the
 splitting into it is planned. The correct discretization

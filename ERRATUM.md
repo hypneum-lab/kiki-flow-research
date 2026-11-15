@@ -963,29 +963,45 @@ hypothesis catalogue v2 (line 40). `paper/lambda_monotonicity.json` and
   a fully decoupled system matches the stationary statistics but not the
   dynamic ones" is replaced by a statement that the fit is withdrawn,
   was run on the coupled system only (`coupling_variant = "dell"`) and
-  has no decoupled counterpart.
+  has no decoupled counterpart. After review, the surrounding claims
+  that "a decoupled baseline reaches the same final entropy only along a
+  qualitatively different trajectory" and that the hierarchy "sets the
+  transient geometry along which specialization emerges" are withdrawn
+  too: the coupling-modes ablation (`paper/coupling_modes_summary.md`,
+  `scripts/hyperparam_sweep_coupling_modes.py`) compares final states
+  only. The question is now stated as open.
 - Conger, Hoffmann, Mazumdar, Ratliff (arXiv:2506.22947) "Theorem 3.4"
   was removed from `paper/main.tex` on 2026-11-05 (`92e8edc`); it was
   never recorded here. `CHANGELOG.md` (entry of 2026-04-22) still cites
   it and the value; that entry is historical and is not rewritten.
 
-Root cause. (a) Grid artefact: the value may be an artefact of the
-grid (catalogue v2, line 40); it is withdrawn, not corrected, and no
-rerun has been made. (b) Interpretation: λ̂ was fitted on the coupled
+Root cause. (a) Grid artefact, an untested hypothesis (catalogue v2,
+line 40): the fit used a single grid of 64 points, with no resolution
+study, and 9, 9 and 8 fitted points out of 50 steps for the three
+pairs (`paper/lambda_monotonicity.json`, lines 18, 28, 38; mask
+d(t) ≥ 10 % of d(0)). The value is withdrawn, not corrected, and no
+rerun has been made. The archived estimate describes an initial-window
+fit on three coupled-system pairs; it does not isolate a coupling
+effect or establish a global contraction rate. (b) Interpretation: λ̂ was fitted on the coupled
 system only, so it cannot measure what the coupling adds. (c)
 Numbering: in arXiv:2506.22947v2, 3.4 is a remark (p. 11); the main
 result is Theorem 3.2 (p. 10), and λ-monotonicity is a condition on the
 velocity fields for every pair of measures (Definition 1.1, p. 2),
 which a fit on three trajectories does not establish (`92e8edc`). (d)
-Convergence: the NH-20 reading note
-(`docs/prereg/nh20/reading-note.md`, PR #61) finds that the convergence
-theorem for entropic JKO, Carlier, Duval, Peyré, Schmitzer Th. 3.16
-(arXiv:1512.02783, p. 17), needs ε|log ε| = O(τ²), that the paper's
-rigorous path sits at a ratio of 18.4 (ε = 0.01, h = 0.05, l. 111),
-and that "aucun résultat de convergence de Carlier ne s'applique donc
-au JKO du labo" (l. 142-144). No published theorem therefore carries a
-discrete trajectory rate over to the continuous flow. The same note
-treats "Strang with JKO sub-steps stays first order" as a prediction
-that no source proves or refutes (l. 362-364), not as a result.
+Numerical scheme. The withdrawn fit was obtained with the fast
+projected Euclidean step (`apply_w2_prox=False`,
+`experiments/check_lambda_monotonicity.py:308`, hence `legacy_split`,
+`kiki_flow_core/master_equation.py:211`, §12), with h = 0.002, not with
+an entropic JKO step of F (§13) nor with the certified implicit step
+(§16); its Sinkhorn ε regularises the distance diagnostic only. The
+NH-20 reading note (`docs/prereg/nh20/reading-note.md`, PR #61)
+separately explains why Carlier, Duval, Peyré, Schmitzer Th. 3.16
+(arXiv:1512.02783, p. 17) does not cover the laboratory's entropic JKO
+implementation (l. 142-144; the ratio 18.4 at ε = 0.01, h = 0.05,
+l. 111, concerns the historical rigorous path, not this fit). No
+justification transferring this fitted discrete rate to the
+continuous Wasserstein flow is established in this repository;
+"Strang with JKO sub-steps stays first order" remains a prediction
+(l. 362-364).
 
 The published PDFs and tags are unchanged.
