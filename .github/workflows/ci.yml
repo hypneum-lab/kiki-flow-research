@@ -7,6 +7,9 @@ on:
 jobs:
   test:
     runs-on: macos-15
+    permissions:
+      contents: read
+      actions: write  # keep-alive step re-enables reproducibility.yml (#44)
     strategy:
       matrix:
         python-version: ["3.14"]
@@ -52,7 +55,7 @@ jobs:
           "
       - run: uv run ruff check .
       - run: uv run mypy kiki_flow_core
-      - run: uv run pytest -v --cov=kiki_flow_core --cov-fail-under=0  # TODO(Task 11): bump to --cov-fail-under=80
+      - run: uv run pytest -v --cov=kiki_flow_core --cov-fail-under=87
       - name: Validate doc-truth (N4 Task 5)
         continue-on-error: true
         run: uv run python scripts/check_status_truth.py
@@ -60,3 +63,11 @@ jobs:
         if: hashFiles('tests/test_smoke_e2e.py') != ''
         run: |
           uv run pytest tests/test_smoke_e2e.py::test_double_run_deterministic -v
+      # GitHub disables scheduled workflows after 60 days without a push.
+      # Re-enable reproducibility.yml on every push to main so it never
+      # goes stale silently (gh returns 0 if already enabled). See #44.
+      - name: Keep reproducibility workflow enabled
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow enable reproducibility.yml --repo ${{ github.repository }}
