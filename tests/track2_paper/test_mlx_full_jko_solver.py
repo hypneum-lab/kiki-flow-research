@@ -1,4 +1,3 @@
-import mlx.core as mx
 import numpy as np
 import pytest
 
@@ -6,7 +5,6 @@ from kiki_flow_core.master_equation import ZeroF
 from kiki_flow_core.state import FlowState
 from kiki_flow_core.track2_paper.full_jko_solver import FullJKOSolver, MLXFullJKOSolver
 from kiki_flow_core.track2_paper.mlx_wasserstein import mlx_prox_w2
-
 from tests.track2_paper._mlx_jit_probe import MLX_JIT_REASON, mlx_jit_available
 
 # JIT probe instead of mx.metal.is_available(): see _mlx_jit_probe.py and #43.

@@ -1,6 +1,5 @@
 import time
 
-import mlx.core as mx
 import numpy as np
 import pytest
 
@@ -9,7 +8,6 @@ from kiki_flow_core.state import FlowState
 from kiki_flow_core.track2_paper.full_jko_solver import FullJKOSolver, MLXFullJKOSolver
 from kiki_flow_core.track2_paper.mlx_wasserstein import mlx_prox_w2, mlx_sinkhorn_cost
 from kiki_flow_core.wasserstein_ops import prox_w2, sinkhorn_cost
-
 from tests.track2_paper._mlx_jit_probe import MLX_JIT_REASON, mlx_jit_available
 
 # mlx-cpu 0.31.1 on Linux: mx.compile fails at the g++ step with
