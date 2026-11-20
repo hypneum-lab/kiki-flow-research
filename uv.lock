@@ -839,9 +839,8 @@ version = "0.0.1"
 source = { editable = "." }
 dependencies = [
     { name = "flax" },
-    { name = "jax" },
-    { name = "jaxlib" },
     { name = "mlx" },
+    { name = "mlx-cpu", marker = "sys_platform == 'linux'" },
     { name = "mypy" },
     { name = "numpy" },
     { name = "optax" },
@@ -874,6 +873,10 @@ text-bridge-labeler = [
     { name = "phonemizer" },
     { name = "spacy" },
 ]
+track3 = [
+    { name = "jax" },
+    { name = "jaxlib" },
+]
 types = [
     { name = "pandas-stubs" },
 ]
@@ -893,10 +896,11 @@ labeler-models = [
 requires-dist = [
     { name = "flax", specifier = ">=0.8" },
     { name = "hypothesis", marker = "extra == 'dev'", specifier = ">=6.100" },
-    { name = "jax", specifier = ">=0.4.30" },
-    { name = "jaxlib", specifier = ">=0.4.30" },
+    { name = "jax", marker = "extra == 'track3'", specifier = ">=0.4.30" },
+    { name = "jaxlib", marker = "extra == 'track3'", specifier = ">=0.4.30" },
     { name = "matplotlib", marker = "extra == 'dev'", specifier = ">=3.8" },
     { name = "mlx", specifier = ">=0.20" },
+    { name = "mlx-cpu", marker = "sys_platform == 'linux'", specifier = "==0.31.1" },
     { name = "mypy", specifier = ">=1.20.1" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.10" },
     { name = "numpy", specifier = ">=2.1" },
@@ -922,7 +926,7 @@ requires-dist = [
     { name = "types-pyyaml", marker = "extra == 'dev'", specifier = ">=6.0" },
     { name = "virtualenv", specifier = ">=21.2.4" },
 ]
-provides-extras = ["text-bridge-labeler", "dev", "types"]
+provides-extras = ["track3", "text-bridge-labeler", "dev", "types"]
 
 [package.metadata.requires-dev]
 dev = [
@@ -1144,6 +1148,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/e1/17/abec0bd0f9347dae13e60b33325cb199312798842901953495e19f3bb3c8/mlx-0.31.1-cp314-cp314-macosx_26_0_arm64.whl", hash = "sha256:69bc88b41ddd61b44cd6a4d417790f9971ba3fdf58d824934cea95a95b9b4031", size = 576275, upload-time = "2026-03-12T02:16:27.57Z" },
     { url = "https://files.pythonhosted.org/packages/a2/91/85c73f7cc3a661416d05315623458c719eda7de958b05f4e10ba40c52d07/mlx-0.31.1-cp314-cp314-manylinux_2_35_aarch64.whl", hash = "sha256:b973506fd49ba39df6dc4ff655b77bd35ea193cee878e71d6ee3d1a951d2b3a6", size = 628701, upload-time = "2026-03-12T02:16:28.949Z" },
     { url = "https://files.pythonhosted.org/packages/7d/e9/d87638e00a44dcf346fe838caaf1e2dae96a88d5779edbd66ce27d4bbdcc/mlx-0.31.1-cp314-cp314-manylinux_2_35_x86_64.whl", hash = "sha256:3987282a1e63252bdd7c636138812c67316c3f7c7a7acad08e76c8843648a056", size = 668959, upload-time = "2026-03-12T02:16:30.41Z" },
+]
+
+[[package]]
+name = "mlx-cpu"
+version = "0.31.1"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/01/e3/2f832234ede13002ee84088772c3a73ee6efd9bcbd6d7a7b243e8cef7e3b/mlx_cpu-0.31.1-py3-none-manylinux_2_35_aarch64.whl", hash = "sha256:8c5a1366efa6be47bec573a31bb224127d0e11c07fe789c3a11a0fc50ad595e3", size = 8696444, upload-time = "2026-03-11T23:20:56.259Z" },
+    { url = "https://files.pythonhosted.org/packages/a1/1a/c17fad043443085578312efd05656246333ee3719ee94b69be43ebc77b23/mlx_cpu-0.31.1-py3-none-manylinux_2_35_x86_64.whl", hash = "sha256:27578a396f08431dd2cc089e755ef58f77d16261d9e91bd0f230157bc1662911", size = 10279829, upload-time = "2026-03-11T23:20:58.536Z" },
 ]
 
 [[package]]

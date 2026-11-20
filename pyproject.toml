@@ -7,9 +7,12 @@ requires-python = ">=3.14"
 license = "MIT"
 authors = [{ name = "Clément Saillant", email = "clement@saillant.cc" }]
 dependencies = [
+    # mlx-metal is an automatic dependency of mlx on Darwin (via uv.lock).
+    # On Linux, mlx-cpu must be installed explicitly as the backend.
+    # Pin mlx-cpu to the same version as mlx (locked at 0.31.1) so the
+    # backends match.
     "mlx>=0.20",
-    "jax>=0.4.30",
-    "jaxlib>=0.4.30",
+    "mlx-cpu==0.31.1; sys_platform == 'linux'",
     "POT>=0.9",
     "pydantic>=2.6",
     "numpy>=2.1",
@@ -29,6 +32,14 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# JAX is only used by kiki_flow_core/track3_deploy/. Install this extra
+# only when that track is needed. On Linux x86-64 without AVX, jaxlib
+# 0.10.x refuses to load ("built using AVX instructions"); omit this
+# extra on those hosts.
+track3 = [
+    "jax>=0.4.30",
+    "jaxlib>=0.4.30",
+]
 text-bridge-labeler = [
     "spacy>=3.7",
     "phonemizer>=3.2",

@@ -81,7 +81,14 @@ uv run pre-commit install
 
 Tested on macOS 26.3 (arm64) with Python 3.14, MLX 0.31, JAX 0.10,
 POT 0.9. Other platforms may work but have not been validated.
-On Linux, the 11 MLX tests in `tests/track2_paper/test_mlx_prox_w2.py`
+
+**Linux x86-64**: `mlx-cpu` is now a locked dependency (`sys_platform ==
+'linux'`), so `uv sync --locked` installs it automatically. JAX/jaxlib
+are in the optional `track3` extra; on CPUs without AVX, omit
+`--all-extras` or the `track3` extra to avoid jaxlib's AVX import
+error. `run_paper` with `use_mlx=False` runs in ≈ 6 min/seed (bit-
+identical across runs); MLX x86 performance is not validated.
+On Linux the 11 MLX tests in `tests/track2_paper/test_mlx_prox_w2.py`
 and `test_mlx_full_jko_solver.py` are skipped automatically because
 `mlx-cpu 0.31.1` JIT compilation fails with GCC 13 (`_Float128`
 redeclaration); all other tests pass on Linux (see issue #43).
@@ -103,7 +110,7 @@ export PHONEMIZER_ESPEAK_LIBRARY=~/espeak-ng-1.52.0/lib/libespeak-ng.dylib
 
 ```bash
 git clone https://github.com/hypneum-lab/kiki-flow-research.git && cd kiki-flow-research
-uv sync --locked --all-extras   # Linux x86_64 only: then `uv pip install mlx-cpu==0.31.1` (the lock ships the Metal backend only)
+uv sync --locked --all-extras   # mlx-cpu installed automatically on Linux (locked); skip --all-extras on no-AVX hosts to avoid jaxlib
 PYTHONPATH=. uv run python -c "from pathlib import Path; from kiki_flow_core.track2_paper.paper_run import run_paper; \
   run_paper(seeds=[0,1,2,3,4], out_dir=Path('paper_repro'), make_all_figures=True)"   # CPU-only pilot: seeds=[0], use_mlx=False
 ```
