@@ -81,6 +81,19 @@ uv run pre-commit install
 Tested on macOS 26.3 (arm64) with Python 3.14, MLX 0.31, JAX 0.10,
 POT 0.9. Other platforms may work but have not been validated.
 
+### Labeler tests (optional)
+
+The HeuristicLabeler tests (`tests/track3_deploy/test_heuristic_labeler.py`
+and `test_label_corpus_smoke.py`) need an extra dependency group and the
+espeak-ng library. Without them the two test files are skipped.
+
+```bash
+uv sync --all-extras --group labeler-models
+bash scripts/ci/build_espeak_ng.sh ~/espeak-ng-1.52.0
+# macOS arm64:
+export PHONEMIZER_ESPEAK_LIBRARY=~/espeak-ng-1.52.0/lib/libespeak-ng.dylib
+```
+
 ## Reproduce in one command
 
 ```bash

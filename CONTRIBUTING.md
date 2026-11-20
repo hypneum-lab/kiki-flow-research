@@ -51,18 +51,55 @@ git push -u origin feat/your-branch
 gh pr create
 ```
 
+### Labeler tests (optional)
+
+The HeuristicLabeler tests in `tests/track3_deploy/` require an extra
+dependency group and a native espeak-ng library:
+
+```bash
+# Install the spaCy French model (pinned wheel, test-only)
+uv sync --all-extras --group labeler-models
+
+# Build espeak-ng 1.52.0 from the pinned source (GPL-3.0-or-later,
+# CI/test-only, not redistributed). Replace <prefix> with any directory.
+bash scripts/ci/build_espeak_ng.sh ~/espeak-ng-1.52.0
+
+# macOS arm64: point phonemizer at the built library
+export PHONEMIZER_ESPEAK_LIBRARY=~/espeak-ng-1.52.0/lib/libespeak-ng.dylib
+```
+
+Sanity-check (mirrors the CI "Check labeler test prerequisites" step):
+
+```python
+import spacy
+from phonemizer.backend import EspeakBackend
+assert spacy.util.is_package('fr_core_news_lg')
+assert EspeakBackend.is_available()
+```
+
+Without these steps the two labeler test files are skipped with the
+reason `fr_core_news_lg / phonemizer / "espeak-ng library not available"`.
+
+## Generated artefacts
+
+`paper/*.json` and `bench/*.jsonl` are outputs of the reproducibility
+scripts — never edit them by hand. See `CLAUDE.md` for the full rule.
+
+For authorship and AI-usage policy, see [`CONTRIBUTORS.md`](CONTRIBUTORS.md).
+
 ## What we are actively looking for
 
 - A real continual-learning benchmark that replaces the distributional
   proxy in `scripts/cl_benchmark.py`.
-- A measured sweep of `(α, β, γ, λ_T)` denser than the current 27
-  configurations in `scripts/hyperparam_sweep.py`.
+- A measured sweep of `(α, β, γ, λ_T)` using `scripts/hyperparam_sweep.py`
+  (coarse grid) and `scripts/hyperparam_sweep_dense.py` (dense grid).
 - A native MLX Sinkhorn implementation that matches POT numerically
   (draft scaffold in `kiki_flow_core/track2_paper/mlx_wasserstein.py`).
 - A clean integration of the surrogate into an actual micro-kiki
   inference pathway (the four integration dependencies are tracked in
   `docs/superpowers/integration-notes.md`).
-- Any reviewer feedback on the paper draft at tag `paper-v0.13-draft`.
+- Any reviewer feedback on the paper draft at the latest `paper-v*-draft`
+  tag (see README for the current tag).
 
 ## What we are not looking for
 
