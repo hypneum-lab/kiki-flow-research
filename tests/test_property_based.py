@@ -214,16 +214,18 @@ def _same_length_simplex_pair(
         hnp.arrays(
             dtype=np.float64,
             shape=n,
-            elements=st.floats(min_value=0.01, max_value=1.0,
-                               allow_nan=False, allow_infinity=False),
+            elements=st.floats(
+                min_value=0.01, max_value=1.0, allow_nan=False, allow_infinity=False
+            ),
         )
     )
     raw_b = draw(
         hnp.arrays(
             dtype=np.float64,
             shape=n,
-            elements=st.floats(min_value=0.01, max_value=1.0,
-                               allow_nan=False, allow_infinity=False),
+            elements=st.floats(
+                min_value=0.01, max_value=1.0, allow_nan=False, allow_infinity=False
+            ),
         )
     )
     return raw_a / raw_a.sum(), raw_b / raw_b.sum()
@@ -245,8 +247,12 @@ def test_prox_w2_output_is_simplex(
     n = distribution.size
     support = np.linspace(0, 1, n).reshape(-1, 1)
     result = prox_w2(
-        distribution, reference, epsilon=epsilon, support=support,
-        n_iter=50, reg=reg,
+        distribution,
+        reference,
+        epsilon=epsilon,
+        support=support,
+        n_iter=50,
+        reg=reg,
     )
     assert np.isfinite(result).all()
     assert (result >= -NEG_TOL).all()
@@ -268,11 +274,19 @@ def test_prox_w2_reg_none_equals_reg_epsilon(
     n = distribution.size
     support = np.linspace(0, 1, n).reshape(-1, 1)
     out_none = prox_w2(
-        distribution, reference, epsilon=epsilon, support=support, n_iter=50,
+        distribution,
+        reference,
+        epsilon=epsilon,
+        support=support,
+        n_iter=50,
         reg=None,
     )
     out_eps = prox_w2(
-        distribution, reference, epsilon=epsilon, support=support, n_iter=50,
+        distribution,
+        reference,
+        epsilon=epsilon,
+        support=support,
+        n_iter=50,
         reg=epsilon,
     )
     np.testing.assert_array_equal(out_none, out_eps)
