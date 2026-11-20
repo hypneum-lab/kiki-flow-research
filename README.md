@@ -80,6 +80,10 @@ uv run pre-commit install
 
 Tested on macOS 26.3 (arm64) with Python 3.14, MLX 0.31, JAX 0.10,
 POT 0.9. Other platforms may work but have not been validated.
+On Linux, the 11 MLX tests in `tests/track2_paper/test_mlx_prox_w2.py`
+and `test_mlx_full_jko_solver.py` are skipped automatically because
+`mlx-cpu 0.31.1` JIT compilation fails with GCC 13 (`_Float128`
+redeclaration); all other tests pass on Linux (see issue #43).
 
 ### Labeler tests (optional)
 

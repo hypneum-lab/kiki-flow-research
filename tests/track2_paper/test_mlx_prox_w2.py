@@ -1,5 +1,6 @@
 import time
 
+import mlx.core as mx
 import numpy as np
 import pytest
 
@@ -8,6 +9,18 @@ from kiki_flow_core.state import FlowState
 from kiki_flow_core.track2_paper.full_jko_solver import FullJKOSolver, MLXFullJKOSolver
 from kiki_flow_core.track2_paper.mlx_wasserstein import mlx_prox_w2, mlx_sinkhorn_cost
 from kiki_flow_core.wasserstein_ops import prox_w2, sinkhorn_cost
+
+# mlx-cpu 0.31.1 on Linux: mx.compile fails at the g++ step with
+# "redeclaration of C++ built-in type '_Float128'" (GCC 13 toolchain
+# incompatibility). Skip this whole module when Metal is unavailable;
+# the skip becomes a pass automatically once mlx-cpu JIT is fixed. #43
+pytestmark = pytest.mark.skipif(
+    not mx.metal.is_available(),
+    reason=(
+        "mlx-cpu 0.31.1 mx.compile JIT fails on Linux g++ "
+        "(_Float128 redeclaration); see #43"
+    ),
+)
 
 # Parity tolerance between the float32 MLX port and the float64 NumPy
 # reference ``wasserstein_ops.prox_w2``. Both run the same Dykstra

@@ -1,9 +1,19 @@
+import mlx.core as mx
 import numpy as np
+import pytest
 
 from kiki_flow_core.master_equation import ZeroF
 from kiki_flow_core.state import FlowState
 from kiki_flow_core.track2_paper.full_jko_solver import FullJKOSolver, MLXFullJKOSolver
 from kiki_flow_core.track2_paper.mlx_wasserstein import mlx_prox_w2
+
+_SKIP_NO_METAL = pytest.mark.skipif(
+    not mx.metal.is_available(),
+    reason=(
+        "mlx-cpu 0.31.1 mx.compile JIT fails on Linux g++ "
+        "(_Float128 redeclaration); see #43"
+    ),
+)
 
 
 def _make_state(rho: np.ndarray) -> FlowState:
@@ -27,6 +37,7 @@ def test_mlx_full_jko_solver_constructs_with_mlx_prox():
     assert solver.prox_fn is mlx_prox_w2
 
 
+@_SKIP_NO_METAL
 def test_mlx_full_jko_solver_step_increments_tau():
     support = np.linspace(0, 1, 4).reshape(-1, 1)
     state = _make_state(np.full(4, 0.25))
@@ -59,6 +70,7 @@ def test_mlx_full_jko_solver_passes_epsilon_as_reg():
     assert solver.reg == 0.02  # noqa: PLR2004
 
 
+@_SKIP_NO_METAL
 def test_mlx_full_jko_solver_forwards_max_iter():
     support = np.linspace(-2, 2, 16).reshape(-1, 1)
     x = support[:, 0]
