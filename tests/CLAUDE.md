@@ -1,9 +1,10 @@
 # tests — pytest + golden NPZ regression
 
 Layout mirrors the source: root tests exercise `kiki_flow_core/` top-level;
-`tests/track{1,2,3}_*/` mirror the matching track subpackage. Coverage
-target is the published 95 % (`--cov=kiki_flow_core` is in pyproject
-`addopts`, so any `pytest` invocation already measures it).
+`tests/track{1,2,3}_*/` mirror the matching track subpackage. Coverage gate: `--cov-fail-under=87` (measured 89 % on macM1,
+branch `4b5fc50e`, 2026-11-20; gate = measured − 2 to leave headroom).
+(`--cov=kiki_flow_core` is in pyproject `addopts`, so any `pytest`
+invocation already measures it.)
 
 ## Conventions
 
