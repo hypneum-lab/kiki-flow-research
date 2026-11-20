@@ -8,6 +8,7 @@ Upstream numerical engine of the *dreamOfkiki* research program, part of
 (L'Electron Rare).
 
 [![CI](https://github.com/hypneum-lab/kiki-flow-research/actions/workflows/ci.yml/badge.svg)](https://github.com/hypneum-lab/kiki-flow-research/actions)
+[![Reproducibility](https://github.com/hypneum-lab/kiki-flow-research/actions/workflows/reproducibility.yml/badge.svg)](https://github.com/hypneum-lab/kiki-flow-research/actions/workflows/reproducibility.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
 > [!WARNING]

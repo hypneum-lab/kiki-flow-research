@@ -60,3 +60,11 @@ jobs:
         if: hashFiles('tests/test_smoke_e2e.py') != ''
         run: |
           uv run pytest tests/test_smoke_e2e.py::test_double_run_deterministic -v
+      # GitHub disables scheduled workflows after 60 days without a push.
+      # Re-enable reproducibility.yml on every push to main so it never
+      # goes stale silently (gh returns 0 if already enabled). See #44.
+      - name: Keep reproducibility workflow enabled
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow enable reproducibility.yml --repo ${{ github.repository }}
