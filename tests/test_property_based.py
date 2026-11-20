@@ -20,6 +20,7 @@ from kiki_flow_core.modules.phonological_loop import PhonologicalLoop
 from kiki_flow_core.modules.scaffolding_scheduler import ScaffoldingScheduler
 from kiki_flow_core.species import CanonicalSpecies, MixedCanonicalSpecies
 from kiki_flow_core.state import FlowState, InvariantViolationError, assert_invariants
+from kiki_flow_core.wasserstein_ops import prox_w2
 
 # Tolerances (named per tests/CLAUDE.md discipline)
 MASS_TOL = 1e-4
@@ -196,3 +197,82 @@ def test_jko_step_preserves_mass_and_increments_tau(rho: np.ndarray, h: float) -
     assert abs(new_rho.sum() - 1.0) < MASS_TOL
     assert (new_rho >= -NEG_TOL).all()
     assert new_state.tau == state.tau + 1
+
+
+# ============================================================================
+# Wasserstein ops invariants
+# ============================================================================
+
+
+@st.composite
+def _same_length_simplex_pair(
+    draw: st.DrawFn,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Draw n once, then two simplex vectors of that length."""
+    n = draw(st.integers(min_value=2, max_value=16))
+    raw_a = draw(
+        hnp.arrays(
+            dtype=np.float64,
+            shape=n,
+            elements=st.floats(min_value=0.01, max_value=1.0,
+                               allow_nan=False, allow_infinity=False),
+        )
+    )
+    raw_b = draw(
+        hnp.arrays(
+            dtype=np.float64,
+            shape=n,
+            elements=st.floats(min_value=0.01, max_value=1.0,
+                               allow_nan=False, allow_infinity=False),
+        )
+    )
+    return raw_a / raw_a.sum(), raw_b / raw_b.sum()
+
+
+@given(
+    pair=_same_length_simplex_pair(),
+    epsilon=st.floats(min_value=0.005, max_value=0.1, allow_nan=False),
+    reg=st.one_of(st.none(), st.just(0.01), st.just(0.05)),
+)
+@settings(deadline=None, max_examples=25)
+def test_prox_w2_output_is_simplex(
+    pair: tuple[np.ndarray, np.ndarray],
+    epsilon: float,
+    reg: float | None,
+) -> None:
+    """prox_w2 output must be finite, non-negative and sum to 1."""
+    distribution, reference = pair
+    n = distribution.size
+    support = np.linspace(0, 1, n).reshape(-1, 1)
+    result = prox_w2(
+        distribution, reference, epsilon=epsilon, support=support,
+        n_iter=50, reg=reg,
+    )
+    assert np.isfinite(result).all()
+    assert (result >= -NEG_TOL).all()
+    assert abs(result.sum() - 1.0) < MASS_TOL
+    assert result.shape == distribution.shape
+
+
+@given(
+    pair=_same_length_simplex_pair(),
+    epsilon=st.floats(min_value=0.005, max_value=0.1, allow_nan=False),
+)
+@settings(deadline=None, max_examples=25)
+def test_prox_w2_reg_none_equals_reg_epsilon(
+    pair: tuple[np.ndarray, np.ndarray],
+    epsilon: float,
+) -> None:
+    """reg=None must give exactly the same result as reg=epsilon."""
+    distribution, reference = pair
+    n = distribution.size
+    support = np.linspace(0, 1, n).reshape(-1, 1)
+    out_none = prox_w2(
+        distribution, reference, epsilon=epsilon, support=support, n_iter=50,
+        reg=None,
+    )
+    out_eps = prox_w2(
+        distribution, reference, epsilon=epsilon, support=support, n_iter=50,
+        reg=epsilon,
+    )
+    np.testing.assert_array_equal(out_none, out_eps)
