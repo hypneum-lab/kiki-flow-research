@@ -14,15 +14,18 @@ import functools
 
 import mlx.core as mx
 
+_PROBE_IN = 1.0
+_PROBE_EXPECTED = 2.0  # _PROBE_IN + 1.0 through the compiled graph
+
 
 @functools.lru_cache(maxsize=1)
 def mlx_jit_available() -> bool:
     """Return True if a trivial ``mx.compile`` round-trips on this host."""
     try:
         compiled = mx.compile(lambda x: x + 1.0)
-        out = compiled(mx.array(1.0))
+        out = compiled(mx.array(_PROBE_IN))
         mx.eval(out)
-        return bool(float(out.item()) == 2.0)
+        return bool(float(out.item()) == _PROBE_EXPECTED)
     except Exception:  # noqa: BLE001 - any JIT/toolchain failure means "no JIT"
         return False
 
